@@ -10,7 +10,7 @@ from rest_framework.viewsets import ViewSet
 
 from dynamics_apis.common.serializers import ErrorSerializer
 from .models import KUser
-from .serializers import KUserSerializer, KUserCreationSerializer
+from .serializers import KUserSerializer, KUserCreationSerializer, KUserQuerySerializer
 
 
 # Create your views here.
@@ -22,16 +22,9 @@ class KUserViewSet(ViewSet):
     @extend_schema(
         description="List Kairnial users",
         parameters=[
-            OpenApiParameter("firstname", OpenApiTypes.STR, OpenApiParameter.QUERY,
-                             description=_("Filter by user first name")),
-            OpenApiParameter("lastname", OpenApiTypes.STR, OpenApiParameter.QUERY,
-                             description=_("Filter by user last name")),
-            OpenApiParameter("email", OpenApiTypes.STR, OpenApiParameter.QUERY,
-                             description=_("Filter by user email")),
-            OpenApiParameter("status", OpenApiTypes.STR, OpenApiParameter.QUERY,
-                             description=_("Filter by user status"),
-                             enum=['running', 'walking', 'standing']),
-            # KUserQuerySerializer,  # serializer fields are converted to parameters
+            OpenApiParameter("client_id", OpenApiTypes.STR, OpenApiParameter.PATH,
+                              description=_("Client ID token")),
+            KUserQuerySerializer,  # serializer fields are converted to parameters
         ],
         responses={200: KUserSerializer, 500: ErrorSerializer},
         methods=["GET"]

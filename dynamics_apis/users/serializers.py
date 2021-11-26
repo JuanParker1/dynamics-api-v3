@@ -44,9 +44,16 @@ class KUserStatSerializer(serializers.Serializer):
 
 class KUserQuerySerializer(serializers.Serializer):
     firstname = serializers.CharField(label=_("First name case insensitive content filter"),
+                                      help_text=_("Filter by user first name. Case insensitive content filter"),
+                                      read_only=True,
                                       required=False)
     lastname = serializers.CharField(label=_("Last name case insensitive content filter"),
+                                     help_text=_("Filter by user last name. Case insensitive content filter"),
+                                     read_only=True,
                                      required=False)
-    email = serializers.CharField(label=_("email case insensitive content filter"), required=False)
+    email = serializers.CharField(label=_("email case insensitive content filter"),
+                                  help_text=_("Filter by user email. Case insensitive content filter"),
+                                  required=False)
     status = serializers.ChoiceField(label=_("status case insensitive exact filter"),
+                                     help_text=_("status case insensitive exact filter"),
                                      choices=['running', 'walking', 'standing'], required=False)

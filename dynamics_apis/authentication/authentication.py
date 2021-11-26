@@ -36,20 +36,10 @@ class KairnialTokenAuthentication(JSONWebTokenAuthentication):
         """
         logger = logging.getLogger('authentication')
         try:
-            token = self.get_token_from_request(request)
+            token = request.META.get('HTTP_AUTHENTICATION').split()[1]
             if token is None:
                 return None
-        except MissingToken:
-            return None
-
-        try:
-            unverified_header = jwt.get_unverified_header(token)
-        except jwt.JWTError:
-            logger.error("Invalid header. Use an RS256 signed JWT Access Token")
-            return None
-
-        if unverified_header["alg"] == "HS256":
-            logger.error("Invalid header. Use an RS256 signed JWT Access Token")
+        except (AttributeError, IndexError):
             return None
 
         try:
@@ -57,8 +47,7 @@ class KairnialTokenAuthentication(JSONWebTokenAuthentication):
                 token,
                 KAIRNIAL_AUTH_PUBLIC_KEY,
                 algorithms=ALGORITHMS,
-                audience=API_AUDIENCE,
-                # issuer="https://" + KAIRNIAL_AUTH_DOMAIN + "/"
+                audience=API_AUDIENCE
             )
             uuid = payload.get('sub')
             first_name, last_name = payload.get('name').split()
