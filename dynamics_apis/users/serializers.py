@@ -5,13 +5,13 @@ from django.utils.translation import ugettext as _
 from rest_framework import serializers
 
 
-class KUserCreationSerializer(serializers.Serializer):
+class UserCreationSerializer(serializers.Serializer):
     firstname = serializers.CharField(label=_("User first name"), required=True)
     lastname = serializers.CharField(label=_("User last name"), required=True)
     email = serializers.CharField(label=_("User email address"), required=True)
 
 
-class KUserSerializer(KUserCreationSerializer):
+class UserSerializer(UserCreationSerializer):
     id = serializers.IntegerField(label=_("User unique ID"), read_only=True)
     uuid = serializers.UUIDField(label=_("User universal identifier"), read_only=True)
     fullname = serializers.CharField(label=_("User full name"), read_only=True)
@@ -25,13 +25,13 @@ class KUserSerializer(KUserCreationSerializer):
     update_time = serializers.DateTimeField(label=_("Date of last connection"), read_only=True)
 
 
-class KUserSimpleSerializer(serializers.Serializer):
+class UserSimpleSerializer(serializers.Serializer):
     id = serializers.IntegerField(label=_("User unique ID"), read_only=True)
     email = serializers.CharField(label=_("User email address"), read_only=True)
 
 
-class KUserStatSerializer(serializers.Serializer):
-    user = KUserSerializer()
+class UserStatSerializer(serializers.Serializer):
+    user = UserSerializer()
     count_pins = serializers.IntegerField(label=_("Number of defects created by user"), default=0,
                                           read_only=True)
     count_forms = serializers.IntegerField(label=_("Number of forms created by user"), default=0,
@@ -42,7 +42,7 @@ class KUserStatSerializer(serializers.Serializer):
                                             read_only=True)
 
 
-class KUserQuerySerializer(serializers.Serializer):
+class UserQuerySerializer(serializers.Serializer):
     firstname = serializers.CharField(label=_("First name case insensitive content filter"),
                                       help_text=_("Filter by user first name. Case insensitive content filter"),
                                       read_only=True,

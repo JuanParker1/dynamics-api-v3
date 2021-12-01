@@ -11,7 +11,7 @@ from rest_framework.views import APIView
 from .serializers import ProjectSerializer
 from dynamics_apis.common.serializers import ErrorSerializer
 from .services import KairnialProject
-from ..common.models import KairnialServiceError
+from dynamics_apis.common.services import KairnialWSServiceError
 
 
 class ProjectView(APIView):
@@ -39,5 +39,10 @@ class ProjectView(APIView):
             response = kp.list(search=search)
             serializer = ProjectSerializer(response['items'], many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        except KairnialServiceError as e:
-            return Response(str(e), content_type='application/json', status=status.HTTP_400_BAD_REQUEST)
+        except KairnialWSServiceError as e:
+            error = ErrorSerializer({
+                'status_code': 400,
+                'error_code': e.status,
+                'description': e.message
+            })
+            return Response(error.data, content_type='application/json', status=status.HTTP_400_BAD_REQUEST)

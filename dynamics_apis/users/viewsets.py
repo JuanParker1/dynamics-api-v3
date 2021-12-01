@@ -9,12 +9,15 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 
 from dynamics_apis.common.serializers import ErrorSerializer
-from .models import KUser
-from .serializers import KUserSerializer, KUserCreationSerializer, KUserQuerySerializer
+from .models import User
+from .serializers import UserSerializer, UserCreationSerializer, UserQuerySerializer
 
 
 # Create your views here.
-class KUserViewSet(ViewSet):
+from ..common.services import KairnialWSServiceError
+
+
+class UserViewSet(ViewSet):
     """
     A ViewSet for listing or retrieving users.
     """
@@ -24,20 +27,29 @@ class KUserViewSet(ViewSet):
         parameters=[
             OpenApiParameter("client_id", OpenApiTypes.STR, OpenApiParameter.PATH,
                               description=_("Client ID token")),
-            KUserQuerySerializer,  # serializer fields are converted to parameters
+            OpenApiParameter("project_id", OpenApiTypes.STR, OpenApiParameter.PATH,
+                             description=_("ID of the project, usually starts with rgoc")),
+            UserQuerySerializer,  # serializer fields are converted to parameters
         ],
-        responses={200: KUserSerializer, 500: ErrorSerializer},
+        responses={200: UserSerializer, 500: ErrorSerializer},
         methods=["GET"]
     )
-    def list(self, request):
-
-        user_list = KUser.list()
-        serializer = KUserSerializer(user_list, many=True)
-        return Response(serializer.data, content_type="application/json")
+    def list(self, request, client_id, project_id):
+        try:
+            user_list = User.list(client_id=client_id, token=request.token, project_id=project_id)
+            serializer = UserSerializer(user_list, many=True)
+            return Response(serializer.data, content_type="application/json")
+        except KairnialWSServiceError as e:
+            error = ErrorSerializer({
+                'status_code': 400,
+                'error_code': e.status,
+                'description': e.message
+            })
+            return Response(error.data, content_type='application/json', status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
         description="Retrieve a Kairnial user",
-        responses={200: KUserSerializer, 500: ErrorSerializer},
+        responses={200: UserSerializer, 500: ErrorSerializer},
         methods=["GET"]
     )
     def retrieve(self, request, pk):
@@ -48,18 +60,18 @@ class KUserViewSet(ViewSet):
         :return: KUser
         """
         try:
-            user = KUser.get(pk=pk)
-            serializer = KUserSerializer(user)
+            user = User.get(pk=pk)
+            serializer = UserSerializer(user)
             return Response(serializer.data, content_type="application/json")
-        except KUser.DoesNotExist:
+        except User.DoesNotExist:
             return Response(_("Invalid user"), status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
         description="Create a Kairnial user",
         parameters=[
-            KUserCreationSerializer,  # serializer fields are converted to parameters
+            UserCreationSerializer,  # serializer fields are converted to parameters
         ],
-        responses={201: KUserSerializer, 500: ErrorSerializer, 400: ErrorSerializer},
+        responses={201: UserSerializer, 500: ErrorSerializer, 400: ErrorSerializer},
         methods=["POST"]
     )
     def create(self, request):

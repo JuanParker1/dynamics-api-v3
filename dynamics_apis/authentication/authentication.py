@@ -43,11 +43,12 @@ class KairnialTokenAuthentication(JSONWebTokenAuthentication):
             return None
 
         try:
+            print(request.client_id)
             payload = jwt.decode(
                 token,
                 KAIRNIAL_AUTH_PUBLIC_KEY,
                 algorithms=ALGORITHMS,
-                audience=API_AUDIENCE
+                audience=request.client_id
             )
             uuid = payload.get('sub')
             first_name, last_name = payload.get('name').split()
@@ -63,10 +64,12 @@ class KairnialTokenAuthentication(JSONWebTokenAuthentication):
         except jwt.ExpiredSignatureError:
             logger.error("Token expired")
             return None
-        except jwt.JWTClaimsError as e:
+        except (jwt.InvalidIssuerError, jwt.InvalidAudienceError) as e:
             logger.error("incorrect claims, please check the audience and issuer")
             return None
-
+        except AttributeError as e:
+            logger.error("Unable to get client_id")
+            return None
         except Exception as e:
             logger.error("Unable to parse authentication")
             return None

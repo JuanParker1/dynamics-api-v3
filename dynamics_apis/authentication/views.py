@@ -26,10 +26,9 @@ class PasswordAuthenticationView(APIView):
     def post(self, request, format=None):
         serializer = PasswordAuthenticationSerializer(data=request.data)
         if serializer.is_valid():
-            ka = KairnialAuthentication()
+            ka = KairnialAuthentication(client_id=serializer.validated_data.get('client_id'))
             try:
                 auth_response = ka.password_authentication(
-                    client_id=serializer.validated_data.get('client_id'),
                     username=serializer.validated_data.get('username'),
                     password=serializer.validated_data.get('password'),
                 )
@@ -56,10 +55,9 @@ class APIKeyAuthenticationView(APIView):
     def post(self, request, format=None):
         serializer = APIKeyAuthenticationSerializer(data=request.data)
         if serializer.is_valid():
-            ka = KairnialAuthentication()
+            ka = KairnialAuthentication(client_id=serializer.validated_data.get('client_id'))
             try:
                 auth_response = ka.secrets_authentication(
-                    client_id=serializer.validated_data.get('client_id'),
                     api_key=serializer.validated_data.get('api_key'),
                     api_secret=serializer.validated_data.get('api_secret'),
                 )

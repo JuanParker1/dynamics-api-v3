@@ -20,11 +20,12 @@ class KairnialUser(KairnialWSService):
         Count users on a project
         :return:
         """
-        response = self.call(action='getNbUsers')
+        return self.call(action='getNbUsers')
 
-    def list(self, project: str = None) -> []:
+    def list(self) -> []:
         """
         List users
         :return:
         """
-        response = self.call(action='getUsers')
+        return self.call(action='getUsers')
+

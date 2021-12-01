@@ -7,6 +7,7 @@ from django.http import JsonResponse
 from jose import jwt
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
+from django.middleware.security import SecurityMiddleware
 
 KAIRNIAL_AUTH_DOMAIN = settings.KIARNIAL_AUTH_DOMAIN
 API_AUDIENCE = settings.KAIRNIAL_AUDIENCE
@@ -36,4 +37,9 @@ class KairnialAuthMiddleware(object):
             pass
         response = self.get_response(request)
         return response
+
+    def process_view(self, request, view_func, view_args, view_kwargs):
+        client_id = view_kwargs.get('client_id', None)
+        if client_id:
+            request.client_id = client_id
 

@@ -3,10 +3,10 @@ Kairnial user model classes
 """
 
 from django.db import models
-
+from .services import KairnialUser
 
 # Create your models here.
-class KUser:
+class User:
     """
     Kairnial user class
     """
@@ -26,6 +26,15 @@ class KUser:
     creation_time = ''
     update_time = ''
 
-    def list(self, **filters):
-        pass
+    def list(self, client_id: str, token: str, project: str, **filters):
+        """
+        Get a list of users for a project
+        :param client_id:
+        :param token:
+        :param project:
+        :param filters:
+        :return:
+        """
+        ku = KairnialUser(client_id=client_id, token=token, project=project)
+        return ku.list()
 
