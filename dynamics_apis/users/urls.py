@@ -1,10 +1,13 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from  .viewsets import UserViewSet
+
+from .viewsets.groups import GroupViewSet
+from  .viewsets.users import UserViewSet
 
 # Create a router and register our viewsets with it.
 router = DefaultRouter()
-router.register(r'', UserViewSet, basename='users')
+router.register(r'users', UserViewSet, basename='users')
+router.register(r'groups', GroupViewSet, basename='users')
 
 # The API URLs are now determined automatically by the router.
 urlpatterns = [

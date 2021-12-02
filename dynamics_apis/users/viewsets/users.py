@@ -9,11 +9,11 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 
 from dynamics_apis.common.serializers import ErrorSerializer
-from .models import User
-from .serializers import UserSerializer, UserCreationSerializer, UserQuerySerializer, \
+from dynamics_apis.users.models import User
+from dynamics_apis.users.serializers import UserSerializer, UserCreationSerializer, UserQuerySerializer, \
     ProjectMemberSerializer
 # Create your views here.
-from ..common.services import KairnialWSServiceError
+from dynamics_apis.common.services import KairnialWSServiceError
 
 
 class UserViewSet(ViewSet):
@@ -41,7 +41,6 @@ class UserViewSet(ViewSet):
                 project_id=project_id,
                 filters=request.GET
             )
-            print(user_list)
             serializer = ProjectMemberSerializer(user_list, many=True)
             return Response(serializer.data, content_type="application/json")
         except (KairnialWSServiceError, KeyError) as e:

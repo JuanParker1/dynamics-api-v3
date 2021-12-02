@@ -52,7 +52,7 @@ class KairnialWSService:
     def get_url(self, action):
         return f'{settings.KAIRNIAL_WS_SERVER}/gateway.php'
 
-    def get_body(self, action: str, parameters: [{}]):
+    def get_body(self, action: str, parameters: [dict] = [{}]) -> str:
         return json.dumps({
             'headers': self._body_headers(),
             'params': parameters,
@@ -84,7 +84,7 @@ class KairnialWSService:
         """
         return f'{self.project_id}.{self.service_domain}.{action}'
 
-    def call(self, action: str, parameters: [{}]) -> dict:
+    def call(self, action: str, parameters: [dict] = [{}]) -> dict:
         """
         Call the Webservice with parameters
         :param action: Name of the action to perform on a domain (user.getUsers)
@@ -95,7 +95,7 @@ class KairnialWSService:
         response = requests.post(
             self.get_url(action=action),
             headers=self.get_headers(),
-            data=self.get_body(action=action)
+            data=self.get_body(action=action, parameters=parameters)
         )
         if response.status_code != 200:
             raise KairnialWSServiceError(

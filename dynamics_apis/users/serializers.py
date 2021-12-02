@@ -61,8 +61,25 @@ class UserQuerySerializer(serializers.Serializer):
     email = serializers.CharField(label=_("email case insensitive content filter"),
                                   help_text=_("Filter by user email. Case insensitive content filter"),
                                   required=False)
-    status = serializers.ChoiceField(label=_("status case insensitive exact filter"),
-                                     help_text=_("status case insensitive exact filter"),
-                                     choices=['running', 'walking', 'standing'], required=False)
+    archived = serializers.BooleanField(label=_("Boolean filter on archived status"),
+                                     help_text=_("Is user archived, 0 or 1"), required=False)
     groups = serializers.CharField(label=_("List users for given numerical group IDs separated by a comma"),
                                    required=False)
+
+
+class GroupSerializer(serializers.Serializer):
+    id = serializers.UUIDField(source='guid', read_only=True)
+    name = serializers.CharField(label=_("Name of the group"), source='groups_label', read_only=True)
+    description = serializers.CharField(label=_("Description of the group"), source='groups_desc', read_only=True)
+    level = serializers.CharField(label=_("Description of the group"), source='groups_level', read_only=True)
+
+
+class GroupQuerySerializer(serializers.Serializer):
+    name = serializers.CharField(label=_("Filter by group name"),
+                                 help_text=_("Filter by group name. Case insensitive filter"),
+                                 required=False)
+
+
+class GroupCreationSerializer(serializers.Serializer):
+    name = serializers.CharField(label=_("Name of the group"))
+    description = serializers.CharField(label=_("Description of the group"))
