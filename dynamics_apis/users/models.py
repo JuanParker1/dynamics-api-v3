@@ -26,15 +26,29 @@ class User:
     creation_time = ''
     update_time = ''
 
-    def list(self, client_id: str, token: str, project: str, **filters):
+    @staticmethod
+    def list(client_id: str, token: str, project_id: str, filters: dict: {}) -> []:
         """
         Get a list of users for a project
         :param client_id:
         :param token:
         :param project:
-        :param filters:
+        :param filters: Dict of filters
         :return:
         """
-        ku = KairnialUser(client_id=client_id, token=token, project=project)
-        return ku.list()
+        users = None
+        ku = KairnialUser(client_id=client_id, token=token, project_id=project_id)
+        if 'groups' in filters:
+            try:
+                list_of_groups = [int(a.strip()) for a in filters.get('groups').split(',')]
+                users = ku.list_for_groups(list_of_groups=list_of_groups)
+            except ValueError:
+                return None
+        else:
+            return ku.list().get('users')
+        manual_filters = set(filters.keys()) & set(['full_name', 'email'])
+        for m in manual_filters:
+            users = [u for u in users if filters.get('m') in getattr(u, m, '').lower()]
+        if 'archived' in filters:
+            users = [u for u in users if getattr(u, 'archive, '').lower()]
 

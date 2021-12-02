@@ -24,19 +24,19 @@ class KairnialWSService:
     client_id = None
     token = None
     token_type = None
-    project = None
+    project_id = None
 
-    def __init__(self, client_id: str, token: str, project: str):
+    def __init__(self, client_id: str, token: str, project_id: str):
         """
         Initialize the project fecthing library
         :param token: Access token to pass to header
         """
         self.client_id = client_id
         self.token = token
-        self.project = project
+        self.project_id = project_id
 
     @classmethod
-    def from_authenticator(cls, authenticator: KairnialAuthentication, project: str):
+    def from_authenticator(cls, authenticator: KairnialAuthentication, project_id: str):
         """
         Initiate a KairnialProject from KairnialAuthentication
         :param authenticator: KairnialAuthentication
@@ -45,17 +45,17 @@ class KairnialWSService:
         return cls(
             client_id=authenticator.client_id,
             token=authenticator.token,
-            project=project
+            project_id=project_id
 
         )
 
     def get_url(self, action):
         return f'{settings.KAIRNIAL_WS_SERVER}/gateway.php'
 
-    def get_body(self, action: str):
+    def get_body(self, action: str, parameters: [{}]):
         return json.dumps({
             'headers': self._body_headers(),
-            'params': self._parameters(),
+            'params': parameters,
             'service': self._service(action=action)
         })
 
@@ -77,28 +77,21 @@ class KairnialWSService:
             'UserLanguage': 'fr'
         }
 
-    def _parameters(self) -> []:
-        """
-        Return body parameters for the WS call
-        :return:
-        """
-        return [{}]
-
     def _service(self, action: str) -> str:
         """
         Return service body
         :return:
         """
-        return f'{self.project}.{self.service_domain}.{action}'
+        return f'{self.project_id}.{self.service_domain}.{action}'
 
-    def call(self, action: str) -> dict:
+    def call(self, action: str, parameters: [{}]) -> dict:
         """
         Call the Webservice with parameters
         :param action: Name of the action to perform on a domain (user.getUsers)
         """
         print(self.get_url(action=action))
         print(self.get_headers())
-        print(self.get_body(action=action))
+        print(self.get_body(action=action, parameters=parameters))
         response = requests.post(
             self.get_url(action=action),
             headers=self.get_headers(),
@@ -116,4 +109,4 @@ class KairnialWSService:
                 raise KairnialWSServiceError(
                     message=_("Invalid response from Web Services"),
                     status=response.status_code
-                )
+                ) from JSONDecodeError

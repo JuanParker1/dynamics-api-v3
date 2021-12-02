@@ -29,3 +29,11 @@ class KairnialUser(KairnialWSService):
         """
         return self.call(action='getUsers')
 
+    def list_for_groups(self, list_of_groups: [str]) -> []:
+        """
+        List users for a set of given groups.
+        Having no group will return an empty set
+        :param list_of_groups: List of group IDs
+        :return:
+        """
+        return self.call(action='getUsersByGroup', parameters={'groupList': list_of_groups})

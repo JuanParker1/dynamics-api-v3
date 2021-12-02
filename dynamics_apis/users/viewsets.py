@@ -10,9 +10,8 @@ from rest_framework.viewsets import ViewSet
 
 from dynamics_apis.common.serializers import ErrorSerializer
 from .models import User
-from .serializers import UserSerializer, UserCreationSerializer, UserQuerySerializer
-
-
+from .serializers import UserSerializer, UserCreationSerializer, UserQuerySerializer, \
+    ProjectMemberSerializer
 # Create your views here.
 from ..common.services import KairnialWSServiceError
 
@@ -26,26 +25,33 @@ class UserViewSet(ViewSet):
         description="List Kairnial users",
         parameters=[
             OpenApiParameter("client_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                              description=_("Client ID token")),
+                             description=_("Client ID token")),
             OpenApiParameter("project_id", OpenApiTypes.STR, OpenApiParameter.PATH,
                              description=_("ID of the project, usually starts with rgoc")),
             UserQuerySerializer,  # serializer fields are converted to parameters
         ],
-        responses={200: UserSerializer, 500: ErrorSerializer},
+        responses={200: ProjectMemberSerializer, 500: ErrorSerializer},
         methods=["GET"]
     )
     def list(self, request, client_id, project_id):
         try:
-            user_list = User.list(client_id=client_id, token=request.token, project_id=project_id)
-            serializer = UserSerializer(user_list, many=True)
+            user_list = User.list(
+                client_id=client_id,
+                token=request.token,
+                project_id=project_id,
+                filters=request.GET
+            )
+            print(user_list)
+            serializer = ProjectMemberSerializer(user_list, many=True)
             return Response(serializer.data, content_type="application/json")
-        except KairnialWSServiceError as e:
+        except (KairnialWSServiceError, KeyError) as e:
             error = ErrorSerializer({
-                'status_code': 400,
-                'error_code': e.status,
-                'description': e.message
+                'status': 400,
+                'code': getattr(e, 'status', 0),
+                'description': getattr(e, 'message', str(e))
             })
-            return Response(error.data, content_type='application/json', status=status.HTTP_400_BAD_REQUEST)
+            return Response(error.data, content_type='application/json',
+                            status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
         description="Retrieve a Kairnial user",
