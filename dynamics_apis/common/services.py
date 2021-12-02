@@ -1,8 +1,10 @@
 import json
 import uuid
+from hashlib import sha1
 from json import JSONDecodeError
 
 import requests
+from django.core.cache import cache
 from django.utils.translation import ugettext as _
 from django.contrib.auth.models import User
 from django.conf import settings
@@ -84,29 +86,55 @@ class KairnialWSService:
         """
         return f'{self.project_id}.{self.service_domain}.{action}'
 
-    def call(self, action: str, parameters: [dict] = [{}]) -> dict:
+    def call(self, action: str, parameters: [dict] = [{}], format: str = 'json'):
         """
         Call the Webservice with parameters
         :param action: Name of the action to perform on a domain (user.getUsers)
         """
-        print(self.get_url(action=action))
-        print(self.get_headers())
-        print(self.get_body(action=action, parameters=parameters))
+
+        url = self.get_url(action=action)
+        headers = self.get_headers()
+        data = self.get_body(action=action, parameters=parameters)
+        print(url, headers, data)
+        cache_key = sha1(f'{url}||{json.dumps(headers)}||{data}'.encode('latin1')).hexdigest()
+        output = cache.get(cache_key)
+        #if output:
+        #    return output
         response = requests.post(
-            self.get_url(action=action),
-            headers=self.get_headers(),
-            data=self.get_body(action=action, parameters=parameters)
+            url=url,
+            headers=headers,
+            data=data
         )
+        print(response.status_code)
         if response.status_code != 200:
+            print(response.status_code)
             raise KairnialWSServiceError(
-                message=response.content,
+                message=response.content or 'General error',
                 status=response.status_code
             )
         else:
-            try:
-                return response.json()
-            except JSONDecodeError as e:
-                raise KairnialWSServiceError(
-                    message=_("Invalid response from Web Services"),
-                    status=response.status_code
-                ) from JSONDecodeError
+            if format == 'json':
+                try:
+                    output = response.json()
+                except JSONDecodeError as e:
+                    raise KairnialWSServiceError(
+                        message=_("Invalid response from Web Services"),
+                        status=response.status_code
+                    ) from JSONDecodeError
+            elif format == 'bool' or format == 'int':
+                try:
+                    val = int(response.content)
+                    if format == 'int':
+                        output =  val
+                    else:
+                        output =  val != 0
+                except ValueError as e:
+                    raise KairnialWSServiceError(
+                        message=_("Invalid response from Web Services"),
+                        status=response.status_code
+                    ) from JSONDecodeError
+            else: # Return content as string
+                output =  response.content
+            cache.set(cache_key, output, timeout=30)
+            print(output)
+            return output

@@ -62,7 +62,7 @@ class GroupViewSet(ViewSet):
         responses={200: GroupSerializer, 500: ErrorSerializer},
         methods=["GET"]
     )
-    def retrieve(self, request, client_id, project_id, pk):
+    def retrieve(self, request, client_id: str, project_id: str, pk: str):
         """
         Retrieve a Kairnial group by ID
         :param request: HTTPRequest
@@ -86,16 +86,27 @@ class GroupViewSet(ViewSet):
 
     @extend_schema(
         description="Create a Kairnial group",
-        parameters=[
-            GroupCreationSerializer,  # serializer fields are converted to parameters
-        ],
-        responses={201: GroupSerializer, 500: ErrorSerializer, 400: ErrorSerializer},
+        request=GroupCreationSerializer,
+        responses={201: OpenApiTypes.STR, 400: OpenApiTypes.STR, 406: OpenApiTypes.STR},
         methods=["POST"]
     )
-    def create(self, request):
+    def create(self, request,  client_id: str, project_id: str):
         """
         Create a Kairnial user. Requires user creation rights
         :param request:
         :return:
         """
-        pass
+        gcs = GroupCreationSerializer(data=request.data)
+        if gcs.is_valid():
+            group = gcs.create(gcs.validated_data)
+            created = group.create(
+                client_id=client_id,
+                token=request.token,
+                project_id=project_id
+            )
+            if created:
+                return Response(_("Group created"), status=status.HTTP_201_CREATED)
+            else:
+                return Response(_("Group could not be created"), status=status.HTTP_406_NOT_ACCEPTABLE)
+        else:
+            return Response(gcs.errors, content_type='application/json', status=status.HTTP_400_BAD_REQUEST)

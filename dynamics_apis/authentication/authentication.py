@@ -43,7 +43,6 @@ class KairnialTokenAuthentication(JSONWebTokenAuthentication):
             return None
 
         try:
-            print(request.client_id)
             payload = jwt.decode(
                 token,
                 KAIRNIAL_AUTH_PUBLIC_KEY,
@@ -52,7 +51,7 @@ class KairnialTokenAuthentication(JSONWebTokenAuthentication):
             )
             uuid = payload.get('sub')
             first_name, last_name = payload.get('name').split()
-            email = payload.get('email').split()
+            email = payload.get('email').strip()
             user = get_user_model()(
                 first_name=first_name,
                 last_name=last_name,

@@ -37,6 +37,7 @@ class ProjectView(APIView):
         )
         try:
             response = kp.list(search=search)
+            print(response)
             serializer = ProjectSerializer(response['items'], many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except KairnialWSServiceError as e:

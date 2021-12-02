@@ -29,6 +29,12 @@ class KairnialUser(KairnialWSService):
         """
         return self.call(action='getUsers')
 
+    def get(self, pk) -> []:
+        """
+        Get user using getFilteredUser
+        """
+        return self.call(action='getFilteredUser', parameters=[{'userIdList': [pk,]}])
+
     def list_for_groups(self, list_of_groups: [str]) -> []:
         """
         List users for a set of given groups.
@@ -36,4 +42,4 @@ class KairnialUser(KairnialWSService):
         :param list_of_groups: List of group IDs
         :return:
         """
-        return self.call(action='getUsersByGroup', parameters={'groupList': list_of_groups})
+        return self.call(action='getUsersByGroup', parameters=[{'groupList': list_of_groups}])
