@@ -20,9 +20,9 @@ class User:
     def list(cls, client_id: str, token: str, project_id: str, filters: dict = {}) -> []:
         """
         Get a list of users for a project
-        :param client_id:
-        :param token:
-        :param project:
+        :param client_id: ClientID Token
+        :param token: Access token
+        :param project_id: Project RGOC Code
         :param filters: Dict of filters
         :return:
         """
@@ -45,9 +45,25 @@ class User:
         return users
 
     @classmethod
+    def count(cls, client_id: str, token: str, project_id: str):
+        """
+        Get a count of users on the project
+        :param client_id: ClientID Token
+        :param token: Access token
+        :param project_id: Project RGOC Code
+        """
+        ku = KairnialUser(client_id=client_id, token=token, project_id=project_id)
+        return ku.count()
+
+
+    @classmethod
     def get(cls, client_id: str, token: str, project_id: str, pk: str):
         """
         Get a specific user
+        :param client_id: ClientID Token
+        :param token: Access token
+        :param project_id: Project RGOC Code
+        :param pk: Group numeric ID
         """
         ku = KairnialUser(client_id=client_id, token=token, project_id=project_id)
         return ku.get(pk=pk)
@@ -88,5 +104,32 @@ class Group:
         """
         kg = KairnialGroup(client_id=client_id, token=token, project_id=project_id)
         return kg.create(self)
+
+    @staticmethod
+    def add_users(client_id: str, token: str, project_id: str, pk: int, user_list: [str]):
+        """
+        Add user to group
+        :param client_id: ClientID Token
+        :param token: Access token
+        :param project_id: Project RGOC Code
+        :param pk: Group numeric ID
+        :user_id: List of user numeric ID
+        """
+        kg = KairnialGroup(client_id=client_id, token=token, project_id=project_id)
+        return kg.add_users(group_id=pk, user_list=user_list)
+
+    @staticmethod
+    def remove_users(client_id: str, token: str, project_id: str, pk: int, user_list: [str]):
+        """
+        Add user to group
+        :param client_id: ClientID Token
+        :param token: Access token
+        :param project_id: Project RGOC Code
+        :param pk: Group numeric ID
+        :user_id: List of user numeric ID
+        """
+        kg = KairnialGroup(client_id=client_id, token=token, project_id=project_id)
+        return kg.remove_users(group_id=pk, user_list=user_list)
+
 
 

@@ -1,6 +1,8 @@
 """
 REST API views for Kairnial users
 """
+import os
+
 from django.utils.translation import ugettext as _
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema, OpenApiParameter
@@ -12,7 +14,7 @@ from rest_framework.viewsets import ViewSet
 from dynamics_apis.common.serializers import ErrorSerializer
 from dynamics_apis.users.models import User
 from dynamics_apis.users.serializers import UserSerializer, UserCreationSerializer, UserQuerySerializer, \
-    ProjectMemberSerializer
+    ProjectMemberSerializer, ProjectMemberCountSerializer
 # Create your views here.
 from dynamics_apis.common.services import KairnialWSServiceError
 
@@ -26,9 +28,11 @@ class UserViewSet(ViewSet):
         description="List Kairnial users",
         parameters=[
             OpenApiParameter("client_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                             description=_("Client ID token")),
+                             description=_("Client ID token"),
+                             default=os.environ.get('DEFAULT_KAIRNIAL_CLIENT_ID', '')),
             OpenApiParameter("project_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                             description=_("ID of the project, usually starts with rgoc")),
+                             description=_("ID of the project, usually starts with rgoc"),
+                             default=os.environ.get('DEFAULT_KAIRNIAL_PROJECT_ID', '')),
             UserQuerySerializer,  # serializer fields are converted to parameters
         ],
         responses={200: ProjectMemberSerializer, 500: ErrorSerializer},
@@ -54,14 +58,49 @@ class UserViewSet(ViewSet):
                             status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
+        description="Count Kairnial users",
+        parameters=[
+            OpenApiParameter("client_id", OpenApiTypes.STR, OpenApiParameter.PATH,
+                             description=_("Client ID token"),
+                             default=os.environ.get('DEFAULT_KAIRNIAL_CLIENT_ID', '')),
+            OpenApiParameter("project_id", OpenApiTypes.STR, OpenApiParameter.PATH,
+                             description=_("ID of the project, usually starts with rgoc"),
+                             default=os.environ.get('DEFAULT_KAIRNIAL_PROJECT_ID', ''))
+        ],
+        responses={200: ProjectMemberCountSerializer, 500: ErrorSerializer},
+        methods=["GET"]
+    )
+    @action(["GET"], detail=False, description=_("Count users for this project"), url_path='count', name="count_users")
+    def count(self, request, client_id, project_id):
+        try:
+            user_count = User.count(
+                client_id=client_id,
+                token=request.token,
+                project_id=project_id
+            )
+            print(user_count)
+            serializer = ProjectMemberCountSerializer(user_count)
+            return Response(serializer.data, content_type="application/json")
+        except (KairnialWSServiceError, KeyError, AttributeError) as e:
+            error = ErrorSerializer({
+                'status': 400,
+                'code': getattr(e, 'status', 0),
+                'description': getattr(e, 'message', str(e))
+            })
+            return Response(error.data, content_type='application/json',
+                            status=status.HTTP_400_BAD_REQUEST)
+
+    @extend_schema(
         description="Retrieve a Kairnial user",
         parameters=[
             OpenApiParameter("id", OpenApiTypes.STR, OpenApiParameter.PATH,
                              description=_("User ID")),
             OpenApiParameter("client_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                             description=_("Client ID token")),
+                             description=_("Client ID token"),
+                             default=os.environ.get('DEFAULT_KAIRNIAL_CLIENT_ID', '')),
             OpenApiParameter("project_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                             description=_("ID of the project, usually starts with rgoc")),
+                             description=_("ID of the project, usually starts with rgoc"),
+                             default=os.environ.get('DEFAULT_KAIRNIAL_PROJECT_ID', '')),
         ],
         responses={200: ProjectMemberSerializer, 400: ErrorSerializer},
         methods=["GET"]
@@ -105,9 +144,9 @@ class UserViewSet(ViewSet):
         description="Retrieve current Kairnial user",
         parameters=[
             OpenApiParameter("client_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                             description=_("Client ID token")),
+                             description=_("Client ID token"), default=os.environ.get('DEFAULT_KAIRNIAL_CLIENT_ID', '')),
             OpenApiParameter("project_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                             description=_("ID of the project, usually starts with rgoc")),
+                             description=_("ID of the project, usually starts with rgoc"), default=os.environ.get('DEFAULT_KAIRNIAL_PROJECT_ID', '')),
         ],
         responses={200: ProjectMemberSerializer, 400: ErrorSerializer},
         methods=["GET"]

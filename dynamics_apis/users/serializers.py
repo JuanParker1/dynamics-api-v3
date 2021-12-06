@@ -13,12 +13,16 @@ class UserCreationSerializer(serializers.Serializer):
     email = serializers.CharField(label=_("User email address"), required=True)
 
 
-
 class ProjectMemberSerializer(serializers.Serializer):
     id = serializers.IntegerField(label=_("User unique ID"), read_only=True, source='account_id')
     email = serializers.CharField(label=_("User email"), required=True, source='account_email')
     full_name = serializers.CharField(label=_("User full name"), required=True, source='account_firstname')
-    archived = serializers.CharField(label=_("User has been archived"), required=False, source='account_achive', default=0)
+    archived = serializers.CharField(label=_("User has been archived"), required=False, source='account_achive',
+                                     default=0)
+
+
+class ProjectMemberCountSerializer(serializers.Serializer):
+    count = serializers.IntegerField(label=_("Number of users on this project"), read_only=True, source='nbUsers')
 
 
 class UserSerializer(UserCreationSerializer):
@@ -32,6 +36,7 @@ class UserSerializer(UserCreationSerializer):
                                                read_only=True)
     creation_time = serializers.DateTimeField(label=_("Date of last connection"), read_only=True)
     update_time = serializers.DateTimeField(label=_("Date of last connection"), read_only=True)
+
 
 class SelfSerializer(UserSerializer):
     uuid = serializers.UUIDField(label=_("User universal identifier"), read_only=True,
@@ -64,7 +69,7 @@ class UserQuerySerializer(serializers.Serializer):
                                   help_text=_("Filter by user email. Case insensitive content filter"),
                                   required=False)
     archived = serializers.BooleanField(label=_("Boolean filter on archived status"),
-                                     help_text=_("Is user archived, 0 or 1"), required=False)
+                                        help_text=_("Is user archived, 0 or 1"), required=False)
     groups = serializers.CharField(label=_("List users for given numerical group IDs separated by a comma"),
                                    required=False)
 
@@ -83,9 +88,17 @@ class GroupQuerySerializer(serializers.Serializer):
                                  required=False)
 
 
+class GroupAddUserSerializer(serializers.Serializer):
+    users = serializers.ListField(label=_("List of numerical user IDs"),
+                                  help_text=_("List of user IDs to add to group"),
+                                  child=serializers.IntegerField(),
+                                  required=True)
+
+
 class GroupCreationSerializer(serializers.Serializer):
-    name = serializers.CharField(label=_("Name of the group"))
-    description = serializers.CharField(label=_("Description of the group"), required=False)
+    name = serializers.CharField(label=_("Name of the group"), help_text=_("Type the name of your group"))
+    description = serializers.CharField(label=_("Description of the group"), required=False,
+                                        help_text=_("Type the description of your group"))
 
     def create(self, validated_data):
         """

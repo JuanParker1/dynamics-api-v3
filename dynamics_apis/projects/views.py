@@ -8,6 +8,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from .models import Project
 from .serializers import ProjectSerializer
 from dynamics_apis.common.serializers import ErrorSerializer
 from .services import KairnialProject
@@ -30,15 +31,14 @@ class ProjectView(APIView):
         methods=["GET"]
     )
     def get(self, request, client_id, format=None):
-        search = request.GET.get('search')
-        kp = KairnialProject(
-            client_id=client_id,
-            token=request.token
-        )
+
         try:
-            response = kp.list(search=search)
-            print(response)
-            serializer = ProjectSerializer(response['items'], many=True)
+            project_list = Project.list(
+                client_id=client_id,
+                token=request.token,
+                search=request.GET.get('search')
+            )
+            serializer = ProjectSerializer(project_list, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except KairnialWSServiceError as e:
             error = ErrorSerializer({

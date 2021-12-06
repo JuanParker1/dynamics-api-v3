@@ -33,7 +33,7 @@ class KairnialUser(KairnialWSService):
         """
         Get user using getFilteredUser
         """
-        return self.call(action='getFilteredUser', parameters=[{'userIdList': [pk,]}])
+        return self.call(action='getFilteredUser', parameters=[{'userIdList': [pk, ]}])
 
     def list_for_groups(self, list_of_groups: [str]) -> []:
         """

@@ -1,6 +1,8 @@
 """
 Authentication serializers
 """
+import os
+
 from django.utils.translation import ugettext as _
 from rest_framework import serializers
 
@@ -17,18 +19,18 @@ class PasswordAuthenticationSerializer(serializers.Serializer):
     """
     Password authentication class
     """
-    client_id = serializers.CharField(label=_("Client ID"))
-    email = serializers.CharField(label=_("User unique identifier"))
-    password = serializers.CharField(label=_("Password"))
+    client_id = serializers.CharField(label=_("Client ID"), default=os.environ.get('DEFAULT_KAIRNIAL_CLIENT_ID', _('Type your client ID here')))
+    email = serializers.CharField(label=_("User unique identifier"), help_text=_('Type your email here'), default=_('Type your email here'))
+    password = serializers.CharField(label=_("Password"), help_text=_('Type your password here'), default=_('Type your password here'))
 
 
 class APIKeyAuthenticationSerializer(serializers.Serializer):
     """
     API Key / Secret authentication class
     """
-    client_id = serializers.CharField(label=_("Client ID"))
-    api_key = serializers.CharField(label=_("User API key"))
-    api_secret = serializers.CharField(label=_("User API secret"))
+    client_id = serializers.CharField(label=_("Client ID"), default=os.environ.get('DEFAULT_KAIRNIAL_CLIENT_ID', ''))
+    api_key = serializers.CharField(label=_("User API key"), default=os.environ.get('DEFAULT_KAIRNIAL_API_KEY', ''))
+    api_secret = serializers.CharField(label=_("User API secret"),  default=os.environ.get('DEFAULT_KAIRNIAL_API_SECRET', ''))
 
 
 class AuthResponseSerializer(serializers.Serializer):

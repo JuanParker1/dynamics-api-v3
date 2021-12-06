@@ -59,7 +59,9 @@ class KairnialAuthentication:
         )
         if response.status_code != 200:
             raise KairnialAuthenticationError(
-                _(f"Authentication failed with code {response.status_code}: {response.content}"))
+                message=_(f"Authentication failed with code {response.status_code}: {response.content}"),
+                status=response.status_code
+            )
 
         try:
             resp = response.json()
@@ -68,7 +70,11 @@ class KairnialAuthentication:
             self._extract_user(resp)
             return resp
         except json.JSONDecodeError:
-            raise KairnialAuthenticationError("Invalid response from server")
+            raise KairnialAuthenticationError(
+                message="Invalid response from server",
+                status=400
+
+            )
 
     def secrets_authentication(self, api_key: str, api_secret: str) -> dict:
         """
@@ -94,7 +100,9 @@ class KairnialAuthentication:
         )
         if response.status_code != 200:
             raise KairnialAuthenticationError(
-                _(f"Authentication failed with code {response.status_code}: {response.content}"))
+                message=_(f"Authentication failed with code {response.status_code}: {response.content}"),
+                status=response.status_code
+            )
 
 
         try:
@@ -104,7 +112,10 @@ class KairnialAuthentication:
             self._extract_user(resp)
             return resp
         except json.JSONDecodeError:
-            raise KairnialAuthenticationError("Invalid response from server")
+            raise KairnialAuthenticationError(
+                message="Invalid response from server",
+                status=400
+            )
 
     def _extract_token_type(self, response: dict):
         """
