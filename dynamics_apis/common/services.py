@@ -2,6 +2,7 @@ import json
 import uuid
 from hashlib import sha1
 from json import JSONDecodeError
+import logging
 
 import requests
 from django.core.cache import cache
@@ -91,23 +92,25 @@ class KairnialWSService:
         Call the Webservice with parameters
         :param action: Name of the action to perform on a domain (user.getUsers)
         """
-
+        logger = logging.getLogger('services')
         url = self.get_url(action=action)
         headers = self.get_headers()
         data = self.get_body(action=action, parameters=parameters)
-        print(url, headers, data)
+        logger.debug(url)
+        logger.debug(headers)
+        logger.debug(data)
         cache_key = sha1(f'{url}||{json.dumps(headers)}||{data}'.encode('latin1')).hexdigest()
         output = cache.get(cache_key)
-        #if output:
-        #    return output
+        if output:
+            return output
         response = requests.post(
             url=url,
             headers=headers,
             data=data
         )
-        print(response.status_code)
+        logger.debug(response.status_code)
         if response.status_code != 200:
-            print(response.status_code)
+            logger.debug(response.status_code)
             raise KairnialWSServiceError(
                 message=response.content or 'General error',
                 status=response.status_code
@@ -136,5 +139,5 @@ class KairnialWSService:
             else: # Return content as string
                 output =  response.content
             cache.set(cache_key, output, timeout=30)
-            print(output)
+            logger.debug(output)
             return output

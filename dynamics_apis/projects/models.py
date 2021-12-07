@@ -15,7 +15,7 @@ class Project:
     }
     filters = ['name', ]
     @classmethod
-    def list(cls, client_id: str, token: str, project_id: str, search: str) -> []:
+    def list(cls, client_id: str, token: str, search: str) -> []:
         """
         Get a list of users for a project
         :param client_id: ClientID Token

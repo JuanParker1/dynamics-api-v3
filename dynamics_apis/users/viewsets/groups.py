@@ -11,8 +11,8 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 
 from dynamics_apis.common.serializers import ErrorSerializer
-from dynamics_apis.users.models import Group
-from dynamics_apis.users.serializers import GroupSerializer, GroupQuerySerializer, GroupCreationSerializer, \
+from dynamics_apis.users.models.groups import Group
+from dynamics_apis.users.serializers.groups import GroupSerializer, GroupQuerySerializer, GroupCreationSerializer, \
     GroupAddUserSerializer
 # Create your views here.
 from dynamics_apis.common.services import KairnialWSServiceError

@@ -1,19 +1,28 @@
 """
 Kairnial User serializer classes
 """
+import json
+import logging
+
 from django.utils.translation import ugettext as _
 from rest_framework import serializers
 
-from dynamics_apis.users.models import Group
+from dynamics_apis.users.models.groups import Group
 
 
 class UserCreationSerializer(serializers.Serializer):
+    """
+    Serializer for user creation
+    """
     first_name = serializers.CharField(label=_("User first name"), required=True)
     last_name = serializers.CharField(label=_("User last name"), required=True)
     email = serializers.CharField(label=_("User email address"), required=True)
 
 
 class ProjectMemberSerializer(serializers.Serializer):
+    """
+    Serializer for project members
+    """
     id = serializers.IntegerField(label=_("User unique ID"), read_only=True, source='account_id')
     email = serializers.CharField(label=_("User email"), required=True, source='account_email')
     full_name = serializers.CharField(label=_("User full name"), required=True, source='account_firstname')
@@ -22,10 +31,16 @@ class ProjectMemberSerializer(serializers.Serializer):
 
 
 class ProjectMemberCountSerializer(serializers.Serializer):
+    """
+    Serializer for number of users on a project
+    """
     count = serializers.IntegerField(label=_("Number of users on this project"), read_only=True, source='nbUsers')
 
 
 class UserSerializer(UserCreationSerializer):
+    """
+    User object serializer
+    """
     id = serializers.IntegerField(label=_("User unique ID"), read_only=True)
     fullname = serializers.CharField(label=_("User full name"), read_only=True)
     status: serializers.CharField(label=_("User status"), read_only=True)
@@ -39,16 +54,25 @@ class UserSerializer(UserCreationSerializer):
 
 
 class SelfSerializer(UserSerializer):
+    """
+    Serializer for current user
+    """
     uuid = serializers.UUIDField(label=_("User universal identifier"), read_only=True,
                                  source='account_uuid')
 
 
 class UserSimpleSerializer(serializers.Serializer):
+    """
+    Serializer for simple user
+    """
     id = serializers.IntegerField(label=_("User unique ID"), read_only=True)
     email = serializers.CharField(label=_("User email address"), read_only=True)
 
 
 class UserStatSerializer(serializers.Serializer):
+    """
+    Serializer for user stats
+    """
     user = UserSerializer()
     count_pins = serializers.IntegerField(label=_("Number of defects created by user"), default=0,
                                           read_only=True)
@@ -61,6 +85,9 @@ class UserStatSerializer(serializers.Serializer):
 
 
 class UserQuerySerializer(serializers.Serializer):
+    """
+    Serializer for user filtering
+    """
     full_name = serializers.CharField(label=_("Full name case insensitive content filter"),
                                       help_text=_("Filter by user full name. Case insensitive content filter"),
                                       read_only=True,
@@ -74,45 +101,3 @@ class UserQuerySerializer(serializers.Serializer):
                                    required=False)
 
 
-class GroupSerializer(serializers.Serializer):
-    id = serializers.UUIDField(source='guid', read_only=True)
-    num_id = serializers.IntegerField(source='groups_id', read_only=True)
-    name = serializers.CharField(label=_("Name of the group"), source='groups_label', read_only=True)
-    description = serializers.CharField(label=_("Description of the group"), source='groups_desc', read_only=True)
-    level = serializers.CharField(label=_("Description of the group"), source='groups_level', read_only=True)
-
-
-class GroupQuerySerializer(serializers.Serializer):
-    name = serializers.CharField(label=_("Filter by group name"),
-                                 help_text=_("Filter by group name. Case insensitive filter"),
-                                 required=False)
-
-
-class GroupAddUserSerializer(serializers.Serializer):
-    users = serializers.ListField(label=_("List of numerical user IDs"),
-                                  help_text=_("List of user IDs to add to group"),
-                                  child=serializers.IntegerField(),
-                                  required=True)
-
-
-class GroupCreationSerializer(serializers.Serializer):
-    name = serializers.CharField(label=_("Name of the group"), help_text=_("Type the name of your group"))
-    description = serializers.CharField(label=_("Description of the group"), required=False,
-                                        help_text=_("Type the description of your group"))
-
-    def create(self, validated_data):
-        """
-        Create a new Group instance
-        """
-        return Group(
-            name=validated_data['name'],
-            description=validated_data.get('description', '')
-        )
-
-    def update(self, instance, validated_data):
-        """
-        Update instane values
-        """
-        instance.name = validated_data['name']
-        instance.description = validated_data.get('description', instance.description)
-        return instance

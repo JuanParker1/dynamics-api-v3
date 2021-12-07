@@ -3,11 +3,6 @@ Call to Kairnial Web Services
 """
 from dynamics_apis.common.services import KairnialWSService
 
-USER_LIST_SERVICE = 'users.getUsers'
-USER_COUNT_SERVICE = 'users.getNbUsers'
-
-GROUP_LIST_PATH = 'users.getGroups'
-
 
 class KairnialUser(KairnialWSService):
     """
@@ -43,3 +38,4 @@ class KairnialUser(KairnialWSService):
         :return:
         """
         return self.call(action='getUsersByGroup', parameters=[{'groupList': list_of_groups}])
+

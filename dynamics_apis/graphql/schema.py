@@ -1,13 +1,15 @@
 """
 Djangophysics GraphQL schemas
 """
-from datetime import datetime, date
 
 from ariadne import QueryType, gql, make_executable_schema
 
 # GraphQL Schema first
-from ..users.models import User, Group
-from ..users.serializers import ProjectMemberSerializer, GroupSerializer
+from ..projects.models import Project
+from dynamics_apis.users.models.users import User
+from dynamics_apis.users.models.groups import Group
+from ..users.serializers.users import ProjectMemberSerializer
+from ..users.serializers.groups import GroupSerializer
 from ..projects.serializers import ProjectSerializer
 
 type_defs = '''
@@ -19,7 +21,7 @@ type_defs = '''
         id: Int!,
         full_name: String!,
         email: String,
-        archived: Bool
+        archived: Boolean
     }
     
     type Group   {
@@ -29,18 +31,18 @@ type_defs = '''
     }
     
     type Project    {
-        id Int!,
-        name String!,
-        services_backend String!,
+        id: Int!,
+        name: String!,
+        services_backend: String!,
         # "Karnial has servers in multiple locations, this provides info on the location of the data
-        authentication_backend String!,
-        active Bool,
-        maintenance Bool,
-        metadata String,
-        application_type String,
-        creation_date String!,
-        last_activity String,
-        project_type String
+        authentication_backend: String!,
+        active: Boolean,
+        maintenance: Boolean,
+        metadata: String,
+        application_type: String,
+        creation_date: String!,
+        last_activity: String,
+        project_type: String
     }
     
     """
@@ -48,13 +50,13 @@ type_defs = '''
     """
     type Query {
         "Current user resolver"
-        user((client_id: String, project_id String): User
+        user(client_id: String!, project_id: String!): User,
         "Searchable list of users"
-        users(client_id: String, project_id String, archived: Bool, full_name: String, email: String): [User]
+        users(client_id: String!, project_id: String!, archived: Boolean, full_name: String, email: String): [User],
         "Searchable list of groups"
-        groups(client_id: String, project_id String, name: String): [Group]
+        groups(client_id: String!, project_id: String!, name: String): [Group],
         "Searchable list of projects"
-        projects(search: String): [Project] 
+        projects(client_id: String!, search: String): [Project],
     }
 '''
 
@@ -76,8 +78,8 @@ def resolve_user(_, info, client_id, project_id):
     :param project_id: ID of the project
     """
     request = info.context.get('request', None)
-    filters = {'email': request.user.email}
-    if request and request.user:
+    if request.token:
+        filters = {'email': request.user.email}
         user_list = User.list(
             client_id=client_id,
             token=request.token,
@@ -89,15 +91,22 @@ def resolve_user(_, info, client_id, project_id):
 
 # Users resolver
 @query.field("users")
-def resolve_users(_, info, client_id, project_id, archived, full_name, email):
+def resolve_users(_, info, client_id, project_id, archived=0, full_name='', email=''):
     """
     Users resolver, if user is connected
     :param _: all params
     :param info: QraphQL request context
     """
     request = info.context.get('request', None)
-    filters = {'archived': archived, 'full_name': full_name, 'email': email}
-    if request and request.user:
+    print(request.token)
+    if request.token:
+        filters = {}
+        if archived:
+            filters['archived'] = archived
+        if full_name:
+            filters['full_name'] = full_name
+        if email:
+            filters['email'] = email
         user_list = User.list(
             client_id=client_id,
             token=request.token,
@@ -110,15 +119,17 @@ def resolve_users(_, info, client_id, project_id, archived, full_name, email):
 
 # Groups resolver
 @query.field("groups")
-def resolve_groups(_, info, client_id, project_id, name):
+def resolve_groups(_, info, client_id, project_id, name=''):
     """
     User resolver, if user is connected
     :param _: all params
     :param info: QraphQL request context
     """
     request = info.context.get('request', None)
-    filters = {'name': name}
-    if request and request.user:
+    filters = {}
+    if name:
+        filter['name'] = name
+    if request.token:
         group_list = Group.list(
             client_id=client_id,
             token=request.token,
@@ -130,18 +141,19 @@ def resolve_groups(_, info, client_id, project_id, name):
 
 # Projects resolver
 @query.field("projects")
-def resolve_projects(_, info, client_id, oroject_id, search):
+def resolve_projects(_, info, client_id, oroject_id, search=''):
     """
     Projects resolver, if user is connected
     :param _: all params
     :param info: QraphQL request context
     """
     request = info.context.get('request', None)
-    if request and request.user:
+    if request.token:
         project_list = Project.list(
             client_id=client_id,
-            token=request.token,
-            project_id=project_id
+            token=request.token
         )
-        serializer = GroupSerializer(project_list, many=True)
+        serializer = ProjectSerializer(project_list, many=True)
         return serializer.data
+
+schema = make_executable_schema(type_defs, query)
