@@ -1,7 +1,7 @@
 """
 Serializers for Group
 """
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from rest_framework import serializers
 
 from dynamics_apis.users.models.groups import Group

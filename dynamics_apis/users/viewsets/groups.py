@@ -2,7 +2,7 @@
 REST API views for Kairnial users
 """
 import os
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import status

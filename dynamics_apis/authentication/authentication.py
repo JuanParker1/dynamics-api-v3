@@ -7,10 +7,7 @@ import logging
 import jwt
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from rest_framework_jwt.authentication import JSONWebTokenAuthentication
-from rest_framework_jwt.blacklist.exceptions import (
-    MissingToken,
-)
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 KAIRNIAL_AUTH_DOMAIN = settings.KIARNIAL_AUTH_DOMAIN
 KAIRNIAL_AUTH_PUBLIC_KEY = settings.KAIRNIAL_AUTH_PUBLIC_KEY
@@ -18,7 +15,7 @@ API_AUDIENCE = settings.KAIRNIAL_AUDIENCE
 ALGORITHMS = ["RS256"]
 
 
-class KairnialTokenAuthentication(JSONWebTokenAuthentication):
+class KairnialTokenAuthentication(JWTAuthentication):
     """
     Token based authentication using the JSON Web Token standard.
 

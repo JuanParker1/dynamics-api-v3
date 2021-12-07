@@ -7,7 +7,7 @@ import requests
 import json
 
 from django.contrib.auth.models import User
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.conf import settings
 
 PASSWORD_LOGIN_PATH = '/api/oauth2/login'

@@ -1,7 +1,7 @@
 """
 Views for Kairnial projects
 """
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import status

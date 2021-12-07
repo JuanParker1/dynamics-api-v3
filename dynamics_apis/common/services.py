@@ -6,7 +6,7 @@ import logging
 
 import requests
 from django.core.cache import cache
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.contrib.auth.models import User
 from django.conf import settings
 
