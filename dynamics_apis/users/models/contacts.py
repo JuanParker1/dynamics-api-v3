@@ -1,7 +1,6 @@
 """
 Kairnial user model classes
 """
-from dynamics_apis.users.services.groups import KairnialGroup
 from dynamics_apis.users.services.contacts import KairnialContact
 
 
@@ -10,7 +9,7 @@ class Contact:
     """
     Kairnial contact class
     """
-    @classmethod
+    @staticmethod
     def list(cls, client_id: str, token: str, project_id: str, filters: dict = None) -> []:
         """
         Get a list of users for a project
@@ -24,3 +23,12 @@ class Contact:
         kc = KairnialContact(client_id=client_id, token=token, project_id=project_id)
         contacts = kc.list(parameters=parameters).get('items')
         return contacts
+
+    @staticmethod
+    def create(client_id: str, token: str, project_id: str, serialized_data: dict):
+        """
+        Create a group through Kairnial Web services call
+        """
+        kc = KairnialContact(client_id=client_id, token=token, project_id=project_id)
+        return kc.create(serialized_data)
+

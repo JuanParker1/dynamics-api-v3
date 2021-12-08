@@ -111,6 +111,7 @@ class KairnialWSService:
         logger.debug(response.status_code)
         if response.status_code != 200:
             logger.debug(response.status_code)
+            logger.debug(response.content)
             raise KairnialWSServiceError(
                 message=response.content or 'General error',
                 status=response.status_code

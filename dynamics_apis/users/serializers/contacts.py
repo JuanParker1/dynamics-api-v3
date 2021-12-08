@@ -47,7 +47,7 @@ class ContactQuerySerializer(serializers.Serializer):
     )
 
 
-class ContactCreationSerializer(serializers.Serializer):
+class ContactCreatorSerializer(serializers.Serializer):
     """
     Serializer for creator in contact response
     """
@@ -92,9 +92,15 @@ class ContactSerializer(serializers.Serializer):
         read_only=True,
         source='contact_company_name'
     )
-    category = serializers.CharField(
-        label=_("Contact category"),
-        help_text=("Contact category name"),
+    company_category = serializers.CharField(
+        label=_("Contact company category"),
+        help_text=_("Company category"),
+        read_only=True,
+        source='entreprises_cat'
+    )
+    work_package = serializers.CharField(
+        label=_("Contact work package"),
+        help_text=("Contact work package name"),
         read_only=True,
         source='contact_category'
     )
@@ -192,7 +198,7 @@ class ContactSerializer(serializers.Serializer):
         label=_("Contact code"),
         help_text=("Contact code"),
         read_only=True,
-        source='contact_fax'
+        source='contact_code'
     )
     created_at = serializers.DateTimeField(
         label=_("Contact creation time"),
@@ -206,8 +212,140 @@ class ContactSerializer(serializers.Serializer):
         read_only=True,
         source='creation_time'
     )
-    created_by = ContactCreationSerializer(
+    created_by = ContactCreatorSerializer(
         label=_("Contact created by"),
         read_only=True,
         source='contact_created_by_user'
+    )
+
+
+class ContactCreationSerializer(serializers.Serializer):
+    """
+    Serializer for contact creation
+    """
+    company_name = serializers.CharField(
+        label=_("Contact company name"),
+        help_text=_("Company name for contact"),
+        source='contact_company_name',
+        required=False
+    )
+    alternative_name = serializers.CharField(
+        label=_("Contact alternative name"),
+        help_text=("Contact alternative name"),
+        source='contact_other_name',
+        required=False
+    )
+    short_name = serializers.CharField(
+        label=_("Contact short name"),
+        help_text=("Contact short name"),
+        source='contact_quick_name',
+        required=False
+    )
+    category = serializers.CharField(
+        label=_("Contact category"),
+        help_text=("Contact category name"),
+        source='entreprise_cat',
+        required=False
+    )
+    public = serializers.IntegerField(
+        label=_("Public contact"),
+        help_text=_("Is contact visible by all project members"),
+        source='contact_public',
+        default=0
+    )
+    name = serializers.CharField(
+        label=_("Contact name"),
+        help_text=("Contact name"),
+        source='contact_name',
+        required=True
+    )
+    address = serializers.CharField(
+        label=_("Contact address"),
+        help_text=("Contact address street name"),
+        source='contact_address',
+        required=False
+    )
+    zipcode = serializers.CharField(
+        label=_("Contact zipcode"),
+        help_text=("Contact address zip code"),
+        source='contact_zip',
+        required=False
+    )
+    city = serializers.CharField(
+        label=_("Contact city"),
+        help_text=("Contact address city"),
+        source='contact_city',
+        required=False
+    )
+    country = serializers.CharField(
+        label=_("Contact country"),
+        help_text=("Contact country name"),
+        source='contact_country',
+        required=False
+    )
+    phone = serializers.CharField(
+        label=_("Contact phone number"),
+        help_text=("Contact phone number"),
+        source='contact_phone',
+        required=False
+    )
+    direct_phone = serializers.CharField(
+        label=_("Contact direct phone number"),
+        help_text=("Contact direct phone number"),
+        source='contact_direct_phone',
+        required=False
+    )
+    fax = serializers.CharField(
+        label=_("Contact fax number"),
+        help_text=("Contact fax number"),
+        source='contact_fax',
+        required=False
+    )
+    mobile = serializers.CharField(
+        label=_("Contact mobile number"),
+        help_text=("Contact mobile number"),
+        source='contact_mobile',
+        required=False
+    )
+    url = serializers.CharField(
+        label=_("Contact website url"),
+        help_text=("Contact website url"),
+        source='contact_url',
+        required=False
+    )
+    email = serializers.CharField(
+        label=_("Contact e-mail address"),
+        help_text=("Contact e-mail address"),
+        source='contact_email',
+        required=False
+    )
+    description = serializers.CharField(
+        label=_("Contact description"),
+        help_text=("Contact description"),
+        source='contact_description',
+        required=False
+    )
+    external_reference = serializers.CharField(
+        label=_("Contact code"),
+        help_text=("Contact code"),
+        source='contact_code',
+        required=False
+    )
+    rate = serializers.CharField(
+        label=_("Contact rate"),
+        help_text=("Contact rate"),
+        source='contact_rate',
+        required=False
+    )
+    link_to_defects = serializers.IntegerField(
+        label=_("Associate contact with defects"),
+        help_text=_("This contact can be associated with defects"),
+        source='quick_list',
+        default=0
+    )
+    log = serializers.CharField(
+        label=_("Contact log"),
+        help_text=("?"),
+        source='contact_log',
+        required=False
     )

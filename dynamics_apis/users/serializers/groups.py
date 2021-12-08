@@ -41,7 +41,9 @@ class GroupCreationSerializer(serializers.Serializer):
     """
     Serializer for group creation
     """
-    name = serializers.CharField(label=_("Name of the group"), help_text=_("Type the name of your group"))
+    name = serializers.CharField(
+        label=_("Name of the group"),
+        help_text=_("Type the name of your group"))
     description = serializers.CharField(label=_("Description of the group"), required=False,
                                         help_text=_("Type the description of your group"))
 

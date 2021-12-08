@@ -18,3 +18,13 @@ class KairnialContact(KairnialWSService):
         :return:
         """
         return self.call(action='getItem', parameters=parameters)
+
+    def create(self, contact_serializer):
+        """
+        Create a group through Kairnial Web Services
+        :param group: dynamics_apis.users.models.Group
+        """
+        return self.call(
+            action='addContact',
+            parameters={'items': contact_serializer},
+            format='bool')
