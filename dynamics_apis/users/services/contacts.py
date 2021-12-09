@@ -22,9 +22,33 @@ class KairnialContact(KairnialWSService):
     def create(self, contact_serializer):
         """
         Create a group through Kairnial Web Services
-        :param group: dynamics_apis.users.models.Group
+        :param contact_serializer: validated data from a ContactCreationSerializer
         """
         return self.call(
-            action='addContact',
-            parameters={'items': contact_serializer},
-            format='bool')
+            action='addCompany',
+            parameters=[contact_serializer, ],
+            format='int')
+
+    def update(self, pk, contact_update_serializer):
+        """
+        Update a Kairnial Contact
+        :param contact_update_serializer: validated data from a ContactUpdateSerializer
+        :param pk: UUID of the contact
+        """
+        contact_update_serializer['guid'] = pk
+        return self.call(
+            action='updateCompany',
+            parameters=[contact_update_serializer,],
+            format='int'
+        )
+
+    def delete(self, pk: int):
+        """
+        Archive a Kairnial contact
+        :param pk: Numerical ID of the contact
+        """
+        return self.call(
+            action='archiveEntreprise',
+            parameters=[{'contactid': pk}],
+            format='int'
+        )

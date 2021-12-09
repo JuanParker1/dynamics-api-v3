@@ -18,6 +18,7 @@ class KairnialWSServiceError(Exception):
     status = 0
 
     def __init__(self, message, status):
+        super()
         self.status = status
         self.message = message
 
@@ -109,6 +110,7 @@ class KairnialWSService:
             data=data
         )
         logger.debug(response.status_code)
+        logger.debug(response.content)
         if response.status_code != 200:
             logger.debug(response.status_code)
             logger.debug(response.content)
@@ -127,12 +129,13 @@ class KairnialWSService:
                     ) from JSONDecodeError
             elif format == 'bool' or format == 'int':
                 try:
-                    val = int(response.content)
+                    val = int(response.content.decode('utf8').replace('"', ''))
                     if format == 'int':
                         output =  val
                     else:
                         output =  val != 0
                 except ValueError as e:
+                    logger.debug(e)
                     raise KairnialWSServiceError(
                         message=_("Invalid response from Web Services"),
                         status=response.status_code

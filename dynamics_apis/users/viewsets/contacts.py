@@ -14,7 +14,7 @@ from dynamics_apis.common.serializers import ErrorSerializer
 from dynamics_apis.users.models.contacts import Contact
 from dynamics_apis.users.serializers.users import ProjectMemberSerializer
 from dynamics_apis.users.serializers.contacts import ContactQuerySerializer, ContactSerializer, \
-    ContactCreationSerializer
+    ContactCreationSerializer, ContactUpdateSerializer
 # Create your views here.
 from dynamics_apis.common.services import KairnialWSServiceError
 
@@ -99,3 +99,76 @@ class ContactViewSet(ViewSet):
         else:
             return Response(ccs.errors, content_type='application/json',
                             status=status.HTTP_400_BAD_REQUEST)
+
+    @extend_schema(
+        description="Update a Kairnial contact",
+        parameters=[
+            OpenApiParameter("client_id", OpenApiTypes.STR, OpenApiParameter.PATH,
+                             description=_("Client ID token"),
+                             default=os.environ.get('DEFAULT_KAIRNIAL_CLIENT_ID', '')),
+            OpenApiParameter("project_id", OpenApiTypes.STR, OpenApiParameter.PATH,
+                             description=_("ID of the project, usually starts with rgoc"),
+                             default=os.environ.get('DEFAULT_KAIRNIAL_PROJECT_ID', '')),
+            OpenApiParameter("id", OpenApiTypes.UUID, OpenApiParameter.PATH,
+                             description=_("UUID of the contact")),
+        ],
+        request=ContactUpdateSerializer,
+        responses={200: OpenApiTypes.STR, 400: OpenApiTypes.STR, 406: OpenApiTypes.STR},
+        methods=["PUT"]
+    )
+    def update(self, request, client_id: str, project_id: str, pk: str):
+        """
+        Create a Kairnial user. Requires user creation rights
+        :param request: HTTPRequest
+        :param client_id: ID of the client
+        :param project_id: ID of the project
+        :param pk: UUID of the contact
+        """
+        cus = ContactUpdateSerializer(data=request.data)
+        if cus.is_valid():
+            updated = Contact.update(
+                client_id=client_id,
+                token=request.token,
+                project_id=project_id,
+                pk=pk,
+                serialized_data=cus.validated_data
+            )
+            if updated:
+                return Response(_("Contact updated"), status=status.HTTP_200_OK)
+            else:
+                return Response(_("Contact could not be updated"),
+                                status=status.HTTP_406_NOT_ACCEPTABLE)
+        else:
+            return Response(cus.errors, content_type='application/json',
+                            status=status.HTTP_400_BAD_REQUEST)
+
+    @extend_schema(
+        description="Delete a Kairnial contact",
+        parameters=[
+            OpenApiParameter("client_id", OpenApiTypes.STR, OpenApiParameter.PATH,
+                             description=_("Client ID token"),
+                             default=os.environ.get('DEFAULT_KAIRNIAL_CLIENT_ID', '')),
+            OpenApiParameter("project_id", OpenApiTypes.STR, OpenApiParameter.PATH,
+                             description=_("ID of the project, usually starts with rgoc"),
+                             default=os.environ.get('DEFAULT_KAIRNIAL_PROJECT_ID', '')),
+            OpenApiParameter("id", OpenApiTypes.INT, OpenApiParameter.PATH,
+                             description=_("Numerical ID of the contact")),
+        ],
+        responses={204: OpenApiTypes.STR, 400: OpenApiTypes.STR, 406: OpenApiTypes.STR},
+        methods=["DELETE"]
+    )
+    def destroy(self, request, client_id: str, project_id: str, pk: int):
+        """
+        Archive contact
+        """
+        deleted = Contact.delete(
+            client_id=client_id,
+            token=request.token,
+            project_id=project_id,
+            pk=pk
+        )
+        if deleted:
+            return Response(_("Contact deleted"), status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response(_("Contact could not be deleted"),
+                            status=status.HTTP_406_NOT_ACCEPTABLE)
