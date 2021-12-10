@@ -60,7 +60,7 @@ class KairnialService:
         """
         return f'{self.service_domain}.{action}'
 
-    def call(self, action: str, parameters: [dict] = [{}], format: str = 'json'):
+    def call(self, action: str, parameters: [dict] = [{}], format: str = 'json', cache=False):
         """
         Call the Webservice with parameters
         :param action: Name of the action to perform on a domain (user.getUsers)
@@ -72,10 +72,11 @@ class KairnialService:
         logger.debug(url)
         logger.debug(headers)
         logger.debug(data)
-        cache_key = sha1(f'{url}||{json.dumps(headers)}||{data}'.encode('latin1')).hexdigest()
-        output = cache.get(cache_key)
-        if output:
-            return output
+        if cache:
+            cache_key = sha1(f'{url}||{json.dumps(headers)}||{data}'.encode('latin1')).hexdigest()
+            output = cache.get(cache_key)
+            if output:
+                return output
         response = requests.post(
             url=url,
             headers=headers,
@@ -114,7 +115,8 @@ class KairnialService:
                     ) from JSONDecodeError
             else:  # Return content as string
                 output = response.content
-            cache.set(cache_key, output, timeout=30)
+            if cache:
+                cache.set(cache_key, output, timeout=30)
             logger.debug(output)
             return output
 

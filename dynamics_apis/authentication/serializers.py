@@ -2,7 +2,7 @@
 Authentication serializers
 """
 import os
-
+from django.conf import settings
 from django.utils.translation import gettext as _
 from rest_framework import serializers
 
@@ -31,6 +31,11 @@ class APIKeyAuthenticationSerializer(serializers.Serializer):
     client_id = serializers.CharField(label=_("Client ID"), default=os.environ.get('DEFAULT_KAIRNIAL_CLIENT_ID', ''))
     api_key = serializers.CharField(label=_("User API key"), default=os.environ.get('DEFAULT_KAIRNIAL_API_KEY', ''))
     api_secret = serializers.CharField(label=_("User API secret"),  default=os.environ.get('DEFAULT_KAIRNIAL_API_SECRET', ''))
+    scopes = serializers.MultipleChoiceField(
+        label=_("Apply to specific scopes"),
+        help_text=_("Select scopes in {}".format(' '.join(settings.KIARNIAL_AUTHENTICATION_SCOPES))),
+        choices=settings.KIARNIAL_AUTHENTICATION_SCOPES,
+        default=['direct-login', 'login-token', 'project-list'])
 
 
 class AuthResponseSerializer(serializers.Serializer):

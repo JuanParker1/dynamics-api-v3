@@ -2,6 +2,7 @@
 Call to Kairnial Web Services
 """
 import json
+import logging
 from hashlib import sha1
 
 import requests
@@ -18,16 +19,18 @@ class KairnialProject(KairnialCrossService):
     """
     Service class for Kairnial Pojects
     """
-    service_domain = 'gadmin_projects'
+    service_domain = 'release'
     client_id = None
     token = None
-    token_type = None
+    token_type = 'Bearer'
+    logger = logging.getLogger('services')
 
     def list(self, search: str = None) -> []:
         """
         List projects
         :return:
         """
+        logger = logging.getLogger('services')
         url = settings.KAIRNIAL_AUTH_SERVER + PROJECT_LIST_PATH
         data = {
             'client_id': self.client_id,
@@ -44,6 +47,9 @@ class KairnialProject(KairnialCrossService):
         cache_key = sha1(f'{url}||{json.dumps(headers)}||{data}'.encode('latin1')).hexdigest()
         if cache.get(cache_key):
             return cache_key
+        logger.debug(url)
+        logger.debug(headers)
+        logger.debug(data)
         response = requests.post(
             url,
             headers=headers,
@@ -54,20 +60,31 @@ class KairnialProject(KairnialCrossService):
                 message=_(f"Fetching from Kairnial backend failed with response {response.status_code}: {response.content}"),
                 status=response.status_code
             )
+        print(response.json())
         json_response = response.json()
         cache.set(cache_key, json_response)
         return json_response
 
-    def create(self, name: str):
+    def create(self, serialized_project):
         """
         Create a new project
+        :param serialized_project: ProjectCreationSerializer validated_data
         """
-        db = 'eu11'
-        storage = ['s3-rsobucketfr']
-        ws_server = settings.KAIRNIAL_WS_SERVER
-        front_server = settings.KAIRNIAL_FRONT_SERVER
         return self.call(
-            action='addProject',
-            parameters=[name, db, storage, ws_server, front_server, None, None, True, {"centralBase": 0}])
+            action='adminEC.registerProject',
+            parameters=[serialized_project],
+            cache=False
+        )
 
+    def update(self, serialized_update_project):
+        """
+        Update un existing project
+        :param serialized_update_project: ProjectUpdateSerializer validated_date
+        :return:
+        """
+        return self.call(
+            action='adminEC.updateProjectInfos',
+            parameters=[serialized_update_project],
+            cache=False
+        )
 

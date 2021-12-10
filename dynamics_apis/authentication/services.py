@@ -1,6 +1,7 @@
 """
 Kairnial auth services
 """
+import logging
 from base64 import b64encode
 
 import requests
@@ -76,7 +77,7 @@ class KairnialAuthentication:
 
             )
 
-    def secrets_authentication(self, api_key: str, api_secret: str) -> dict:
+    def secrets_authentication(self, api_key: str, api_secret: str, scopes: [str]) -> dict:
         """
         Get auth token from auth server
         :param client_id: Client ID, ask Kairnial support for one
@@ -84,15 +85,19 @@ class KairnialAuthentication:
         :param api_secret: User API Secret
         :return:
         """
+        logger = logging.getLogger('services')
         secrets_header = b64encode(f'{api_key}:{api_secret}'.encode('latin1'))
         payload = {
             'grant_type': 'client_credentials',
-             'scope': 'login-token project-list'
+            'scope': ' '.join(scopes)
         }
+        logger.debug(settings.KAIRNIAL_AUTH_SERVER + API_AUTHENT_PATH.format(clientID=self.client_id))
+        logger.debug(payload)
         headers = {
             'Content-Type': 'application/x-www-form-urlencoded',
             'Authorization': f'Basic {secrets_header.decode("utf8")}'
         }
+        logger.debug(headers)
         response = requests.post(
             settings.KAIRNIAL_AUTH_SERVER + API_AUTHENT_PATH.format(clientID=self.client_id),
             headers=headers,

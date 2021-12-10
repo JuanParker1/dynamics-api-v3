@@ -17,14 +17,22 @@ class KairnialGroup(KairnialWSService):
         List users
         :return:
         """
-        return self.call(action='getGroups', parameters=[{'allGroups': True}])
+        return self.call(
+            action='getGroups',
+            parameters=[{'allGroups': True}],
+            cache=True)
 
     def create(self, group):
         """
         Create a group through Kairnial Web Services
         :param group: dynamics_apis.users.models.Group
         """
-        return self.call(action='addGroup', parameters=[group.name, group.description], format='bool')
+        return self.call(
+            action='addGroup',
+            parameters=[group.name, group.description],
+            format='bool',
+            cache=False
+        )
 
     def add_users(self, group_id: int, user_list: [int]):
         """
@@ -32,8 +40,11 @@ class KairnialGroup(KairnialWSService):
         """
         no_error = True
         for user in user_list:
-            resp = self.call(action='addUserToGroup', parameters=[{'groupe': group_id, 'user': [user, ]}],
-                             format='bool')
+            resp = self.call(
+                action='addUserToGroup',
+                parameters=[{'groupe': group_id, 'user': [user, ]}],
+                format='bool',
+                cache=False)
             no_error &= resp
         return no_error
 
@@ -43,7 +54,10 @@ class KairnialGroup(KairnialWSService):
         """
         no_error = True
         for user in user_list:
-            resp = self.call(action='removeUserFromGroup', parameters=[{'groupe': group_id, 'user': [user, ]}],
-                             format='bool')
+            resp = self.call(
+                action='removeUserFromGroup',
+                parameters=[{'groupe': group_id, 'user': [user, ]}],
+                format='bool',
+                cache=False)
             no_error &= resp
         return no_error

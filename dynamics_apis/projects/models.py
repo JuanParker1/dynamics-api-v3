@@ -28,12 +28,25 @@ class Project:
         return projects
 
     @classmethod
-    def create(cls, client_id: str, token: str, name: str):
+    def create(cls, client_id: str, token: str, serialized_project):
         """
         Create a new project
         :param client_id: ClientID Token
         :param token: Access token
-        :param name: Name of the project
+        :param serialized_project: ProjectCreationSerializer validated_date
         """
         kp = KairnialProject(client_id=client_id, token=token)
-        return kp.create(name=name)
+        return kp.create(serialized_project=serialized_project)
+
+    @classmethod
+    def update(cls, client_id: str, token: str, pk: str, serialized_project):
+        """
+        Update an existing project
+        :param client_id: ClientID Token
+        :param token: Access token
+        :param pk: RGOC ID of the project
+        :param serialized_project: ProjectUpdateSerializer validated_date
+        :return:
+        """
+        kp = KairnialProject(client_id=client_id, token=token)
+        return kp.update(serialized_update_project=serialized_project)

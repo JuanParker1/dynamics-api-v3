@@ -32,6 +32,7 @@ class ProjectSerializer(serializers.Serializer):
     Serializer for the Kairnial Project response
     """
     id = serializers.CharField(label=_("Project ID"), source='g_nom', read_only=True)
+    uuid = serializers.CharField(label=_("Project UUID"), read_only=True)
     name = serializers.CharField(label=_("Name of the project"), source='g_desc', read_only=True)
     services_backend = serializers.CharField(
         label=_("Backend serving the project"),
@@ -50,9 +51,11 @@ class ProjectSerializer(serializers.Serializer):
     metadata = serializers.CharField(label=_("Project metadata"), source='g_metadata', required=False, read_only=True)
     application_type = serializers.CharField(label=_("Type of application hosting the project"), source='app_type',
                                              read_only=True)
-    creation_date = serializers.DateTimeField(label=_("Date of last activity"), source='lastactivity', read_only=True)
-    last_activity = serializers.DateTimeField(label=_("Date of creation"), source='g_createdate', read_only=True)
-    project_type = serializers.CharField(label=_("Type of project"), source='serial', read_only=True)
+    creation_date = serializers.DateTimeField(label=_("Date of last activity"), source='g_createdate', read_only=True, format='%Y-%M-%D')
+    last_activity = serializers.DateTimeField(label=_("Date of creation"), source='lastactivity', read_only=True, format='%Y-%M-%D:%h:%m:%s')
+    project_type = serializers.CharField(label=_("Type of project"), source='app_type', read_only=True)
+    creator = serializers.CharField(label=_("Creator of the project"), source='createBy', read_only=True)
+    base_project = serializers.CharField(label=_("Project used as base"), source='serial', read_only=True)
 
     def get_infos(self, obj):
         return ProjectInfoSerializer(json.loads(obj.get('g_infos'))).data
@@ -67,4 +70,65 @@ class ProjectCreationSerializer(serializers.Serializer):
         help_text=_('Name of the project, max 255 characters'),
         required=True,
         max_length=255
+    )
+    skip_emails = serializers.BooleanField(
+        label=_("Skip email notification"),
+        help_text=_("Do not send notification email on project creation"),
+        default=False,
+        source='noEmail'
+    )
+    language = serializers.CharField(
+        label=_("Project language"),
+        help_text=_("Base language for the project"),
+        default='en'
+    )
+    environment = serializers.CharField(
+        label=_("Project environment"),
+        help_text=_("Base configuration for the project"),
+        default='default'
+    )
+    template = serializers.CharField(
+        label=_("Project template UUID"),
+        help_text=_("Create project from project template. UUID of the project template"),
+        required=False,
+        source='type/app_uuid'
+    )
+
+
+class ProjectUpdateSerializer(serializers.Serializer):
+    name = serializers.CharField(
+        label=_('Project name'),
+        help_text=_('Name of the project, max 255 characters'),
+        required=True,
+        source='g_name'
+    )
+    base_project = serializers.CharField(
+        label=_('Project serial'),
+        help_text=_('Name of the project, max 255 characters'),
+        required=False
+    )
+    address = serializers.CharField(
+        label=_('Project address'),
+        help_text=_('Address of the project'),
+        required=False
+    )
+    city = serializers.CharField(
+        label=_('Project city'),
+        help_text=_('City of the project'),
+        required=False
+    )
+    region = serializers.CharField(
+        label=_('Project region'),
+        help_text=_('Region of the project'),
+        required=False
+    )
+    zone = serializers.CharField(
+        label=_('Project zone'),
+        help_text=_('Zone of the project'),
+        required=False
+    )
+    type = serializers.CharField(
+        label=_('Project type'),
+        help_text=_('Type of the project'),
+        required=False
     )

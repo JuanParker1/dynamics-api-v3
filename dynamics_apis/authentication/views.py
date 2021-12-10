@@ -60,6 +60,7 @@ class APIKeyAuthenticationView(APIView):
                 auth_response = ka.secrets_authentication(
                     api_key=serializer.validated_data.get('api_key'),
                     api_secret=serializer.validated_data.get('api_secret'),
+                    scopes=serializer.validated_data.get('scopes'),
                 )
                 resp_serializer = AuthResponseSerializer(auth_response)
                 return Response(resp_serializer.data, status=status.HTTP_200_OK)

@@ -17,7 +17,10 @@ class KairnialContact(KairnialWSService):
         :param search: Search contact
         :return:
         """
-        return self.call(action='getItem', parameters=parameters)
+        return self.call(
+            action='getItem',
+            parameters=parameters,
+            cache=True)
 
     def create(self, contact_serializer):
         """
@@ -27,7 +30,9 @@ class KairnialContact(KairnialWSService):
         return self.call(
             action='addCompany',
             parameters=[contact_serializer, ],
-            format='int')
+            format='int',
+            cache=False
+        )
 
     def update(self, pk, contact_update_serializer):
         """
@@ -39,7 +44,8 @@ class KairnialContact(KairnialWSService):
         return self.call(
             action='updateCompany',
             parameters=[contact_update_serializer,],
-            format='int'
+            format='int',
+            cache=False
         )
 
     def delete(self, pk: int):
@@ -50,5 +56,6 @@ class KairnialContact(KairnialWSService):
         return self.call(
             action='archiveEntreprise',
             parameters=[{'contactid': pk}],
-            format='int'
+            format='int',
+            cache=False
         )
