@@ -20,10 +20,20 @@ class Project:
         Get a list of users for a project
         :param client_id: ClientID Token
         :param token: Access token
-        :param project_id: Project RGOC Code
         :param search: Search on project name
         :return:
         """
         kp = KairnialProject(client_id=client_id, token=token)
         projects = kp.list(search=search).get('items')
         return projects
+
+    @classmethod
+    def create(cls, client_id: str, token: str, name: str):
+        """
+        Create a new project
+        :param client_id: ClientID Token
+        :param token: Access token
+        :param name: Name of the project
+        """
+        kp = KairnialProject(client_id=client_id, token=token)
+        return kp.create(name=name)

@@ -4,6 +4,7 @@ Project information serializers
 import json
 from django.utils.translation import gettext as _
 from rest_framework import serializers
+from django.conf import settings
 
 
 class ProjectInfoSerializer(serializers.Serializer):
@@ -55,3 +56,15 @@ class ProjectSerializer(serializers.Serializer):
 
     def get_infos(self, obj):
         return ProjectInfoSerializer(json.loads(obj.get('g_infos'))).data
+
+
+class ProjectCreationSerializer(serializers.Serializer):
+    """
+    Serializer to create a new project
+    """
+    name = serializers.CharField(
+        label=_('Project name'),
+        help_text=_('Name of the project, max 255 characters'),
+        required=True,
+        max_length=255
+    )

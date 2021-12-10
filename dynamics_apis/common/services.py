@@ -1,16 +1,12 @@
 import json
-import uuid
+import logging
 from hashlib import sha1
 from json import JSONDecodeError
-import logging
 
 import requests
+from django.conf import settings
 from django.core.cache import cache
 from django.utils.translation import gettext as _
-from django.contrib.auth.models import User
-from django.conf import settings
-
-from dynamics_apis.authentication.services import KairnialAuthentication
 
 
 class KairnialWSServiceError(Exception):
@@ -23,38 +19,14 @@ class KairnialWSServiceError(Exception):
         self.message = message
 
 
-class KairnialWSService:
+class KairnialService:
     service_domain = ''
     client_id = None
     token = None
-    token_type = None
-    project_id = None
+    token_type = 'Bearer'
 
-    def __init__(self, client_id: str, token: str, project_id: str):
-        """
-        Initialize the project fecthing library
-        :param token: Access token to pass to header
-        """
-        self.client_id = client_id
-        self.token = token
-        self.project_id = project_id
-
-    @classmethod
-    def from_authenticator(cls, authenticator: KairnialAuthentication, project_id: str):
-        """
-        Initiate a KairnialProject from KairnialAuthentication
-        :param authenticator: KairnialAuthentication
-        :return:
-        """
-        return cls(
-            client_id=authenticator.client_id,
-            token=authenticator.token,
-            project_id=project_id
-
-        )
-
-    def get_url(self, action):
-        return f'{settings.KAIRNIAL_WS_SERVER}/gateway.php'
+    def get_url(self):
+        raise NotImplementedError
 
     def get_body(self, action: str, parameters: [dict] = [{}]) -> str:
         return json.dumps({
@@ -86,7 +58,7 @@ class KairnialWSService:
         Return service body
         :return:
         """
-        return f'{self.project_id}.{self.service_domain}.{action}'
+        return f'{self.service_domain}.{action}'
 
     def call(self, action: str, parameters: [dict] = [{}], format: str = 'json'):
         """
@@ -94,7 +66,7 @@ class KairnialWSService:
         :param action: Name of the action to perform on a domain (user.getUsers)
         """
         logger = logging.getLogger('services')
-        url = self.get_url(action=action)
+        url = self.get_url()
         headers = self.get_headers()
         data = self.get_body(action=action, parameters=parameters)
         logger.debug(url)
@@ -131,17 +103,58 @@ class KairnialWSService:
                 try:
                     val = int(response.content.decode('utf8').replace('"', ''))
                     if format == 'int':
-                        output =  val
+                        output = val
                     else:
-                        output =  val != 0
+                        output = val != 0
                 except ValueError as e:
                     logger.debug(e)
                     raise KairnialWSServiceError(
                         message=_("Invalid response from Web Services"),
                         status=response.status_code
                     ) from JSONDecodeError
-            else: # Return content as string
-                output =  response.content
+            else:  # Return content as string
+                output = response.content
             cache.set(cache_key, output, timeout=30)
             logger.debug(output)
             return output
+
+
+class KairnialCrossService(KairnialService):
+
+    def __init__(self, client_id: str, token: str):
+        """
+        Initialize the Kairnial Auth services library
+        :param client_id: ID of the client
+        :param token: Access token to pass to header
+        :param project_id: ID of the project
+        """
+        self.client_id = client_id
+        self.token = token
+
+    def get_url(self):
+        return f'{settings.KAIRNIAL_CROSS_SERVER}/gateway.php'
+
+
+class KairnialWSService(KairnialService):
+    project_id = None
+
+    def __init__(self, client_id: str, token: str, project_id: str):
+        """
+        Initialize the Kairnial Web Services library
+        :param client_id: ID of the client
+        :param token: Access token to pass to header
+        :param project_id: ID of the project
+        """
+        self.client_id = client_id
+        self.token = token
+        self.project_id = project_id
+
+    def get_url(self):
+        return f'{settings.KAIRNIAL_WS_SERVER}/gateway.php'
+
+    def _service(self, action: str) -> str:
+        """
+        Return service body
+        :return:
+        """
+        return f'{self.project_id}.{self.service_domain}.{action}'

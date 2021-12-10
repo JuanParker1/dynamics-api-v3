@@ -9,41 +9,19 @@ from django.conf import settings
 from django.core.cache import cache
 from django.utils.translation import gettext as _
 from dynamics_apis.authentication.services import KairnialAuthentication
-from dynamics_apis.common.services import KairnialWSServiceError
+from dynamics_apis.common.services import KairnialWSServiceError, KairnialCrossService
 
 PROJECT_LIST_PATH = '/api/v2/projects'
+PROJECT_CREATION_PATH = '/adminEC'
 
-
-class KairnialProject:
+class KairnialProject(KairnialCrossService):
     """
     Service class for Kairnial Pojects
     """
+    service_domain = 'gadmin_projects'
     client_id = None
     token = None
     token_type = None
-
-
-    def __init__(self, client_id: str, token: str, token_type='Bearer'):
-        """
-        Initialize the project fecthing library
-        :param token: Access token to pass to header
-        """
-        self.client_id = client_id
-        self.token = token
-        self.token_type = token_type
-
-    @classmethod
-    def from_authenticator(cls, authenticator: KairnialAuthentication):
-        """
-        Initiate a KairnialProject from KairnialAuthentication
-        :param authenticator: KairnialAuthentication
-        :return:
-        """
-        return cls(
-            client_id=authenticator.client_id,
-            token=authenticator.token,
-            token_type=authenticator.token_type
-        )
 
     def list(self, search: str = None) -> []:
         """
@@ -79,4 +57,17 @@ class KairnialProject:
         json_response = response.json()
         cache.set(cache_key, json_response)
         return json_response
+
+    def create(self, name: str):
+        """
+        Create a new project
+        """
+        db = 'eu11'
+        storage = ['s3-rsobucketfr']
+        ws_server = settings.KAIRNIAL_WS_SERVER
+        front_server = settings.KAIRNIAL_FRONT_SERVER
+        return self.call(
+            action='addProject',
+            parameters=[name, db, storage, ws_server, front_server, None, None, True, {"centralBase": 0}])
+
 

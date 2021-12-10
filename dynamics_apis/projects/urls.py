@@ -1,8 +1,12 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 
-from .views import ProjectView
+from .viewsets import ProjectViewSet
+
+router = DefaultRouter()
+router.register(r'contacts', ProjectViewSet, basename='projects')
 
 # The API URLs are now determined automatically by the router.
 urlpatterns = [
-    path('', ProjectView.as_view()),
+    path('', include(router.urls)),
 ]
