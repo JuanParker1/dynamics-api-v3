@@ -1,2 +1,2 @@
-# dynamics-api-v2
+# dynamics-api-v3
 POC on API structure and documentation
