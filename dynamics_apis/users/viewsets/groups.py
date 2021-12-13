@@ -13,7 +13,7 @@ from rest_framework.viewsets import ViewSet
 from dynamics_apis.common.serializers import ErrorSerializer
 from dynamics_apis.users.models.groups import Group
 from dynamics_apis.users.serializers.groups import GroupSerializer, GroupQuerySerializer, GroupCreationSerializer, \
-    GroupAddUserSerializer
+    GroupAddUserSerializer, RightSerializer, GroupAddRightSerializer
 # Create your views here.
 from dynamics_apis.common.services import KairnialWSServiceError
 
@@ -63,7 +63,7 @@ class GroupViewSet(ViewSet):
                             status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
-        description="Retrieve a Kairnial user",
+        description="Retrieve a Kairnial group",
         parameters=[
             OpenApiParameter("client_id", OpenApiTypes.STR, OpenApiParameter.PATH,
                              description=_("Client ID token"),
@@ -71,6 +71,8 @@ class GroupViewSet(ViewSet):
             OpenApiParameter("project_id", OpenApiTypes.STR, OpenApiParameter.PATH,
                              description=_("ID of the project, usually starts with rgoc"),
                              default=os.environ.get('DEFAULT_KAIRNIAL_PROJECT_ID', '')),
+            OpenApiParameter("id", OpenApiTypes.STR, OpenApiParameter.PATH,
+                             description=_("UUID of the group")),
 
         ],
         responses={200: GroupSerializer, 500: ErrorSerializer},
@@ -144,6 +146,8 @@ class GroupViewSet(ViewSet):
             OpenApiParameter("project_id", OpenApiTypes.STR, OpenApiParameter.PATH,
                              description=_("ID of the project, usually starts with rgoc"),
                              default=os.environ.get('DEFAULT_KAIRNIAL_PROJECT_ID', '')),
+            OpenApiParameter("id", OpenApiTypes.INT, OpenApiParameter.PATH,
+                             description=_("Numeric ID of the group")),
         ],
         request=GroupAddUserSerializer,
         responses={201: OpenApiTypes.STR, 400: OpenApiTypes.STR, 406: OpenApiTypes.STR},
@@ -192,6 +196,8 @@ class GroupViewSet(ViewSet):
             OpenApiParameter("project_id", OpenApiTypes.STR, OpenApiParameter.PATH,
                              description=_("ID of the project, usually starts with rgoc"),
                              default=os.environ.get('DEFAULT_KAIRNIAL_PROJECT_ID', '')),
+            OpenApiParameter("id", OpenApiTypes.INT, OpenApiParameter.PATH,
+                             description=_("Numeric ID of the group")),
         ],
         request=GroupAddUserSerializer,
         responses={201: OpenApiTypes.STR, 400: OpenApiTypes.STR, 406: OpenApiTypes.STR},
@@ -222,6 +228,148 @@ class GroupViewSet(ViewSet):
                 })
                 return Response(error.data, content_type="application/json", status=status.HTTP_400_BAD_REQUEST)
             return Response(_("Users removed from group"), status=status.HTTP_201_CREATED)
+        except ValueError as e:
+            error = ErrorSerializer({
+                'status': 400,
+                'code': getattr(e, 'status', 0),
+                'description': _("Invalid user IDs")
+            })
+            return Response(error.data, content_type="application/json", status=status.HTTP_400_BAD_REQUEST)
+
+    @extend_schema(
+        description="List rights for a group",
+        parameters=[
+            OpenApiParameter("client_id", OpenApiTypes.STR, OpenApiParameter.PATH,
+                             description=_("Client ID token"),
+                             default=os.environ.get('DEFAULT_KAIRNIAL_CLIENT_ID', '')),
+            OpenApiParameter("project_id", OpenApiTypes.STR, OpenApiParameter.PATH,
+                             description=_("ID of the project, usually starts with rgoc"),
+                             default=os.environ.get('DEFAULT_KAIRNIAL_PROJECT_ID', '')),
+            OpenApiParameter("id", OpenApiTypes.STR, OpenApiParameter.PATH,
+                             description=_("UUID of the group")),
+        ],
+        responses={200: RightSerializer, 400: OpenApiTypes.STR, 406: OpenApiTypes.STR},
+        methods=["POST"]
+    )
+    @action(['GET'], detail=True, url_path='rights', url_name="list_rights_for_group")
+    def list_rights(self, request, client_id: str, project_id: str, pk):
+        """
+        Add a list of rights to a group
+        :param request: HTTPRequest
+        :param client_id: ID of the client
+        :param project_id: ID of the project
+        :param pk: ID of the group
+        """
+        try:
+            group_right_list = Group.list_rights(
+                client_id=client_id,
+                token=request.token,
+                project_id=project_id,
+                pk=pk
+            )
+            print("get rights list", group_right_list)
+            serializer = RightSerializer(group_right_list)
+            return Response(serializer.data, content_type="application/json")
+        except (KairnialWSServiceError, KeyError) as e:
+            error = ErrorSerializer({
+                'status': 400,
+                'code': getattr(e, 'status', 0),
+                'description': getattr(e, 'message', str(e))
+            })
+            return Response(error.data, content_type='application/json',
+                            status=status.HTTP_400_BAD_REQUEST)
+
+    @extend_schema(
+        description="Add rights to a group",
+        parameters=[
+            OpenApiParameter("client_id", OpenApiTypes.STR, OpenApiParameter.PATH,
+                             description=_("Client ID token"),
+                             default=os.environ.get('DEFAULT_KAIRNIAL_CLIENT_ID', '')),
+            OpenApiParameter("project_id", OpenApiTypes.STR, OpenApiParameter.PATH,
+                             description=_("ID of the project, usually starts with rgoc"),
+                             default=os.environ.get('DEFAULT_KAIRNIAL_PROJECT_ID', '')),
+            OpenApiParameter("id", OpenApiTypes.STR, OpenApiParameter.PATH,
+                             description=_("UUID of the group")),
+        ],
+        request=GroupAddRightSerializer,
+        responses={201: OpenApiTypes.STR, 400: OpenApiTypes.STR, 406: OpenApiTypes.STR},
+        methods=["POST"]
+    )
+    @action(['POST'], detail=True, url_path='rights/add', url_name="add_rights_to_group")
+    def add_rights(self, request, client_id: str, project_id: str, pk):
+        """
+        Add a list of rights to a group
+        :param request: HTTPRequest
+        :param client_id: ID of the client
+        :param project_id: ID of the project
+        :param pk: ID of the group
+        """
+        try:
+            print("rights", request.data)
+            right_list = map(int, request.data.get('rights'))
+            resp = Group.add_rights(
+                client_id=client_id,
+                token=request.token,
+                project_id=project_id,
+                pk=pk,
+                right_list=right_list)
+            if not resp:
+                error = ErrorSerializer({
+                    'status': 400,
+                    'code': 0,
+                    'description': _("Not all rights could be added to group")
+                })
+                return Response(error.data, content_type="application/json", status=status.HTTP_400_BAD_REQUEST)
+            return Response(_("Rights added to group"), status=status.HTTP_201_CREATED)
+        except ValueError as e:
+            error = ErrorSerializer({
+                'status': 400,
+                'code': getattr(e, 'status', 0),
+                'description': _("Invalid right IDs")
+            })
+            return Response(error.data, content_type="application/json", status=status.HTTP_400_BAD_REQUEST)
+
+    @extend_schema(
+        description="Remove rights from a group",
+        parameters=[
+            OpenApiParameter("client_id", OpenApiTypes.STR, OpenApiParameter.PATH,
+                             description=_("Client ID token"),
+                             default=os.environ.get('DEFAULT_KAIRNIAL_CLIENT_ID', '')),
+            OpenApiParameter("project_id", OpenApiTypes.STR, OpenApiParameter.PATH,
+                             description=_("ID of the project, usually starts with rgoc"),
+                             default=os.environ.get('DEFAULT_KAIRNIAL_PROJECT_ID', '')),
+            OpenApiParameter("id", OpenApiTypes.STR, OpenApiParameter.PATH,
+                             description=_("UUID of the group")),
+        ],
+        request=GroupAddRightSerializer,
+        responses={201: OpenApiTypes.STR, 400: OpenApiTypes.STR, 406: OpenApiTypes.STR},
+        methods=["POST"]
+    )
+    @action(['POST'], detail=True, url_path='rights/remove', url_name="remove_rights_from_group")
+    def remove_rights(self, request, client_id: str, project_id: str, pk):
+        """
+        Remove a list of users to a group
+        :param request: HTTPRequest
+        :param client_id: ID of the client
+        :param project_id: ID of the project
+        :param pk: ID of the group
+        """
+        try:
+            right_list = map(int, request.data.get('rights'))
+            resp = Group.remove_users(
+                client_id=client_id,
+                token=request.token,
+                project_id=project_id,
+                pk=pk,
+                user_list=right_list)
+            if not resp:
+                error = ErrorSerializer({
+                    'status': 400,
+                    'code': 0,
+                    'description': _("Not all rights could be removed from group")
+                })
+                return Response(error.data, content_type="application/json", status=status.HTTP_400_BAD_REQUEST)
+            return Response(_("Rights removed from group"), status=status.HTTP_201_CREATED)
         except ValueError as e:
             error = ErrorSerializer({
                 'status': 400,

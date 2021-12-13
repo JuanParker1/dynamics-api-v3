@@ -20,7 +20,7 @@ class KairnialContact(KairnialWSService):
         return self.call(
             action='getItem',
             parameters=parameters,
-            cache=True)
+            use_cache=True)
 
     def create(self, contact_serializer):
         """
@@ -31,7 +31,7 @@ class KairnialContact(KairnialWSService):
             action='addCompany',
             parameters=[contact_serializer, ],
             format='int',
-            cache=False
+            use_cache=False
         )
 
     def update(self, pk, contact_update_serializer):
@@ -45,7 +45,7 @@ class KairnialContact(KairnialWSService):
             action='updateCompany',
             parameters=[contact_update_serializer,],
             format='int',
-            cache=False
+            use_cache=False
         )
 
     def delete(self, pk: int):
@@ -57,5 +57,5 @@ class KairnialContact(KairnialWSService):
             action='archiveEntreprise',
             parameters=[{'contactid': pk}],
             format='int',
-            cache=False
+            use_cache=False
         )

@@ -49,4 +49,4 @@ class Project:
         :return:
         """
         kp = KairnialProject(client_id=client_id, token=token)
-        return kp.update(serialized_update_project=serialized_project)
+        return kp.update(pk=pk, serialized_update_project=serialized_project)

@@ -100,7 +100,7 @@ class ProjectUpdateSerializer(serializers.Serializer):
         label=_('Project name'),
         help_text=_('Name of the project, max 255 characters'),
         required=True,
-        source='g_name'
+        source='g_desc'
     )
     base_project = serializers.CharField(
         label=_('Project serial'),

@@ -73,18 +73,19 @@ class KairnialProject(KairnialCrossService):
         return self.call(
             action='adminEC.registerProject',
             parameters=[serialized_project],
-            cache=False
+            use_cache=False
         )
 
-    def update(self, serialized_update_project):
+    def update(self, pk, serialized_update_project):
         """
         Update un existing project
         :param serialized_update_project: ProjectUpdateSerializer validated_date
         :return:
         """
+        serialized_update_project['g_nom'] = pk
         return self.call(
             action='adminEC.updateProjectInfos',
             parameters=[serialized_update_project],
-            cache=False
+            use_cache=False
         )
 

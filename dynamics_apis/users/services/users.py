@@ -17,7 +17,7 @@ class KairnialUser(KairnialWSService):
         """
         return self.call(
             action='getNbUsers',
-            cache=True
+            use_cache=True
         )
 
     def list(self) -> []:
@@ -27,7 +27,7 @@ class KairnialUser(KairnialWSService):
         """
         return self.call(
             action='getUsers',
-            cache=True)
+            use_cache=True)
 
     def get(self, pk) -> []:
         """
@@ -36,7 +36,7 @@ class KairnialUser(KairnialWSService):
         return self.call(
             action='getFilteredUser',
             parameters=[{'userIdList': [pk, ]}],
-            cache=True)
+            use_cache=True)
 
     def list_for_groups(self, list_of_groups: [str]) -> []:
         """
@@ -48,4 +48,4 @@ class KairnialUser(KairnialWSService):
         return self.call(
             action='getUsersByGroup',
             parameters=[{'groupList': list_of_groups}],
-            cache=True)
+            use_cache=True)

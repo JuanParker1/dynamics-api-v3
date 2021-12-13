@@ -28,11 +28,11 @@ class KairnialService:
     def get_url(self):
         raise NotImplementedError
 
-    def get_body(self, action: str, parameters: [dict] = [{}]) -> str:
+    def get_body(self, service: str, action: str, parameters: [dict] = None) -> str:
         return json.dumps({
             'headers': self._body_headers(),
             'params': parameters,
-            'service': self._service(action=action)
+            'service': self._service(service=service, action=action)
         })
 
     def get_headers(self) -> dict:
@@ -53,27 +53,39 @@ class KairnialService:
             'UserLanguage': 'fr'
         }
 
-    def _service(self, action: str) -> str:
+    def _service(self, service: str, action: str) -> str:
         """
         Return service body
         :return:
         """
-        return f'{self.service_domain}.{action}'
+        return f'{service}.{action}'
 
-    def call(self, action: str, parameters: [dict] = [{}], format: str = 'json', cache=False):
+    def call(
+            self,
+            action: str,
+            service: str = '',
+            parameters: [dict] = None,
+            format: str = 'json',
+            use_cache=False):
         """
         Call the Webservice with parameters
-        :param action: Name of the action to perform on a domain (user.getUsers)
+        :param action: Name of the action to perform on a domain (getUsers)
+        :param parameters: list of dict to send to server
+        :param service: name of service (user, ...). Uses service_domain if not set
+        :param format: expected output format from tre Kairnial Web Service
+        :param cache: cache response
         """
+        parameters = parameters or [{}]
+        service = service if service else self.service_domain
         logger = logging.getLogger('services')
         url = self.get_url()
         headers = self.get_headers()
-        data = self.get_body(action=action, parameters=parameters)
+        data = self.get_body(service=service, action=action, parameters=parameters)
         logger.debug(url)
         logger.debug(headers)
         logger.debug(data)
-        if cache:
-            cache_key = sha1(f'{url}||{json.dumps(headers)}||{data}'.encode('latin1')).hexdigest()
+        cache_key = sha1(f'{url}||{json.dumps(headers)}||{data}'.encode('latin1')).hexdigest()
+        if use_cache:
             output = cache.get(cache_key)
             if output:
                 return output
@@ -115,7 +127,7 @@ class KairnialService:
                     ) from JSONDecodeError
             else:  # Return content as string
                 output = response.content
-            if cache:
+            if use_cache:
                 cache.set(cache_key, output, timeout=30)
             logger.debug(output)
             return output
@@ -147,16 +159,16 @@ class KairnialWSService(KairnialService):
         :param token: Access token to pass to header
         :param project_id: ID of the project
         """
-        self.client_id = client_id
-        self.token = token
-        self.project_id = project_id
+        self.client_id = client_id.strip()
+        self.token = token.strip()
+        self.project_id = project_id.strip()
 
     def get_url(self):
         return f'{settings.KAIRNIAL_WS_SERVER}/gateway.php'
 
-    def _service(self, action: str) -> str:
+    def _service(self, service: str, action: str) -> str:
         """
         Return service body
         :return:
         """
-        return f'{self.project_id}.{self.service_domain}.{action}'
+        return f'{self.project_id}.{service}.{action}'

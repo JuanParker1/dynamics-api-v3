@@ -88,7 +88,7 @@ class ProjectViewSet(ViewSet):
                              description=_("RGOC ID of the project")),
         ],
         request=ProjectUpdateSerializer,
-        responses={201: OpenApiTypes.STR, 400: OpenApiTypes.STR, 406: OpenApiTypes.STR},
+        responses={200: OpenApiTypes.STR, 400: OpenApiTypes.STR, 406: OpenApiTypes.STR},
         methods=["PUT"]
     )
     def update(self, request, client_id: str, pk: str):
@@ -108,7 +108,7 @@ class ProjectViewSet(ViewSet):
                 serialized_project=pus.validated_data
             )
             if created:
-                return Response(_("Project updated"), status=status.HTTP_201_CREATED)
+                return Response(_("Project updated"), status=status.HTTP_200_OK)
             else:
                 return Response(_("Project could not be updated"),
                                 status=status.HTTP_406_NOT_ACCEPTABLE)

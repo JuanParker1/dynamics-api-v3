@@ -47,7 +47,7 @@ class Group:
         :param token: Access token
         :param project_id: Project RGOC Code
         :param pk: Group numeric ID
-        :user_id: List of user numeric ID
+        :param user_list: List of user numeric ID
         """
         kg = KairnialGroup(client_id=client_id, token=token, project_id=project_id)
         return kg.add_users(group_id=pk, user_list=user_list)
@@ -60,10 +60,47 @@ class Group:
         :param token: Access token
         :param project_id: Project RGOC Code
         :param pk: Group numeric ID
-        :user_id: List of user numeric ID
+        :param user_list: List of user numeric ID
         """
         kg = KairnialGroup(client_id=client_id, token=token, project_id=project_id)
         return kg.remove_users(group_id=pk, user_list=user_list)
 
+    @staticmethod
+    def list_rights(client_id: str, token: str, project_id: str, pk: int):
+        """
+        List rights for group
+        :param client_id: ClientID Token
+        :param token: Access token
+        :param project_id: Project RGOC Code
+        :param pk: Group numeric ID
+        """
+        kg = KairnialGroup(client_id=client_id, token=token, project_id=project_id)
+        return kg.list_rights(group_id=pk)
 
+
+    @staticmethod
+    def add_rights(client_id: str, token: str, project_id: str, pk: int, right_list: [str]):
+        """
+        Add user to group
+        :param client_id: ClientID Token
+        :param token: Access token
+        :param project_id: Project RGOC Code
+        :param pk: Group numeric ID
+        :right_list: List of right numeric ID
+        """
+        kg = KairnialGroup(client_id=client_id, token=token, project_id=project_id)
+        return kg.add_rights(group_id=pk, right_list=right_list)
+
+    @staticmethod
+    def remove_rights(client_id: str, token: str, project_id: str, pk: int, right_list: [str]):
+        """
+        Add user to group
+        :param client_id: ClientID Token
+        :param token: Access token
+        :param project_id: Project RGOC Code
+        :param pk: Group numeric ID
+        :right_list: List of user numeric ID
+        """
+        kg = KairnialGroup(client_id=client_id, token=token, project_id=project_id)
+        return kg.remove_rights(group_id=pk, right_list=right_list)
 

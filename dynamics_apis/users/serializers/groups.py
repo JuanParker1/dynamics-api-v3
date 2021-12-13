@@ -36,6 +36,15 @@ class GroupAddUserSerializer(serializers.Serializer):
                                   child=serializers.IntegerField(),
                                   required=True)
 
+class GroupAddRightSerializer(serializers.Serializer):
+    """
+    Serializer for user addition or removal to group
+    """
+    rights = serializers.ListField(label=_("List of numerical right IDs"),
+                                  help_text=_("List of right IDs to add to group"),
+                                  child=serializers.IntegerField(),
+                                  required=True)
+
 
 class GroupCreationSerializer(serializers.Serializer):
     """
@@ -63,3 +72,19 @@ class GroupCreationSerializer(serializers.Serializer):
         instance.name = validated_data['name']
         instance.description = validated_data.get('description', instance.description)
         return instance
+
+
+class RightSerializer(serializers.Serializer):
+    legacy_rights = serializers.ListField(
+        label=_("List of legacy rights"),
+        help_text=_("List of legacy rights associated with the group"),
+        child=serializers.IntegerField(), source='acls')
+    rights = serializers.ListField(
+        label=_("List of rights"),
+        help_text=_("List of rights associated with the group"),
+        child=serializers.CharField(), source='acl_links')
+    modules = serializers.ListField(
+        label=_("List of activated modules"),
+        help_text=_("List of modules activated on the group"),
+        child=serializers.CharField())
+
