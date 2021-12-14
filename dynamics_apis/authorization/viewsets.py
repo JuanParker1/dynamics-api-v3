@@ -1,7 +1,6 @@
 """
 REST API views for Kairnial ACL
 """
-import os
 
 from django.utils.translation import gettext as _
 from drf_spectacular.types import OpenApiTypes
@@ -12,8 +11,8 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 
 from dynamics_apis.common.serializers import ErrorSerializer
-# Create your views here.
 from dynamics_apis.common.services import KairnialWSServiceError
+from dynamics_apis.common.viewsets import project_parameters
 from .models import ACL, Module
 from .serializers import ACLSerializer, ACLQuerySerializer, ModuleSerializer
 
@@ -25,15 +24,7 @@ class ACLViewSet(ViewSet):
 
     @extend_schema(
         description="List Kairnial authorizations",
-        parameters=[
-            OpenApiParameter("client_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                             description=_("Client ID token"),
-                             default=os.environ.get('DEFAULT_KAIRNIAL_CLIENT_ID', '')),
-            OpenApiParameter("project_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                             description=_("ID of the project, usually starts with rgoc"),
-                             default=os.environ.get('DEFAULT_KAIRNIAL_PROJECT_ID', '')),
-            ACLQuerySerializer
-        ],
+        parameters=project_parameters + [ACLQuerySerializer],
         responses={200: ACLSerializer, 400: ErrorSerializer},
         methods=["GET"]
     )
@@ -68,13 +59,7 @@ class ACLViewSet(ViewSet):
 
     @extend_schema(
         description="List Kairnial groups associated with an authorization",
-        parameters=[
-            OpenApiParameter("client_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                             description=_("Client ID token"),
-                             default=os.environ.get('DEFAULT_KAIRNIAL_CLIENT_ID', '')),
-            OpenApiParameter("project_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                             description=_("ID of the project, usually starts with rgoc"),
-                             default=os.environ.get('DEFAULT_KAIRNIAL_PROJECT_ID', '')),
+        parameters=project_parameters + [
             OpenApiParameter("id", OpenApiTypes.STR, OpenApiParameter.PATH,
                              description=_("UUID of the authorization")),
             ACLQuerySerializer
@@ -102,14 +87,7 @@ class ModuleViewSet(ViewSet):
 
     @extend_schema(
         description="List Kairnial modules",
-        parameters=[
-            OpenApiParameter("client_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                             description=_("Client ID token"),
-                             default=os.environ.get('DEFAULT_KAIRNIAL_CLIENT_ID', '')),
-            OpenApiParameter("project_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                             description=_("ID of the project, usually starts with rgoc"),
-                             default=os.environ.get('DEFAULT_KAIRNIAL_PROJECT_ID', ''))
-        ],
+        parameters=project_parameters,
         responses={200: ModuleSerializer, 400: ErrorSerializer},
         methods=["GET"]
     )

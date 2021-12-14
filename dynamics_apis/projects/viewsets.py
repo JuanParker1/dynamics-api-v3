@@ -15,6 +15,7 @@ from .serializers import ProjectSerializer, ProjectCreationSerializer, ProjectUp
 from dynamics_apis.common.serializers import ErrorSerializer
 from .services import KairnialProject
 from dynamics_apis.common.services import KairnialWSServiceError
+from dynamics_apis.common.viewsets import client_parameters
 
 
 class ProjectViewSet(ViewSet):
@@ -25,7 +26,7 @@ class ProjectViewSet(ViewSet):
     @extend_schema(
         description="Get a list of projects",
         request=ProjectSerializer,
-        parameters=[
+        parameters=client_parameters + [
             OpenApiParameter("search", OpenApiTypes.STR, OpenApiParameter.QUERY,
                              description=_("Search project name containing")),
         ],
@@ -80,10 +81,7 @@ class ProjectViewSet(ViewSet):
 
     @extend_schema(
         description="Update a Kairnial project",
-        parameters=[
-            OpenApiParameter("client_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                             description=_("Client ID token"),
-                             default=os.environ.get('DEFAULT_KAIRNIAL_CLIENT_ID', '')),
+        parameters=client_parameters + [
             OpenApiParameter("id", OpenApiTypes.STR, OpenApiParameter.PATH,
                              description=_("RGOC ID of the project")),
         ],

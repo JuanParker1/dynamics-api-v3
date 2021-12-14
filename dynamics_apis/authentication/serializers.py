@@ -35,7 +35,7 @@ class APIKeyAuthenticationSerializer(serializers.Serializer):
         label=_("Apply to specific scopes"),
         help_text=_("Select scopes in {}".format(' '.join(settings.KIARNIAL_AUTHENTICATION_SCOPES))),
         choices=settings.KIARNIAL_AUTHENTICATION_SCOPES,
-        default=['direct-login', 'login-token', 'project-list'])
+        default=['login-token', 'project-list'])
 
 
 class AuthResponseSerializer(serializers.Serializer):

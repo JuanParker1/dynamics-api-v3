@@ -11,6 +11,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 
+from dynamics_apis.common.viewsets import project_parameters
 from dynamics_apis.common.serializers import ErrorSerializer
 from dynamics_apis.users.models.users import User
 from dynamics_apis.users.serializers.users import UserSerializer, UserCreationSerializer, UserQuerySerializer, \
@@ -26,13 +27,7 @@ class UserViewSet(ViewSet):
 
     @extend_schema(
         description="List Kairnial users",
-        parameters=[
-            OpenApiParameter("client_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                             description=_("Client ID token"),
-                             default=os.environ.get('DEFAULT_KAIRNIAL_CLIENT_ID', '')),
-            OpenApiParameter("project_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                             description=_("ID of the project, usually starts with rgoc"),
-                             default=os.environ.get('DEFAULT_KAIRNIAL_PROJECT_ID', '')),
+        parameters=project_parameters + [
             UserQuerySerializer,  # serializer fields are converted to parameters
         ],
         responses={200: ProjectMemberSerializer, 500: ErrorSerializer},
@@ -59,14 +54,7 @@ class UserViewSet(ViewSet):
 
     @extend_schema(
         description="Count Kairnial users",
-        parameters=[
-            OpenApiParameter("client_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                             description=_("Client ID token"),
-                             default=os.environ.get('DEFAULT_KAIRNIAL_CLIENT_ID', '')),
-            OpenApiParameter("project_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                             description=_("ID of the project, usually starts with rgoc"),
-                             default=os.environ.get('DEFAULT_KAIRNIAL_PROJECT_ID', ''))
-        ],
+        parameters=project_parameters,
         responses={200: ProjectMemberCountSerializer, 500: ErrorSerializer},
         methods=["GET"]
     )
@@ -92,15 +80,9 @@ class UserViewSet(ViewSet):
 
     @extend_schema(
         description="Retrieve a Kairnial user",
-        parameters=[
+        parameters=project_parameters + [
             OpenApiParameter("id", OpenApiTypes.STR, OpenApiParameter.PATH,
                              description=_("User ID")),
-            OpenApiParameter("client_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                             description=_("Client ID token"),
-                             default=os.environ.get('DEFAULT_KAIRNIAL_CLIENT_ID', '')),
-            OpenApiParameter("project_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                             description=_("ID of the project, usually starts with rgoc"),
-                             default=os.environ.get('DEFAULT_KAIRNIAL_PROJECT_ID', '')),
         ],
         responses={200: ProjectMemberSerializer, 400: ErrorSerializer},
         methods=["GET"]
@@ -126,7 +108,7 @@ class UserViewSet(ViewSet):
 
     @extend_schema(
         description="Create a Kairnial user",
-        parameters=[
+        parameters=project_parameters + [
             UserCreationSerializer,  # serializer fields are converted to parameters
         ],
         responses={201: UserSerializer, 500: ErrorSerializer, 400: ErrorSerializer},
@@ -142,12 +124,7 @@ class UserViewSet(ViewSet):
 
     @extend_schema(
         description="Retrieve current Kairnial user",
-        parameters=[
-            OpenApiParameter("client_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                             description=_("Client ID token"), default=os.environ.get('DEFAULT_KAIRNIAL_CLIENT_ID', '')),
-            OpenApiParameter("project_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                             description=_("ID of the project, usually starts with rgoc"), default=os.environ.get('DEFAULT_KAIRNIAL_PROJECT_ID', '')),
-        ],
+        parameters=project_parameters,
         responses={200: ProjectMemberSerializer, 400: ErrorSerializer},
         methods=["GET"]
     )

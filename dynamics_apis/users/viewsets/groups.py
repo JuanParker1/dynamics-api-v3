@@ -16,6 +16,7 @@ from dynamics_apis.users.serializers.groups import GroupSerializer, GroupQuerySe
     GroupAddUserSerializer, RightSerializer, GroupAddRightSerializer
 # Create your views here.
 from dynamics_apis.common.services import KairnialWSServiceError
+from dynamics_apis.common.viewsets import project_parameters
 
 
 class GroupViewSet(ViewSet):
@@ -25,13 +26,7 @@ class GroupViewSet(ViewSet):
 
     @extend_schema(
         description="List Kairnial groups",
-        parameters=[
-            OpenApiParameter("client_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                             description=_("Client ID token"),
-                             default=os.environ.get('DEFAULT_KAIRNIAL_CLIENT_ID', '')),
-            OpenApiParameter("project_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                             description=_("ID of the project, usually starts with rgoc"),
-                             default=os.environ.get('DEFAULT_KAIRNIAL_PROJECT_ID', '')),
+        parameters=project_parameters + [
             GroupQuerySerializer,  # serializer fields are converted to parameters
         ],
         responses={200: GroupSerializer, 500: ErrorSerializer},
@@ -64,13 +59,7 @@ class GroupViewSet(ViewSet):
 
     @extend_schema(
         description="Retrieve a Kairnial group",
-        parameters=[
-            OpenApiParameter("client_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                             description=_("Client ID token"),
-                             default=os.environ.get('DEFAULT_KAIRNIAL_CLIENT_ID', '')),
-            OpenApiParameter("project_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                             description=_("ID of the project, usually starts with rgoc"),
-                             default=os.environ.get('DEFAULT_KAIRNIAL_PROJECT_ID', '')),
+        parameters=project_parameters + [
             OpenApiParameter("id", OpenApiTypes.STR, OpenApiParameter.PATH,
                              description=_("UUID of the group")),
 
@@ -103,14 +92,7 @@ class GroupViewSet(ViewSet):
 
     @extend_schema(
         description="Create a Kairnial group",
-        parameters=[
-            OpenApiParameter("client_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                             description=_("Client ID token"),
-                             default=os.environ.get('DEFAULT_KAIRNIAL_CLIENT_ID', '')),
-            OpenApiParameter("project_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                             description=_("ID of the project, usually starts with rgoc"),
-                             default=os.environ.get('DEFAULT_KAIRNIAL_PROJECT_ID', '')),
-        ],
+        parameters=project_parameters,
         request=GroupCreationSerializer,
         responses={201: OpenApiTypes.STR, 400: OpenApiTypes.STR, 406: OpenApiTypes.STR},
         methods=["POST"]
@@ -139,13 +121,7 @@ class GroupViewSet(ViewSet):
 
     @extend_schema(
         description="Add users to a group",
-        parameters= [
-            OpenApiParameter("client_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                             description=_("Client ID token"),
-                             default=os.environ.get('DEFAULT_KAIRNIAL_CLIENT_ID', '')),
-            OpenApiParameter("project_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                             description=_("ID of the project, usually starts with rgoc"),
-                             default=os.environ.get('DEFAULT_KAIRNIAL_PROJECT_ID', '')),
+        parameters= project_parameters + [
             OpenApiParameter("id", OpenApiTypes.INT, OpenApiParameter.PATH,
                              description=_("Numeric ID of the group")),
         ],
@@ -189,13 +165,7 @@ class GroupViewSet(ViewSet):
 
     @extend_schema(
         description="Remove users from a group",
-        parameters= [
-            OpenApiParameter("client_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                             description=_("Client ID token"),
-                             default=os.environ.get('DEFAULT_KAIRNIAL_CLIENT_ID', '')),
-            OpenApiParameter("project_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                             description=_("ID of the project, usually starts with rgoc"),
-                             default=os.environ.get('DEFAULT_KAIRNIAL_PROJECT_ID', '')),
+        parameters= project_parameters + [
             OpenApiParameter("id", OpenApiTypes.INT, OpenApiParameter.PATH,
                              description=_("Numeric ID of the group")),
         ],
@@ -238,13 +208,7 @@ class GroupViewSet(ViewSet):
 
     @extend_schema(
         description="List rights for a group",
-        parameters=[
-            OpenApiParameter("client_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                             description=_("Client ID token"),
-                             default=os.environ.get('DEFAULT_KAIRNIAL_CLIENT_ID', '')),
-            OpenApiParameter("project_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                             description=_("ID of the project, usually starts with rgoc"),
-                             default=os.environ.get('DEFAULT_KAIRNIAL_PROJECT_ID', '')),
+        parameters=project_parameters + [
             OpenApiParameter("id", OpenApiTypes.STR, OpenApiParameter.PATH,
                              description=_("UUID of the group")),
         ],
@@ -281,13 +245,7 @@ class GroupViewSet(ViewSet):
 
     @extend_schema(
         description="Add rights to a group",
-        parameters=[
-            OpenApiParameter("client_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                             description=_("Client ID token"),
-                             default=os.environ.get('DEFAULT_KAIRNIAL_CLIENT_ID', '')),
-            OpenApiParameter("project_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                             description=_("ID of the project, usually starts with rgoc"),
-                             default=os.environ.get('DEFAULT_KAIRNIAL_PROJECT_ID', '')),
+        parameters=project_parameters + [
             OpenApiParameter("id", OpenApiTypes.STR, OpenApiParameter.PATH,
                              description=_("UUID of the group")),
         ],
@@ -331,13 +289,7 @@ class GroupViewSet(ViewSet):
 
     @extend_schema(
         description="Remove rights from a group",
-        parameters=[
-            OpenApiParameter("client_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                             description=_("Client ID token"),
-                             default=os.environ.get('DEFAULT_KAIRNIAL_CLIENT_ID', '')),
-            OpenApiParameter("project_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                             description=_("ID of the project, usually starts with rgoc"),
-                             default=os.environ.get('DEFAULT_KAIRNIAL_PROJECT_ID', '')),
+        parameters=project_parameters + [
             OpenApiParameter("id", OpenApiTypes.STR, OpenApiParameter.PATH,
                              description=_("UUID of the group")),
         ],

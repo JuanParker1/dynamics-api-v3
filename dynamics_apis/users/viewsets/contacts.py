@@ -17,6 +17,7 @@ from dynamics_apis.users.serializers.contacts import ContactQuerySerializer, Con
     ContactCreationSerializer, ContactUpdateSerializer
 # Create your views here.
 from dynamics_apis.common.services import KairnialWSServiceError
+from dynamics_apis.common.viewsets import project_parameters
 
 
 class ContactViewSet(ViewSet):
@@ -26,13 +27,7 @@ class ContactViewSet(ViewSet):
 
     @extend_schema(
         description="List Kairnial contacts",
-        parameters=[
-            OpenApiParameter("client_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                             description=_("Client ID token"),
-                             default=os.environ.get('DEFAULT_KAIRNIAL_CLIENT_ID', '')),
-            OpenApiParameter("project_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                             description=_("ID of the project, usually starts with rgoc"),
-                             default=os.environ.get('DEFAULT_KAIRNIAL_PROJECT_ID', '')),
+        parameters=project_parameters + [
             ContactQuerySerializer,  # serializer fields are converted to parameters
         ],
         responses={200: ContactSerializer, 500: ErrorSerializer},
@@ -64,14 +59,7 @@ class ContactViewSet(ViewSet):
 
     @extend_schema(
         description="Create a Kairnial contact",
-        parameters=[
-            OpenApiParameter("client_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                             description=_("Client ID token"),
-                             default=os.environ.get('DEFAULT_KAIRNIAL_CLIENT_ID', '')),
-            OpenApiParameter("project_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                             description=_("ID of the project, usually starts with rgoc"),
-                             default=os.environ.get('DEFAULT_KAIRNIAL_PROJECT_ID', '')),
-        ],
+        parameters=project_parameters,
         request=ContactCreationSerializer,
         responses={201: OpenApiTypes.STR, 400: OpenApiTypes.STR, 406: OpenApiTypes.STR},
         methods=["POST"]
@@ -102,13 +90,7 @@ class ContactViewSet(ViewSet):
 
     @extend_schema(
         description="Update a Kairnial contact",
-        parameters=[
-            OpenApiParameter("client_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                             description=_("Client ID token"),
-                             default=os.environ.get('DEFAULT_KAIRNIAL_CLIENT_ID', '')),
-            OpenApiParameter("project_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                             description=_("ID of the project, usually starts with rgoc"),
-                             default=os.environ.get('DEFAULT_KAIRNIAL_PROJECT_ID', '')),
+        parameters=project_parameters + [
             OpenApiParameter("id", OpenApiTypes.UUID, OpenApiParameter.PATH,
                              description=_("UUID of the contact")),
         ],
@@ -144,13 +126,7 @@ class ContactViewSet(ViewSet):
 
     @extend_schema(
         description="Delete a Kairnial contact",
-        parameters=[
-            OpenApiParameter("client_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                             description=_("Client ID token"),
-                             default=os.environ.get('DEFAULT_KAIRNIAL_CLIENT_ID', '')),
-            OpenApiParameter("project_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                             description=_("ID of the project, usually starts with rgoc"),
-                             default=os.environ.get('DEFAULT_KAIRNIAL_PROJECT_ID', '')),
+        parameters=project_parameters + [
             OpenApiParameter("id", OpenApiTypes.INT, OpenApiParameter.PATH,
                              description=_("Numerical ID of the contact")),
         ],
