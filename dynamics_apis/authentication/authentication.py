@@ -66,5 +66,5 @@ class KairnialTokenAuthentication(JWTAuthentication):
             logger.error("Unable to get client_id")
             return None
         except Exception as e:
-            logger.error("Unable to parse authentication")
+            logger.error("Unable to parse authentication", e)
             return None

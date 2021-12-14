@@ -186,7 +186,7 @@ from dynamics_apis.settings import *
 
 KIARNIAL_AUTH_DOMAIN = os.environ.get('KAIRNIAL_AUTH_DOMAIN', '')
 # Kairnial auth server public key for token validation
-KAIRNIAL_AUTH_PUBLIC_KEY = os.environ.get('KAIRNIAL_AUTH_PUBLIC_KEY', '')
+KAIRNIAL_AUTH_PUBLIC_KEY = load_key(path=os.path.join(os.path.dirname(__file__), os.environ.get('KAIRNIAL_AUTH_PUBLIC_KEY_PATH', '')))
 KAIRNIAL_AUTH_SERVER = 'https://' + KIARNIAL_AUTH_DOMAIN
 KAIRNIAL_CROSS_SERVER = os.environ.get('KAIRNIAL_CROSS_SERVER', '')
 KAIRNIAL_WS_SERVER = os.environ.get('KAIRNIAL_WS_SERVER', '')
