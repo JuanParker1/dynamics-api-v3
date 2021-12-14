@@ -11,7 +11,6 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 KAIRNIAL_AUTH_DOMAIN = settings.KIARNIAL_AUTH_DOMAIN
 KAIRNIAL_AUTH_PUBLIC_KEY = settings.KAIRNIAL_AUTH_PUBLIC_KEY
-API_AUDIENCE = settings.KAIRNIAL_AUDIENCE
 ALGORITHMS = ["RS256"]
 
 

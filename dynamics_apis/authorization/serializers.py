@@ -40,3 +40,43 @@ class ACLQuerySerializer(serializers.Serializer):
         help_text=_("Search in ACL type and description"),
         required=False
     )
+
+
+class ModuleSerializer(serializers.Serializer):
+    uuid = serializers.UUIDField(
+        label=_("ACL UUID"),
+        read_only=True
+    )
+    route = serializers.CharField(
+        label=_('Route of the module'),
+        read_only=True
+    )
+    url = serializers.CharField(
+        label=_('URL of the module'),
+        read_only=True,
+    )
+    name = serializers.SerializerMethodField()
+    subtitle = serializers.CharField(
+        label=_('subtitle of the module'),
+        read_only=True,
+        source='subTitle'
+    )
+    icon = serializers.CharField(
+        label=_('icon of the module'),
+        read_only=True
+    )
+    target = serializers.CharField(
+        label=_('target of the module'),
+        read_only=True
+    )
+    index = serializers.IntegerField(
+        label=_('index of the module'),
+        read_only=True
+    )
+    viewable = serializers.BooleanField(
+        label=_('is module viewable'),
+        read_only=True
+    )
+
+    def get_name(self, obj):
+        return obj.get('title')

@@ -1,7 +1,7 @@
 """
 Kairnial authorization models
 """
-from dynamics_apis.authorization.services import KairnialACL
+from dynamics_apis.authorization.services import KairnialACL, KairnialModule
 
 
 class ACL:
@@ -18,3 +18,16 @@ class ACL:
         if search:
             acl_list = [l for l in acl_list if search in f"{l['description']}|{l['acl_type']}"]
         return acl_list
+
+class Module:
+
+    @classmethod
+    def list(cls, client_id: str, token: str, project_id: str, search: str = None):
+        """
+        List Kairnial authorizations
+        """
+        km = KairnialModule(client_id=client_id, token=token, project_id=project_id)
+        module_list = km.list().get('acls')
+        if search:
+            module_list = [l for l in module_list if search in f"{l['title']}|{l['subtitle']}"]
+        return module_list

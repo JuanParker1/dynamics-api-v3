@@ -20,3 +20,20 @@ class KairnialACL(KairnialWSService):
             action='getAclGrants',
             parameters=[{}],
             use_cache=True)
+
+
+class KairnialModule(KairnialWSService):
+    """
+    Service class for Kairnial Groups
+    """
+    service_domain = 'aclmanager'
+
+    def list(self) -> []:
+        """
+        List access rights
+        :return:
+        """
+        return self.call(
+            action='getModules',
+            parameters=[{}],
+            use_cache=True)

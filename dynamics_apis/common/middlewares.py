@@ -2,18 +2,7 @@
 Kairnial authentication middleware
 """
 
-from django.conf import settings
-from django.http import JsonResponse
-from jose import jwt
 from django.contrib.auth import authenticate
-from django.contrib.auth.models import User
-from django.middleware.security import SecurityMiddleware
-
-KAIRNIAL_AUTH_DOMAIN = settings.KIARNIAL_AUTH_DOMAIN
-API_AUDIENCE = settings.KAIRNIAL_AUDIENCE
-ALGORITHMS = ["RS256"]
-
-KAIRNIAL_AUTH_PUBLIC_KEY = settings.KAIRNIAL_AUTH_PUBLIC_KEY
 
 
 class KairnialAuthMiddleware(object):
@@ -42,4 +31,3 @@ class KairnialAuthMiddleware(object):
         client_id = view_kwargs.get('client_id', None)
         if client_id:
             request.client_id = client_id
-
