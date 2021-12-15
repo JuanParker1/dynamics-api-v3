@@ -89,9 +89,9 @@ class KairnialGroup(KairnialWSService):
                         'acl_id': right,
                         'acl_type': right
                     }],
-                format='bool',
+                format='json',
                 use_cache=False)
-            no_error &= resp
+            no_error &= resp.get('success', False)
         return no_error
 
     def remove_rights(self, group_id: int, right_list: [int]):
@@ -104,7 +104,7 @@ class KairnialGroup(KairnialWSService):
                 service='aclmanager',
                 action='removeRigthToGroup',
                 parameters=[{'groupe': group_id, 'acl_id': [right, ]}],
-                format='bool',
+                format='json',
                 use_cache=False)
-            no_error &= resp
+            no_error &= resp.get('success', False)
         return no_error

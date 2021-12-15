@@ -60,7 +60,7 @@ class GroupViewSet(ViewSet):
     @extend_schema(
         description="Retrieve a Kairnial group",
         parameters=project_parameters + [
-            OpenApiParameter("id", OpenApiTypes.STR, OpenApiParameter.PATH,
+            OpenApiParameter("id", OpenApiTypes.UUID, OpenApiParameter.PATH,
                              description=_("UUID of the group")),
 
         ],
@@ -209,11 +209,11 @@ class GroupViewSet(ViewSet):
     @extend_schema(
         description="List rights for a group",
         parameters=project_parameters + [
-            OpenApiParameter("id", OpenApiTypes.STR, OpenApiParameter.PATH,
+            OpenApiParameter("id", OpenApiTypes.UUID, OpenApiParameter.PATH,
                              description=_("UUID of the group")),
         ],
         responses={200: RightSerializer, 400: OpenApiTypes.STR, 406: OpenApiTypes.STR},
-        methods=["POST"]
+        methods=["GET"]
     )
     @action(['GET'], detail=True, url_path='rights', url_name="list_rights_for_group")
     def list_rights(self, request, client_id: str, project_id: str, pk):
@@ -222,7 +222,7 @@ class GroupViewSet(ViewSet):
         :param request: HTTPRequest
         :param client_id: ID of the client
         :param project_id: ID of the project
-        :param pk: ID of the group
+        :param pk: UUID of the group
         """
         try:
             group_right_list = Group.list_rights(
@@ -246,7 +246,7 @@ class GroupViewSet(ViewSet):
     @extend_schema(
         description="Add rights to a group",
         parameters=project_parameters + [
-            OpenApiParameter("id", OpenApiTypes.STR, OpenApiParameter.PATH,
+            OpenApiParameter("id", OpenApiTypes.UUID, OpenApiParameter.PATH,
                              description=_("UUID of the group")),
         ],
         request=GroupAddRightSerializer,
@@ -260,7 +260,7 @@ class GroupViewSet(ViewSet):
         :param request: HTTPRequest
         :param client_id: ID of the client
         :param project_id: ID of the project
-        :param pk: ID of the group
+        :param pk: UUID of the group
         """
         try:
             print("rights", request.data)
@@ -290,7 +290,7 @@ class GroupViewSet(ViewSet):
     @extend_schema(
         description="Remove rights from a group",
         parameters=project_parameters + [
-            OpenApiParameter("id", OpenApiTypes.STR, OpenApiParameter.PATH,
+            OpenApiParameter("id", OpenApiTypes.UUID, OpenApiParameter.PATH,
                              description=_("UUID of the group")),
         ],
         request=GroupAddRightSerializer,
@@ -304,7 +304,7 @@ class GroupViewSet(ViewSet):
         :param request: HTTPRequest
         :param client_id: ID of the client
         :param project_id: ID of the project
-        :param pk: ID of the group
+        :param pk: UUID of the group
         """
         try:
             right_list = map(int, request.data.get('rights'))

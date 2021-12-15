@@ -27,7 +27,7 @@ class Module:
         List Kairnial authorizations
         """
         km = KairnialModule(client_id=client_id, token=token, project_id=project_id)
-        module_list = km.list().get('acls')
+        module_list = km.list().get('modules')
         if search:
             module_list = [l for l in module_list if search in f"{l['title']}|{l['subtitle']}"]
         return module_list
