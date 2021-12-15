@@ -16,17 +16,14 @@ default_project_example = OpenApiExample(
     value=os.environ.get('DEFAULT_KAIRNIAL_PROJECT_ID', '')
 )
 
-project_parameters = [
+client_parameters = [
     OpenApiParameter("client_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                     description=_("Client ID token"),
+                     description=_("Client ID obtain from Kairnial support"),
                      examples=[default_client_example]),
+]
+
+project_parameters = client_parameters + [
     OpenApiParameter("project_id", OpenApiTypes.STR, OpenApiParameter.PATH,
                      description=_("ID of the project, usually starts with rgoc"),
                      examples=[default_project_example]),
-]
-
-client_parameters = [
-    OpenApiParameter("client_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                     description=_("Client ID token"),
-                     examples=[default_client_example]),
 ]

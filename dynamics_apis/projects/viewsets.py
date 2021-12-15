@@ -24,7 +24,8 @@ class ProjectViewSet(ViewSet):
     """
 
     @extend_schema(
-        description="Get a list of projects",
+        summary=_("List projects"),
+        description=_("Get a list of projects associated to current connected user"),
         request=ProjectSerializer,
         parameters=client_parameters + [
             OpenApiParameter("search", OpenApiTypes.STR, OpenApiParameter.QUERY,
@@ -52,7 +53,8 @@ class ProjectViewSet(ViewSet):
             return Response(error.data, content_type='application/json', status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
-        description="Create a Kairnial project",
+        summary=_("Create a Kairnial project"),
+        description=_("Create a new project for the current connected user, give a template UUID to copy the configuration from an existing project"),
         parameters=[
             OpenApiParameter("client_id", OpenApiTypes.STR, OpenApiParameter.PATH,
                              description=_("Client ID token"),
@@ -80,7 +82,8 @@ class ProjectViewSet(ViewSet):
                             status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
-        description="Update a Kairnial project",
+        summary=_("Update a Kairnial project"),
+        description=_("Udpdate information on a existing project"),
         parameters=client_parameters + [
             OpenApiParameter("id", OpenApiTypes.STR, OpenApiParameter.PATH,
                              description=_("RGOC ID of the project")),

@@ -37,7 +37,6 @@ class KairnialTokenAuthentication(JWTAuthentication):
                 return None
         except (AttributeError, IndexError):
             return None
-
         try:
             payload = jwt.decode(
                 token,

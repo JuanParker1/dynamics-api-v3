@@ -23,10 +23,10 @@ from .projects import urls as project_urls
 from .graphql import urls as graphql_urls
 
 urlpatterns = [
-    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('schema/', SpectacularAPIView.as_view(), name='schema'),
     # Optional UI:
-    path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-    path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+    path('', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
     path('<str:client_id>/<str:project_id>/', include(users_urls)),
     path('<str:client_id>/<str:project_id>/authorization/', include(authorization_urls)),
     path('<str:client_id>/projects/', include(project_urls)),

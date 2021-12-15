@@ -26,7 +26,8 @@ class UserViewSet(ViewSet):
     """
 
     @extend_schema(
-        description="List Kairnial users",
+        summary=_("List Kairnial users"),
+        description=_("List Kairnial users on this project"),
         parameters=project_parameters + [
             UserQuerySerializer,  # serializer fields are converted to parameters
         ],
@@ -53,7 +54,8 @@ class UserViewSet(ViewSet):
                             status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
-        description="Count Kairnial users",
+        summary=_("Count Kairnial users"),
+        description=_("Count the number of active users on the project"),
         parameters=project_parameters,
         responses={200: ProjectMemberCountSerializer, 500: ErrorSerializer},
         methods=["GET"]
@@ -79,7 +81,8 @@ class UserViewSet(ViewSet):
                             status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
-        description="Retrieve a Kairnial user",
+        summary=_("Retrieve a Kairnial user"),
+        description=_("Get information on a specific project user"),
         parameters=project_parameters + [
             OpenApiParameter("id", OpenApiTypes.STR, OpenApiParameter.PATH,
                              description=_("User ID")),
@@ -107,7 +110,8 @@ class UserViewSet(ViewSet):
             return Response(_("User not found"), status=status.HTTP_404_NOT_FOUND)
 
     @extend_schema(
-        description="Create a Kairnial user",
+        summary=_("Create a Kairnial user"),
+        description=_("Create or invite a new user on the project"),
         parameters=project_parameters + [
             UserCreationSerializer,  # serializer fields are converted to parameters
         ],
@@ -123,7 +127,8 @@ class UserViewSet(ViewSet):
         pass
 
     @extend_schema(
-        description="Retrieve current Kairnial user",
+        summary=_("Retrieve current Kairnial user"),
+        description=_("Get information on the current connected user"),
         parameters=project_parameters,
         responses={200: ProjectMemberSerializer, 400: ErrorSerializer},
         methods=["GET"]

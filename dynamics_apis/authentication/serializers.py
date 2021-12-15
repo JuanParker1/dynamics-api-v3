@@ -19,7 +19,10 @@ class PasswordAuthenticationSerializer(serializers.Serializer):
     """
     Password authentication class
     """
-    client_id = serializers.CharField(label=_("Client ID"), default=os.environ.get('DEFAULT_KAIRNIAL_CLIENT_ID', _('Type your client ID here')))
+    client_id = serializers.CharField(
+        label=_("Client ID"),
+        help_text=_("Client ID obtain from Kairnial support"),
+        default=os.environ.get('DEFAULT_KAIRNIAL_CLIENT_ID', _('Type your client ID here')))
     email = serializers.CharField(label=_("User unique identifier"), help_text=_('Type your email here'), default=_('Type your email here'))
     password = serializers.CharField(label=_("Password"), help_text=_('Type your password here'), default=_('Type your password here'))
 
@@ -28,9 +31,18 @@ class APIKeyAuthenticationSerializer(serializers.Serializer):
     """
     API Key / Secret authentication class
     """
-    client_id = serializers.CharField(label=_("Client ID"), default=os.environ.get('DEFAULT_KAIRNIAL_CLIENT_ID', ''))
-    api_key = serializers.CharField(label=_("User API key"), default=os.environ.get('DEFAULT_KAIRNIAL_API_KEY', ''))
-    api_secret = serializers.CharField(label=_("User API secret"),  default=os.environ.get('DEFAULT_KAIRNIAL_API_SECRET', ''))
+    client_id = serializers.CharField(
+        label=_("Client ID"),
+        help_text=_("Client ID obtain from Kairnial support"),
+        default=os.environ.get('DEFAULT_KAIRNIAL_CLIENT_ID', ''))
+    api_key = serializers.CharField(
+        label=_("User API key"),
+        help_text=_("User API Key obtained from Kairnial support"),
+        default=os.environ.get('DEFAULT_KAIRNIAL_API_KEY', ''))
+    api_secret = serializers.CharField(
+        label=_("User API secret"),
+        help_text=_("User API secret obtained from Kairnial support"),
+        default=os.environ.get('DEFAULT_KAIRNIAL_API_SECRET', ''))
     scopes = serializers.MultipleChoiceField(
         label=_("Apply to specific scopes"),
         help_text=_("Select scopes in {}".format(' '.join(settings.KIARNIAL_AUTHENTICATION_SCOPES))),

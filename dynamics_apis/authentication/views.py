@@ -1,14 +1,16 @@
 """
 Authentication views
 """
-import json
+from django.utils.translation import gettext as _
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .serializers import PasswordAuthenticationSerializer, APIKeyAuthenticationSerializer, AuthResponseSerializer
-from .services import KairnialAuthentication, KairnialAuthenticationError
+
 from dynamics_apis.common.serializers import ErrorSerializer
+from .serializers import PasswordAuthenticationSerializer, APIKeyAuthenticationSerializer, \
+    AuthResponseSerializer
+from .services import KairnialAuthentication, KairnialAuthenticationError
 
 
 class PasswordAuthenticationView(APIView):
@@ -18,12 +20,13 @@ class PasswordAuthenticationView(APIView):
     permission_classes = []
 
     @extend_schema(
-        description="Create token from username / password authentication",
+        summary=_("Get a token from user / password"),
+        description=_("Create token from username / password authentication"),
         request=PasswordAuthenticationSerializer,
         responses={200: AuthResponseSerializer, 400: ErrorSerializer},
         methods=["POST"]
     )
-    def post(self, request, format=None):
+    def post(self, request):
         serializer = PasswordAuthenticationSerializer(data=request.data)
         if serializer.is_valid():
             ka = KairnialAuthentication(client_id=serializer.validated_data.get('client_id'))
@@ -35,9 +38,11 @@ class PasswordAuthenticationView(APIView):
                 resp_serializer = AuthResponseSerializer(auth_response)
                 return Response(resp_serializer.data, status=status.HTTP_200_OK)
             except KairnialAuthenticationError as e:
-                return Response(str(e), content_type='application/text', status=status.HTTP_400_BAD_REQUEST)
+                return Response(str(e), content_type='application/text',
+                                status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response(serializer.errors, content_type='application/json', status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors, content_type='application/json',
+                            status=status.HTTP_400_BAD_REQUEST)
 
 
 class APIKeyAuthenticationView(APIView):
@@ -47,12 +52,13 @@ class APIKeyAuthenticationView(APIView):
     permission_classes = []
 
     @extend_schema(
-        description="Create token from API key / secret authentication",
+        summary=_("Get a token from API key"),
+        description=_("Create token from API key / secret authentication"),
         responses={200: AuthResponseSerializer, 400: ErrorSerializer},
         request=APIKeyAuthenticationSerializer,
         methods=["POST"]
     )
-    def post(self, request, format=None):
+    def post(self, request):
         serializer = APIKeyAuthenticationSerializer(data=request.data)
         if serializer.is_valid():
             ka = KairnialAuthentication(client_id=serializer.validated_data.get('client_id'))
@@ -65,6 +71,8 @@ class APIKeyAuthenticationView(APIView):
                 resp_serializer = AuthResponseSerializer(auth_response)
                 return Response(resp_serializer.data, status=status.HTTP_200_OK)
             except KairnialAuthenticationError as e:
-                return Response(str(e), content_type='application/text', status=status.HTTP_400_BAD_REQUEST)
+                return Response(str(e), content_type='application/text',
+                                status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response(serializer.errors, content_type='application/json', status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors, content_type='application/json',
+                            status=status.HTTP_400_BAD_REQUEST)

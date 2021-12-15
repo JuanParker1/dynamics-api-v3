@@ -25,7 +25,8 @@ class GroupViewSet(ViewSet):
     """
 
     @extend_schema(
-        description="List Kairnial groups",
+        summary=_("List of Kairnial groups"),
+        description=_("List Kairnial groups defined on the project"),
         parameters=project_parameters + [
             GroupQuerySerializer,  # serializer fields are converted to parameters
         ],
@@ -58,7 +59,8 @@ class GroupViewSet(ViewSet):
                             status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
-        description="Retrieve a Kairnial group",
+        summary=_("Retrieve a group"),
+        description=_("Retrieve a Kairnial group by UUID"),
         parameters=project_parameters + [
             OpenApiParameter("id", OpenApiTypes.UUID, OpenApiParameter.PATH,
                              description=_("UUID of the group")),
@@ -91,7 +93,8 @@ class GroupViewSet(ViewSet):
             return Response(_("Invalid group"), status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
-        description="Create a Kairnial group",
+        summary=_("Create a Kairnial group"),
+        description=_("Create a new Kairnial group on the project"),
         parameters=project_parameters,
         request=GroupCreationSerializer,
         responses={201: OpenApiTypes.STR, 400: OpenApiTypes.STR, 406: OpenApiTypes.STR},
@@ -120,7 +123,8 @@ class GroupViewSet(ViewSet):
             return Response(gcs.errors, content_type='application/json', status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
-        description="Add users to a group",
+        summary=_("Add users to a group"),
+        description=_("Add an existing project user to the group"),
         parameters= project_parameters + [
             OpenApiParameter("id", OpenApiTypes.INT, OpenApiParameter.PATH,
                              description=_("Numeric ID of the group")),
@@ -164,7 +168,8 @@ class GroupViewSet(ViewSet):
             return Response(error.data, content_type="application/json", status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
-        description="Remove users from a group",
+        summary=_("Remove users from a group"),
+        description=_("Remove a project user from the group"),
         parameters= project_parameters + [
             OpenApiParameter("id", OpenApiTypes.INT, OpenApiParameter.PATH,
                              description=_("Numeric ID of the group")),
@@ -207,7 +212,8 @@ class GroupViewSet(ViewSet):
             return Response(error.data, content_type="application/json", status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
-        description="List rights for a group",
+        summary=_("List authorizations for group"),
+        description=_("List legacy rights, new accesses and modules for a group"),
         parameters=project_parameters + [
             OpenApiParameter("id", OpenApiTypes.UUID, OpenApiParameter.PATH,
                              description=_("UUID of the group")),
@@ -215,8 +221,8 @@ class GroupViewSet(ViewSet):
         responses={200: RightSerializer, 400: OpenApiTypes.STR, 406: OpenApiTypes.STR},
         methods=["GET"]
     )
-    @action(['GET'], detail=True, url_path='rights', url_name="list_rights_for_group")
-    def list_rights(self, request, client_id: str, project_id: str, pk):
+    @action(['GET'], detail=True, url_path='authorizations', url_name="list_authorizations_for_group")
+    def list_authorization(self, request, client_id: str, project_id: str, pk):
         """
         Add a list of rights to a group
         :param request: HTTPRequest
@@ -244,7 +250,8 @@ class GroupViewSet(ViewSet):
                             status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
-        description="Add rights to a group",
+        summary=_("Add authorization to a group"),
+        description=_("Add a new access right to a group"),
         parameters=project_parameters + [
             OpenApiParameter("id", OpenApiTypes.UUID, OpenApiParameter.PATH,
                              description=_("UUID of the group")),
@@ -253,8 +260,8 @@ class GroupViewSet(ViewSet):
         responses={201: OpenApiTypes.STR, 400: OpenApiTypes.STR, 406: OpenApiTypes.STR},
         methods=["POST"]
     )
-    @action(['POST'], detail=True, url_path='rights/add', url_name="add_rights_to_group")
-    def add_rights(self, request, client_id: str, project_id: str, pk):
+    @action(['POST'], detail=True, url_path='authorization/add', url_name="add_authorization_to_group")
+    def add_authorization(self, request, client_id: str, project_id: str, pk):
         """
         Add a list of rights to a group
         :param request: HTTPRequest
@@ -263,7 +270,6 @@ class GroupViewSet(ViewSet):
         :param pk: UUID of the group
         """
         try:
-            print("rights", request.data)
             right_list = map(int, request.data.get('rights'))
             resp = Group.add_rights(
                 client_id=client_id,
@@ -275,7 +281,7 @@ class GroupViewSet(ViewSet):
                 error = ErrorSerializer({
                     'status': 400,
                     'code': 0,
-                    'description': _("Not all rights could be added to group")
+                    'description': _("Not all authorizations could be added to group")
                 })
                 return Response(error.data, content_type="application/json", status=status.HTTP_400_BAD_REQUEST)
             return Response(_("Rights added to group"), status=status.HTTP_201_CREATED)
@@ -288,7 +294,8 @@ class GroupViewSet(ViewSet):
             return Response(error.data, content_type="application/json", status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
-        description="Remove rights from a group",
+        summary=_("Remove authorization from a group"),
+        description=_("Remove a new access right from a group"),
         parameters=project_parameters + [
             OpenApiParameter("id", OpenApiTypes.UUID, OpenApiParameter.PATH,
                              description=_("UUID of the group")),
@@ -297,8 +304,8 @@ class GroupViewSet(ViewSet):
         responses={201: OpenApiTypes.STR, 400: OpenApiTypes.STR, 406: OpenApiTypes.STR},
         methods=["POST"]
     )
-    @action(['POST'], detail=True, url_path='rights/remove', url_name="remove_rights_from_group")
-    def remove_rights(self, request, client_id: str, project_id: str, pk):
+    @action(['POST'], detail=True, url_path='authorization/remove', url_name="remove_authorization_from_group")
+    def remove_authorization(self, request, client_id: str, project_id: str, pk):
         """
         Remove a list of users to a group
         :param request: HTTPRequest

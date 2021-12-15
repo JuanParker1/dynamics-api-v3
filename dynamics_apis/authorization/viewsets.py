@@ -23,7 +23,8 @@ class ACLViewSet(ViewSet):
     """
 
     @extend_schema(
-        description="List Kairnial authorizations",
+        summary=_("List Kairnial authorizations"),
+        description=_("List Kairnial platform new access rights"),
         parameters=project_parameters + [ACLQuerySerializer],
         responses={200: ACLSerializer, 400: ErrorSerializer},
         methods=["GET"]
@@ -58,7 +59,8 @@ class ACLViewSet(ViewSet):
                             status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
-        description="List Kairnial groups associated with an authorization",
+        summary=_("List groups with authorization"),
+        description=_("List Kairnial groups associated with an access right"),
         parameters=project_parameters + [
             OpenApiParameter("id", OpenApiTypes.STR, OpenApiParameter.PATH,
                              description=_("UUID of the authorization")),
@@ -86,7 +88,8 @@ class ModuleViewSet(ViewSet):
     """
 
     @extend_schema(
-        description="List Kairnial modules",
+        summary=_("List Kairnial modules"),
+        description=_("List Kairnial application modules"),
         parameters=project_parameters,
         responses={200: ModuleSerializer, 400: ErrorSerializer},
         methods=["GET"]

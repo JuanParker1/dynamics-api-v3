@@ -26,7 +26,8 @@ class ContactViewSet(ViewSet):
     """
 
     @extend_schema(
-        description="List Kairnial contacts",
+        summary=_("List Kairnial contacts"),
+        description=_("List Kairnial contacts or companies on the project"),
         parameters=project_parameters + [
             ContactQuerySerializer,  # serializer fields are converted to parameters
         ],
@@ -58,7 +59,8 @@ class ContactViewSet(ViewSet):
                             status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
-        description="Create a Kairnial contact",
+        summary=_("Create a Kairnial contact"),
+        description=_("Create a new contact or company on the project"),
         parameters=project_parameters,
         request=ContactCreationSerializer,
         responses={201: OpenApiTypes.STR, 400: OpenApiTypes.STR, 406: OpenApiTypes.STR},
@@ -89,7 +91,8 @@ class ContactViewSet(ViewSet):
                             status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
-        description="Update a Kairnial contact",
+        summary=_("Update a Kairnial contact"),
+        description=_("Update an existing Kairnial contact or company on the project"),
         parameters=project_parameters + [
             OpenApiParameter("id", OpenApiTypes.UUID, OpenApiParameter.PATH,
                              description=_("UUID of the contact")),
@@ -125,7 +128,8 @@ class ContactViewSet(ViewSet):
                             status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
-        description="Delete a Kairnial contact",
+        summary=_("Delete a Kairnial contact"),
+        description=_("Delete an existing Kairnial contact or company from the project. This is a soft delete"),
         parameters=project_parameters + [
             OpenApiParameter("id", OpenApiTypes.INT, OpenApiParameter.PATH,
                              description=_("Numerical ID of the contact")),
