@@ -1,13 +1,11 @@
 """
 Kairnial User serializer classes
 """
-import json
-import logging
 
 from django.utils.translation import gettext as _
 from rest_framework import serializers
 
-from dynamics_apis.users.models.groups import Group
+from dynamics_apis.users.serializers.groups import GroupSerializer
 
 
 class UserCreationSerializer(serializers.Serializer):
@@ -101,3 +99,92 @@ class UserQuerySerializer(serializers.Serializer):
                                    required=False)
 
 
+class UserGroupSerializer(serializers.Serializer):
+    """
+    Serializer for list of groups for user
+    """
+    group_ids = serializers.ListField(
+        label=_("list of group IDs"),
+        help_text=_("List of numeric group IDs"),
+        child=serializers.IntegerField()
+    )
+
+
+class UserInviteSerializer(serializers.Serializer):
+    """
+    Serializer for user invitation
+    """
+    email = serializers.CharField(
+        label=_('User email'),
+        help_text=_('User identifier and used to send invite'),
+        required=True,
+    )
+    first_name = serializers.CharField(
+        label=_('User first name'),
+        help_text=_('First name for user. If not provided, deduced from email'),
+        required=False,
+        source='firstname'
+    )
+    last_name = serializers.CharField(
+        label=_('User last name'),
+        help_text=_('Last name for user. If not provided, deduced from email'),
+        required=False,
+        source='lastname'
+    )
+    language = serializers.ChoiceField(
+        label=_('User language'),
+        help_text=_('Interface language for user'),
+        choices=['en', 'fr', 'de', 'es'],
+        source='lng'
+    )
+
+
+class UserMultiInviteSerializer(serializers.Serializer):
+    users = UserInviteSerializer(
+        label=_('List of users'),
+        help_text=_('List of users to invite'),
+        many=True,
+        required=True
+    )
+
+
+class UserInviteResponseSerializer(serializers.Serializer):
+    admin_confirmation = serializers.BooleanField(
+        label=_('Admin confirmation needed'),
+        help_text=_('User is invited but the project admin needs to confirm the invitation'),
+        read_only=True,
+        source='needsAdminConfirmation'
+    )
+    already_invited = serializers.BooleanField(
+        label=_('User is already invited'),
+        help_text=_('User has already been sent an invitation'),
+        read_only=True,
+        source='alreadyInvited'
+    )
+    email_sent = serializers.BooleanField(
+        label=_('Invitation email sent'),
+        help_text=_('An invitation email has been sent to the user'),
+        read_only=True,
+        source='emailSent'
+    )
+    created = serializers.BooleanField(
+        label=_('User created'),
+        help_text=_('User has been created'),
+        read_only=True,
+        source='userHasBeenCreated'
+    )
+    creation_needed = serializers.BooleanField(
+        label=_('Creation needed'),
+        help_text=_('User needs to be created'),
+        read_only=True,
+        source='needToCreateUser'
+    )
+    user = ProjectMemberSerializer(
+        label=_('Created user'),
+        help_text=_('User details')
+    )
+
+
+class UserMultiInviteResponseSerializer(serializers.Serializer):
+    users=UserInviteResponseSerializer(many=True)
+    groups=GroupSerializer(many=True)

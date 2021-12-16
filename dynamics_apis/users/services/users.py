@@ -49,3 +49,28 @@ class KairnialUser(KairnialWSService):
             action='getUsersByGroup',
             parameters=[{'groupList': list_of_groups}],
             use_cache=True)
+
+    def get_groups(self, pk):
+        """
+        Get groups for user
+        :param pk: User Numeric ID
+        :return:
+        """
+        return self.call(
+            action='getUserGroups',
+            parameters=[pk,],
+            use_cache=True
+        )
+
+    def invite(self, users: []):
+        """
+        Invite now users
+        :param users: list of UserInviteSerializer validated_data
+        :return:
+        """
+        return self.call(
+            service='aclmanager',
+            action='inviteUsers',
+            parameters=users,
+            use_cache=False
+        )

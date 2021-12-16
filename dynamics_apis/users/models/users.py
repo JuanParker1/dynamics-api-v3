@@ -68,3 +68,26 @@ class User:
         ku = KairnialUser(client_id=client_id, token=token, project_id=project_id)
         return ku.get(pk=pk)
 
+    @classmethod
+    def groups(self, client_id: str, token: str, project_id: str, pk: str):
+        """
+        Get a specific user
+        :param client_id: ClientID Token
+        :param token: Access token
+        :param project_id: Project RGOC Code
+        :param pk: Group numeric ID
+        """
+        ku = KairnialUser(client_id=client_id, token=token, project_id=project_id)
+        return ku.get_groups(pk=pk)
+
+    @classmethod
+    def invite(self, client_id: str, token: str, project_id: str, users: list):
+        """
+        Get a specific user
+        :param client_id: ClientID Token
+        :param token: Access token
+        :param project_id: Project RGOC Code
+        :param users: List of validated UserInviteSerializer
+        """
+        ku = KairnialUser(client_id=client_id, token=token, project_id=project_id)
+        return ku.invite(users=users)

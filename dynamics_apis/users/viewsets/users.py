@@ -15,7 +15,8 @@ from dynamics_apis.common.viewsets import project_parameters
 from dynamics_apis.common.serializers import ErrorSerializer
 from dynamics_apis.users.models.users import User
 from dynamics_apis.users.serializers.users import UserSerializer, UserCreationSerializer, UserQuerySerializer, \
-    ProjectMemberSerializer, ProjectMemberCountSerializer
+    ProjectMemberSerializer, ProjectMemberCountSerializer, UserGroupSerializer, UserInviteSerializer, \
+    UserInviteResponseSerializer, UserMultiInviteSerializer, UserMultiInviteResponseSerializer
 # Create your views here.
 from dynamics_apis.common.services import KairnialWSServiceError
 
@@ -166,3 +167,62 @@ class UserViewSet(ViewSet):
             return Response(error.data, content_type='application/json',
                             status=status.HTTP_400_BAD_REQUEST)
 
+
+    @extend_schema(
+        summary=_("List Kairnial user groups"),
+        description=_("List groups for Kairnial user"),
+        parameters=project_parameters,
+        responses={200: UserGroupSerializer, 500: ErrorSerializer},
+        methods=["GET"]
+    )
+    @action(["GET"], detail=True, description=_("List groups for this user"), url_path='groups', name="groups")
+    def groups(self, request, client_id, project_id, pk):
+        try:
+            user_groups = User.groups(
+                client_id=client_id,
+                token=request.token,
+                project_id=project_id,
+                pk=pk
+            )
+            serializer = UserGroupSerializer({'group_ids': user_groups})
+            return Response(serializer.data, content_type="application/json")
+        except (KairnialWSServiceError, KeyError, AttributeError) as e:
+            error = ErrorSerializer({
+                'status': 400,
+                'code': getattr(e, 'status', 0),
+                'description': getattr(e, 'message', str(e))
+            })
+            return Response(error.data, content_type='application/json',
+                            status=status.HTTP_400_BAD_REQUEST)
+
+    @extend_schema(
+        summary=_("Invite new users"),
+        description=_("Invite new users into project"),
+        request=UserMultiInviteSerializer,
+        parameters=project_parameters,
+        responses={200: UserMultiInviteResponseSerializer, 500: ErrorSerializer},
+        methods=["POST"]
+    )
+    @action(["POST"], detail=False, description=_("Invite list of users"), url_path='invite', name="invite")
+    def invite(self, request, client_id, project_id):
+        user_list = UserMultiInviteSerializer(data=request.data)
+        if not user_list.is_valid():
+            return Response(user_list.errors, content_type='application/json',
+                            status=status.HTTP_400_BAD_REQUEST)
+        try:
+            invites = User.invite(
+                client_id=client_id,
+                token=request.token,
+                project_id=project_id,
+                users=user_list.validated_data.get('users')
+            )
+            serializer = UserMultiInviteResponseSerializer(invites)
+            return Response(serializer.data, content_type="application/json")
+        except (KairnialWSServiceError, KeyError, AttributeError) as e:
+            error = ErrorSerializer({
+                'status': 400,
+                'code': getattr(e, 'status', 0),
+                'description': getattr(e, 'message', str(e))
+            })
+            return Response(error.data, content_type='application/json',
+                            status=status.HTTP_400_BAD_REQUEST)
