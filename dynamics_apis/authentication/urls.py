@@ -1,6 +1,6 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from  .views import PasswordAuthenticationView, APIKeyAuthenticationView
+from django.urls import path
+
+from .views import PasswordAuthenticationView, APIKeyAuthenticationView
 
 # The API URLs are now determined automatically by the router.
 urlpatterns = [

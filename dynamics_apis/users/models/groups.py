@@ -47,7 +47,7 @@ class Group:
         :param token: Access token
         :param project_id: Project RGOC Code
         :param pk: Group numeric ID
-        :user_id: List of user numeric ID
+        :param user_list: List of user numeric ID
         """
         kg = KairnialGroup(client_id=client_id, token=token, project_id=project_id)
         return kg.add_users(group_id=pk, user_list=user_list)
@@ -60,10 +60,47 @@ class Group:
         :param token: Access token
         :param project_id: Project RGOC Code
         :param pk: Group numeric ID
-        :user_id: List of user numeric ID
+        :param user_list: List of user numeric ID
         """
         kg = KairnialGroup(client_id=client_id, token=token, project_id=project_id)
         return kg.remove_users(group_id=pk, user_list=user_list)
 
+    @staticmethod
+    def list_authorizations(client_id: str, token: str, project_id: str, pk: str):
+        """
+        List rights for group
+        :param client_id: ClientID Token
+        :param token: Access token
+        :param project_id: Project RGOC Code
+        :param pk: Group UUID
+        """
+        kg = KairnialGroup(client_id=client_id, token=token, project_id=project_id)
+        return kg.list_authorizations(group_id=pk)
 
+
+    @staticmethod
+    def add_authorizations(client_id: str, token: str, project_id: str, pk: str, authorizations: {}):
+        """group_id
+        Add user to group
+        :param client_id: ClientID Token
+        :param token: Access token
+        :param project_id: Project RGOC Code
+        :param pk: Group UUID
+        :authorizations: dict of groups with {uuid: type}
+        """
+        kg = KairnialGroup(client_id=client_id, token=token, project_id=project_id)
+        return kg.add_authorizations(group_id=pk, authorizations=authorizations)
+
+    @staticmethod
+    def remove_authorzations(client_id: str, token: str, project_id: str, pk: str, authorizations: {}):
+        """
+        Add user to group
+        :param client_id: ClientID Token
+        :param token: Access token
+        :param project_id: Project RGOC Code
+        :param pk: Group UUID
+        :authorizations: dict of groups with {uuid: type}
+        """
+        kg = KairnialGroup(client_id=client_id, token=token, project_id=project_id)
+        return kg.remove_authorizations(group_id=pk, authorizations=authorizations)
 

@@ -1,13 +1,14 @@
 """
 Kairnial auth services
 """
+import logging
 from base64 import b64encode
 
 import requests
 import json
 
 from django.contrib.auth.models import User
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from django.conf import settings
 
 PASSWORD_LOGIN_PATH = '/api/oauth2/login'
@@ -76,7 +77,7 @@ class KairnialAuthentication:
 
             )
 
-    def secrets_authentication(self, api_key: str, api_secret: str) -> dict:
+    def secrets_authentication(self, api_key: str, api_secret: str, scopes: [str]) -> dict:
         """
         Get auth token from auth server
         :param client_id: Client ID, ask Kairnial support for one
@@ -84,20 +85,29 @@ class KairnialAuthentication:
         :param api_secret: User API Secret
         :return:
         """
-        secrets_header = b64encode(f'{api_key}:{api_secret}'.encode('latin1'))
+        logger = logging.getLogger('services')
+        # secrets_header = b64encode(f'{api_key}:{api_secret}'.encode('latin1'))
         payload = {
-            'grant_type': 'client_credentials',
-             'scope': 'login-token project-list'
+            'grant_type': 'api_key',
+            'scope': 'direct-login project-list',#' '.join(scopes),
+            'client_id': self.client_id,
+            'api_key': api_key,
+            'api_secret': api_secret
+
         }
+        logger.debug(settings.KAIRNIAL_AUTH_SERVER + PASSWORD_LOGIN_PATH)
+        logger.debug(payload)
         headers = {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Authorization': f'Basic {secrets_header.decode("utf8")}'
+            'Content-Type': 'application/json',
         }
+        logger.debug(headers)
         response = requests.post(
-            settings.KAIRNIAL_AUTH_SERVER + API_AUTHENT_PATH.format(clientID=self.client_id),
+            settings.KAIRNIAL_AUTH_SERVER + PASSWORD_LOGIN_PATH,
             headers=headers,
-            data=payload
+            data=json.dumps(payload)
         )
+        logger.debug(response.status_code)
+        logger.debug(response.content)
         if response.status_code != 200:
             raise KairnialAuthenticationError(
                 message=_(f"Authentication failed with code {response.status_code}: {response.content}"),
@@ -107,6 +117,7 @@ class KairnialAuthentication:
 
         try:
             resp = response.json()
+            logger.debug(resp)
             self._extract_token(resp)
             self._extract_token_type(resp)
             self._extract_user(resp)
