@@ -4,7 +4,7 @@ REST API views for Kairnial users
 import os
 from django.utils.translation import gettext as _
 from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -13,10 +13,19 @@ from rest_framework.viewsets import ViewSet
 from dynamics_apis.common.serializers import ErrorSerializer
 from dynamics_apis.users.models.groups import Group
 from dynamics_apis.users.serializers.groups import GroupSerializer, GroupQuerySerializer, GroupCreationSerializer, \
-    GroupAddUserSerializer, RightSerializer, GroupAddRightSerializer
+    GroupAddUserSerializer, RightSerializer, GroupAddAuthorizationSerializer
 # Create your views here.
 from dynamics_apis.common.services import KairnialWSServiceError
 from dynamics_apis.common.viewsets import project_parameters
+
+
+add_authorization_example = OpenApiExample(
+    name='Example authorization',
+    value={
+        '2f4abb17-fbf4-4636-811c-44d30cb8f128': 'bim:pins',
+        '443e4612-cc58-4d25-a635-53a2dab280a1': 'documents:hide_annotation'
+    }
+)
 
 
 class GroupViewSet(ViewSet):
@@ -256,7 +265,8 @@ class GroupViewSet(ViewSet):
             OpenApiParameter("id", OpenApiTypes.UUID, OpenApiParameter.PATH,
                              description=_("UUID of the group")),
         ],
-        request=GroupAddRightSerializer,
+        request=GroupAddAuthorizationSerializer,
+        examples=[add_authorization_example,],
         responses={201: OpenApiTypes.STR, 400: OpenApiTypes.STR, 406: OpenApiTypes.STR},
         methods=["POST"]
     )
@@ -300,7 +310,8 @@ class GroupViewSet(ViewSet):
             OpenApiParameter("id", OpenApiTypes.UUID, OpenApiParameter.PATH,
                              description=_("UUID of the group")),
         ],
-        request=GroupAddRightSerializer,
+        examples=[add_authorization_example, ],
+        request=GroupAddAuthorizationSerializer,
         responses={201: OpenApiTypes.STR, 400: OpenApiTypes.STR, 406: OpenApiTypes.STR},
         methods=["POST"]
     )

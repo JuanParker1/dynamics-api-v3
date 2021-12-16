@@ -36,13 +36,12 @@ class GroupAddUserSerializer(serializers.Serializer):
                                   child=serializers.IntegerField(),
                                   required=True)
 
-class GroupAddRightSerializer(serializers.Serializer):
+class GroupAddAuthorizationSerializer(serializers.Serializer):
     """
     Serializer for user addition or removal to group
     """
-    rights = serializers.ListField(label=_("List of numerical right IDs"),
-                                  help_text=_("List of right IDs to add to group"),
-                                  child=serializers.IntegerField(),
+    authorizations = serializers.DictField(label=_("List of ofauthorization"),
+                                  help_text=_("List of UUID: type of authorization key:value"),
                                   required=True)
 
 

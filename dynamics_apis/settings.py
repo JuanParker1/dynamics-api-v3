@@ -3,7 +3,8 @@ KAIRNIAL_PROJECT_ENVIRONMENTS = [
 ]
 KIARNIAL_AUTHENTICATION_SCOPES = [
     'login-token',
-    'project-list'
+    'project-list',
+    'direct-login'
 ]
 
 import os

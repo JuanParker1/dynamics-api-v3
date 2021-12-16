@@ -1,6 +1,7 @@
 """
 Call to Kairnial Group Web Services
 """
+
 from dynamics_apis.common.services import KairnialWSService
 
 
@@ -71,14 +72,14 @@ class KairnialGroup(KairnialWSService):
             format='json',
             use_cache=True)
 
-    def add_rights(self, group_id: str, right_list: [{str: str}]):
+    def add_authorizations(self, group_id: str, authorizations: dict):
         """
-        Add a list of rights to a group
+        Add a list of authorizations to a group
         :param group_id: UUID of the group
-        :param right_list: list of ACL uuid: strings
+        :param authorizations: dict with authorization uuid:type
         """
         no_error = True
-        for right in right_list:
+        for authorization_uuid, authorization_name in authorizations.items():
             resp = self.call(
                 service='aclmanager',
                 action='addAclGrant',
@@ -86,24 +87,32 @@ class KairnialGroup(KairnialWSService):
                     {
                         'item_type': 'group',
                         'item_uuid': group_id,
-                        'acl_id': right,
-                        'acl_type': right
+                        'acl_id': authorization_uuid,
+                        'acl_type': authorization_name
                     }],
                 format='json',
                 use_cache=False)
             no_error &= resp.get('success', False)
         return no_error
 
-    def remove_rights(self, group_id: int, right_list: [int]):
+    def remove_rights(self, group_id: int, authorizations: dict):
         """
-        Add a list of rights to a group
+        Add a list of authorizations to a group
+        :param group_id: UUID of the group
+        :param authorizations: dict with authorization uuid:type
         """
         no_error = True
-        for right in right_list:
+        for authorization_uuid, authorization_name in authorizations.items():
             resp = self.call(
                 service='aclmanager',
                 action='removeRigthToGroup',
-                parameters=[{'groupe': group_id, 'acl_id': [right, ]}],
+                parameters=[
+                    {
+                        'item_type': 'group',
+                        'item_uuid': group_id,
+                        'acl_id': authorization_uuid,
+                        'acl_type': authorization_name
+                    }],
                 format='json',
                 use_cache=False)
             no_error &= resp.get('success', False)
