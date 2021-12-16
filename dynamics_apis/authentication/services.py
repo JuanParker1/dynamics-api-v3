@@ -89,24 +89,25 @@ class KairnialAuthentication:
         # secrets_header = b64encode(f'{api_key}:{api_secret}'.encode('latin1'))
         payload = {
             'grant_type': 'api_key',
-            'scope': ' '.join(scopes),
+            'scope': 'direct-login project-list',#' '.join(scopes),
             'client_id': self.client_id,
             'api_key': api_key,
             'api_secret': api_secret
 
         }
-        logger.debug(settings.KAIRNIAL_AUTH_SERVER + API_AUTHENT_PATH.format(clientID=self.client_id))
+        logger.debug(settings.KAIRNIAL_AUTH_SERVER + PASSWORD_LOGIN_PATH)
         logger.debug(payload)
         headers = {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            # 'Authorization': f'  {secrets_header.decode("utf8")}'
+            'Content-Type': 'application/json',
         }
         logger.debug(headers)
         response = requests.post(
-            settings.KAIRNIAL_AUTH_SERVER + API_AUTHENT_PATH.format(clientID=self.client_id),
+            settings.KAIRNIAL_AUTH_SERVER + PASSWORD_LOGIN_PATH,
             headers=headers,
-            data=payload
+            data=json.dumps(payload)
         )
+        logger.debug(response.status_code)
+        logger.debug(response.content)
         if response.status_code != 200:
             raise KairnialAuthenticationError(
                 message=_(f"Authentication failed with code {response.status_code}: {response.content}"),
@@ -116,7 +117,7 @@ class KairnialAuthentication:
 
         try:
             resp = response.json()
-            print(resp)
+            logger.debug(resp)
             self._extract_token(resp)
             self._extract_token_type(resp)
             self._extract_user(resp)

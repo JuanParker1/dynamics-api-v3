@@ -61,7 +61,7 @@ class KairnialGroup(KairnialWSService):
             no_error &= resp
         return no_error
 
-    def list_rights(self, group_id: int):
+    def list_authorizations(self, group_id: str):
         """
         Displays the list of rights attached to this group
         """
@@ -95,7 +95,7 @@ class KairnialGroup(KairnialWSService):
             no_error &= resp.get('success', False)
         return no_error
 
-    def remove_rights(self, group_id: int, authorizations: dict):
+    def remove_authorizations(self, group_id: str, authorizations: dict):
         """
         Add a list of authorizations to a group
         :param group_id: UUID of the group

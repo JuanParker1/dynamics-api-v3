@@ -222,7 +222,7 @@ class GroupViewSet(ViewSet):
 
     @extend_schema(
         summary=_("List authorizations for group"),
-        description=_("List legacy rights, new accesses and modules for a group"),
+        description=_("List legacy authorizations, new authorizations and modules for a group"),
         parameters=project_parameters + [
             OpenApiParameter("id", OpenApiTypes.UUID, OpenApiParameter.PATH,
                              description=_("UUID of the group")),
@@ -240,14 +240,14 @@ class GroupViewSet(ViewSet):
         :param pk: UUID of the group
         """
         try:
-            group_right_list = Group.list_rights(
+            group_authorizations_list = Group.list_authorizations(
                 client_id=client_id,
                 token=request.token,
                 project_id=project_id,
                 pk=pk
             )
-            print("get rights list", group_right_list)
-            serializer = RightSerializer(group_right_list)
+            print("get authorization list", group_authorizations_list)
+            serializer = RightSerializer(group_authorizations_list)
             return Response(serializer.data, content_type="application/json")
         except (KairnialWSServiceError, KeyError) as e:
             error = ErrorSerializer({
@@ -260,7 +260,7 @@ class GroupViewSet(ViewSet):
 
     @extend_schema(
         summary=_("Add authorization to a group"),
-        description=_("Add a new access right to a group"),
+        description=_("Add a new authorizations to a group"),
         parameters=project_parameters + [
             OpenApiParameter("id", OpenApiTypes.UUID, OpenApiParameter.PATH,
                              description=_("UUID of the group")),
@@ -280,13 +280,12 @@ class GroupViewSet(ViewSet):
         :param pk: UUID of the group
         """
         try:
-            right_list = map(int, request.data.get('rights'))
-            resp = Group.add_rights(
+            resp = Group.add_authorizations(
                 client_id=client_id,
                 token=request.token,
                 project_id=project_id,
                 pk=pk,
-                right_list=right_list)
+                authorizations=request.data)
             if not resp:
                 error = ErrorSerializer({
                     'status': 400,
@@ -299,7 +298,7 @@ class GroupViewSet(ViewSet):
             error = ErrorSerializer({
                 'status': 400,
                 'code': getattr(e, 'status', 0),
-                'description': _("Invalid right IDs")
+                'description': _("Invalid authorization IDs")
             })
             return Response(error.data, content_type="application/json", status=status.HTTP_400_BAD_REQUEST)
 
@@ -325,25 +324,24 @@ class GroupViewSet(ViewSet):
         :param pk: UUID of the group
         """
         try:
-            right_list = map(int, request.data.get('rights'))
-            resp = Group.remove_users(
+            resp = Group.remove_authorzations(
                 client_id=client_id,
                 token=request.token,
                 project_id=project_id,
                 pk=pk,
-                user_list=right_list)
+                authorizations=request.data)
             if not resp:
                 error = ErrorSerializer({
                     'status': 400,
                     'code': 0,
-                    'description': _("Not all rights could be removed from group")
+                    'description': _("Not all authorizations could be removed from group")
                 })
                 return Response(error.data, content_type="application/json", status=status.HTTP_400_BAD_REQUEST)
-            return Response(_("Rights removed from group"), status=status.HTTP_201_CREATED)
+            return Response(_("Authorizations removed from group"), status=status.HTTP_201_CREATED)
         except ValueError as e:
             error = ErrorSerializer({
                 'status': 400,
                 'code': getattr(e, 'status', 0),
-                'description': _("Invalid user IDs")
+                'description': _("Invalid authorization IDs")
             })
             return Response(error.data, content_type="application/json", status=status.HTTP_400_BAD_REQUEST)
