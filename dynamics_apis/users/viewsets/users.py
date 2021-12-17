@@ -16,7 +16,7 @@ from dynamics_apis.common.serializers import ErrorSerializer
 from dynamics_apis.users.models.users import User
 from dynamics_apis.users.serializers.users import UserSerializer, UserCreationSerializer, UserQuerySerializer, \
     ProjectMemberSerializer, ProjectMemberCountSerializer, UserGroupSerializer, UserInviteSerializer, \
-    UserInviteResponseSerializer, UserMultiInviteSerializer, UserMultiInviteResponseSerializer
+    UserInviteResponseSerializer, UserMultiInviteSerializer, UserMultiInviteResponseSerializer, UserUUIDSerializer
 # Create your views here.
 from dynamics_apis.common.services import KairnialWSServiceError
 
@@ -32,10 +32,17 @@ class UserViewSet(ViewSet):
         parameters=project_parameters + [
             UserQuerySerializer,  # serializer fields are converted to parameters
         ],
-        responses={200: ProjectMemberSerializer, 500: ErrorSerializer},
+        responses={200: UserUUIDSerializer, 500: ErrorSerializer},
         methods=["GET"]
     )
     def list(self, request, client_id, project_id):
+        """
+        List users on a projects
+        :param request:
+        :param client_id: Client ID token
+        :param project_id: Project RGOC ID
+        :return:
+        """
         try:
             user_list = User.list(
                 client_id=client_id,
@@ -43,7 +50,7 @@ class UserViewSet(ViewSet):
                 project_id=project_id,
                 filters=request.GET
             )
-            serializer = ProjectMemberSerializer(user_list, many=True)
+            serializer = UserUUIDSerializer(user_list, many=True)
             return Response(serializer.data, content_type="application/json")
         except (KairnialWSServiceError, KeyError, AttributeError) as e:
             error = ErrorSerializer({
@@ -63,13 +70,19 @@ class UserViewSet(ViewSet):
     )
     @action(["GET"], detail=False, description=_("Count users for this project"), url_path='count', name="count_users")
     def count(self, request, client_id, project_id):
+        """
+        Count users on a project
+        :param request:
+        :param client_id: Client ID token
+        :param project_id: Project RGOC ID
+        :return:
+        """
         try:
             user_count = User.count(
                 client_id=client_id,
                 token=request.token,
                 project_id=project_id
             )
-            print(user_count)
             serializer = ProjectMemberCountSerializer(user_count)
             return Response(serializer.data, content_type="application/json")
         except (KairnialWSServiceError, KeyError, AttributeError) as e:
@@ -86,16 +99,18 @@ class UserViewSet(ViewSet):
         description=_("Get information on a specific project user"),
         parameters=project_parameters + [
             OpenApiParameter("id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                             description=_("User ID")),
+                             description=_("User Unique ID")),
         ],
-        responses={200: ProjectMemberSerializer, 400: ErrorSerializer},
+        responses={200: UserUUIDSerializer, 400: ErrorSerializer},
         methods=["GET"]
     )
-    def retrieve(self, request, client_id, project_id, pk):
+    def retrieve(self, request, client_id: str, project_id: str, pk: str):
         """
         Retrieve a Kairnial user by ID
         :param request:
-        :param pk: ID of the user
+        :param client_id: Client ID token
+        :param project_id: Project RGOC ID
+        :param pk: UUID of the user
         :return: KUser
         """
         try:
@@ -105,27 +120,11 @@ class UserViewSet(ViewSet):
                 project_id=project_id,
                 pk=pk
             )[0]
-            serializer = ProjectMemberSerializer(user)
+            serializer = UserUUIDSerializer(user)
             return Response(serializer.data, content_type="application/json")
         except IndexError:
             return Response(_("User not found"), status=status.HTTP_404_NOT_FOUND)
 
-    @extend_schema(
-        summary=_("Create a Kairnial user"),
-        description=_("Create or invite a new user on the project"),
-        parameters=project_parameters + [
-            UserCreationSerializer,  # serializer fields are converted to parameters
-        ],
-        responses={201: UserSerializer, 500: ErrorSerializer, 400: ErrorSerializer},
-        methods=["POST"]
-    )
-    def create(self, request):
-        """
-        Create a Kairnial user. Requires user creation rights
-        :param request:
-        :return:
-        """
-        pass
 
     @extend_schema(
         summary=_("Retrieve current Kairnial user"),
@@ -135,7 +134,7 @@ class UserViewSet(ViewSet):
         methods=["GET"]
     )
     @action(['GET'], detail=False, url_path='me', url_name="me")
-    def me(self, request, client_id, project_id):
+    def me(self, request, client_id: str, project_id: str):
         """
         Get info for connected user
         """
@@ -146,9 +145,7 @@ class UserViewSet(ViewSet):
                 project_id=project_id
             )
             for user in user_list:
-                print(user.get('account_email'), request.user.email)
                 if user.get('account_email') == request.user.email:
-                    print(user)
                     serializer = ProjectMemberSerializer(user)
                     return Response(serializer.data, content_type="application/json")
             error = ErrorSerializer({
@@ -171,12 +168,23 @@ class UserViewSet(ViewSet):
     @extend_schema(
         summary=_("List Kairnial user groups"),
         description=_("List groups for Kairnial user"),
-        parameters=project_parameters,
-        responses={200: UserGroupSerializer, 500: ErrorSerializer},
+        parameters=project_parameters + [
+            OpenApiParameter("id", OpenApiTypes.INT, OpenApiParameter.PATH,
+                             description=_("User Numeric ID")),
+        ],
+        responses={200: UserGroupSerializer, 400: ErrorSerializer},
         methods=["GET"]
     )
     @action(["GET"], detail=True, description=_("List groups for this user"), url_path='groups', name="groups")
-    def groups(self, request, client_id, project_id, pk):
+    def groups(self, request, client_id: str, project_id: str, pk: int):
+        """
+        List groups on a project
+        :param request:
+        :param client_id: Client ID token
+        :param project_id: Project RGOC ID
+        :param pk: User Numeric ID
+        :return:
+        """
         try:
             user_groups = User.groups(
                 client_id=client_id,
@@ -196,15 +204,21 @@ class UserViewSet(ViewSet):
                             status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
-        summary=_("Invite new users"),
+        summary=_("Imvite new users"),
         description=_("Invite new users into project"),
         request=UserMultiInviteSerializer,
         parameters=project_parameters,
-        responses={200: UserMultiInviteResponseSerializer, 500: ErrorSerializer},
+        responses={200: [UserInviteResponseSerializer], 400: ErrorSerializer},
         methods=["POST"]
     )
-    @action(["POST"], detail=False, description=_("Invite list of users"), url_path='invite', name="invite")
-    def invite(self, request, client_id, project_id):
+    def create(self, request, client_id, project_id):
+        """
+
+        :param request:
+        :param client_id: Client ID token
+        :param project_id: Project RGOC ID
+        :return:
+        """
         user_list = UserMultiInviteSerializer(data=request.data)
         if not user_list.is_valid():
             return Response(user_list.errors, content_type='application/json',
@@ -216,7 +230,7 @@ class UserViewSet(ViewSet):
                 project_id=project_id,
                 users=user_list.validated_data.get('users')
             )
-            serializer = UserMultiInviteResponseSerializer(invites)
+            serializer = UserInviteResponseSerializer(invites, many=True)
             return Response(serializer.data, content_type="application/json")
         except (KairnialWSServiceError, KeyError, AttributeError) as e:
             error = ErrorSerializer({
@@ -226,3 +240,30 @@ class UserViewSet(ViewSet):
             })
             return Response(error.data, content_type='application/json',
                             status=status.HTTP_400_BAD_REQUEST)
+
+    @extend_schema(
+        summary=_("Archive user"),
+        description=_("Archive user on project"),
+        parameters=project_parameters + [
+            OpenApiParameter("id", OpenApiTypes.STR, OpenApiParameter.PATH,
+                             description=_("User Unique ID")),
+        ],
+        responses={204: OpenApiTypes.STR, 400: ErrorSerializer},
+        methods=["DELETE"]
+    )
+    def destroy(self, request, client_id: str, project_id: str, pk: str):
+        """
+
+        :param request:
+        :param client_id: Client ID token
+        :param project_id: Project RGOC ID
+        :param pk: User UUID
+        :return:
+        """
+        archived = User.archive(
+            client_id=client_id,
+            token=request.token,
+            project_id=project_id,
+            pk=pk
+        )
+        return Response(_("User archived"), status=status.HTTP_204_NO_CONTENT)

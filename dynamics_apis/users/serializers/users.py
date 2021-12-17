@@ -5,8 +5,6 @@ Kairnial User serializer classes
 from django.utils.translation import gettext as _
 from rest_framework import serializers
 
-from dynamics_apis.users.serializers.groups import GroupSerializer
-
 
 class UserCreationSerializer(serializers.Serializer):
     """
@@ -15,6 +13,47 @@ class UserCreationSerializer(serializers.Serializer):
     first_name = serializers.CharField(label=_("User first name"), required=True)
     last_name = serializers.CharField(label=_("User last name"), required=True)
     email = serializers.CharField(label=_("User email address"), required=True)
+
+
+class UserUUIDSerializer(serializers.Serializer):
+    """
+    Serializer for another kind of user with UUID
+    """
+    id = serializers.UUIDField(
+        label=_("User numeric ID"),
+        help_text=_('Numeric ID for the user, not a username'),
+        read_only=True,
+        source='account_id')
+    uuid = serializers.UUIDField(
+        label=_("User unique ID"),
+        help_text=_('Unique ID for the user, not a username'),
+        read_only=True,
+        source='account_uuid')
+    email = serializers.CharField(
+        label=_("User email"),
+        help_text=_("e-mail for user, equivalent to username"),
+        read_only=True, source='account_email')
+    first_name = serializers.CharField(
+        label=_("User first name"),
+        help_text=_("User first name"),
+        read_only=True, source='account_firstname')
+    last_name = serializers.CharField(
+        label=_("User last name"),
+        help_text=_("User last name"),
+        read_only=True,
+        source='account_lastname')
+    expires = serializers.BooleanField(
+        label=_("account expires"),
+        help_text=_("Indicator if account is set to expire"),
+        read_only=True, source='account_expiration')
+    archive = serializers.BooleanField(
+        label=_("archived account"),
+        help_text=_("User account has been archived"),
+        read_only=True, source='account_archive')
+    title = serializers.CharField(
+        label=_("User title"),
+        help_text=_("Title of the user"),
+        read_only=True, source='user_gender')
 
 
 class ProjectMemberSerializer(serializers.Serializer):
@@ -148,6 +187,40 @@ class UserMultiInviteSerializer(serializers.Serializer):
     )
 
 
+class InvitedUserSerializer(serializers.Serializer):
+    id = serializers.UUIDField(
+        label=_("User unique ID"),
+        help_text=_('Unique ID for the user, not a username'),
+        read_only=True,
+        source='_unique_identifier')
+    email = serializers.CharField(
+        label=_("User email"),
+        help_text=_("e-mail for user, equivalent to username"),
+        required=True, source='_email')
+    first_name = serializers.CharField(
+        label=_("User first name"),
+        help_text=_("User first name"),
+        required=True, source='_firstName')
+    last_name = serializers.CharField(
+        label=_("User last name"),
+        help_text=_("User last name"),
+        required=True,
+        source='_lastName')
+    expires = serializers.BooleanField(
+        label=_("account expires"),
+        help_text=_("Indicator if account is set to expire"),
+        required=True, source='_account_expires')
+    archive = serializers.BooleanField(
+        label=_("archived account"),
+        help_text=_("User account has been archived"),
+        required=True, source='_archive')
+    language = serializers.CharField(
+        label=_("User language"),
+        help_text=_("Language of the user interface"),
+        required=False, source='_language',
+        default=0)
+
+
 class UserInviteResponseSerializer(serializers.Serializer):
     admin_confirmation = serializers.BooleanField(
         label=_('Admin confirmation needed'),
@@ -179,12 +252,11 @@ class UserInviteResponseSerializer(serializers.Serializer):
         read_only=True,
         source='needToCreateUser'
     )
-    user = ProjectMemberSerializer(
+    user = InvitedUserSerializer(
         label=_('Created user'),
         help_text=_('User details')
     )
 
 
 class UserMultiInviteResponseSerializer(serializers.Serializer):
-    users=UserInviteResponseSerializer(many=True)
-    groups=GroupSerializer(many=True)
+    users = UserInviteResponseSerializer(many=True)

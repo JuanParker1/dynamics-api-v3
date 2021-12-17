@@ -17,7 +17,7 @@ class User:
     }
     filters = ['email', 'full_name']
     @classmethod
-    def list(cls, client_id: str, token: str, project_id: str, filters: dict = {}) -> []:
+    def list(cls, client_id: str, token: str, project_id: str, filters: dict = dict) -> []:
         """
         Get a list of users for a project
         :param client_id: ClientID Token
@@ -30,13 +30,11 @@ class User:
         if 'groups' in filters:
             try:
                 list_of_groups = [int(a.strip()) for a in filters.get('groups').split(',') if a]
-                print(list_of_groups)
                 users = ku.list_for_groups(list_of_groups=list_of_groups)
             except ValueError as e:
-                print(e)
                 return None
         else:
-            users = ku.list().get('users')
+            users = ku.list().get('items')
         manual_filters = set(filters.keys()) & set(cls.filters)
         for m in manual_filters:
             users = [u for u in users if filters.get(m).lower() in u.get(cls.properties[m]).lower()]
@@ -63,13 +61,13 @@ class User:
         :param client_id: ClientID Token
         :param token: Access token
         :param project_id: Project RGOC Code
-        :param pk: Group numeric ID
+        :param pk: User UUID
         """
         ku = KairnialUser(client_id=client_id, token=token, project_id=project_id)
-        return ku.get(pk=pk)
+        return [user for user in ku.get(pk=pk) if user.get('account_uuid') == pk]
 
     @classmethod
-    def groups(self, client_id: str, token: str, project_id: str, pk: str):
+    def groups(self, client_id: str, token: str, project_id: str, pk: int):
         """
         Get a specific user
         :param client_id: ClientID Token
@@ -91,3 +89,15 @@ class User:
         """
         ku = KairnialUser(client_id=client_id, token=token, project_id=project_id)
         return ku.invite(users=users)
+
+    @classmethod
+    def archive(self, client_id: str, token: str, project_id: str, pk: str):
+        """
+        Archive a user
+        :param client_id: ClientID Token
+        :param token: Access token
+        :param project_id: Project RGOC Code
+        :param pk: User UUID
+        """
+        ku = KairnialUser(client_id=client_id, token=token, project_id=project_id)
+        return ku.archive(pk=pk)

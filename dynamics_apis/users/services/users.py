@@ -26,16 +26,17 @@ class KairnialUser(KairnialWSService):
         :return:
         """
         return self.call(
+            service='aclmanager',
             action='getUsers',
             use_cache=True)
 
-    def get(self, pk) -> []:
+    def get(self, pk: int) -> []:
         """
         Get user using getFilteredUser
         """
         return self.call(
-            action='getFilteredUser',
-            parameters=[{'userIdList': [pk, ]}],
+            service='aclmanager',
+            action='getUsers',
             use_cache=True)
 
     def list_for_groups(self, list_of_groups: [str]) -> []:
@@ -50,7 +51,7 @@ class KairnialUser(KairnialWSService):
             parameters=[{'groupList': list_of_groups}],
             use_cache=True)
 
-    def get_groups(self, pk):
+    def get_groups(self, pk: int):
         """
         Get groups for user
         :param pk: User Numeric ID
@@ -68,9 +69,27 @@ class KairnialUser(KairnialWSService):
         :param users: list of UserInviteSerializer validated_data
         :return:
         """
+        invited_users = []
+        for user in users:
+            response = self.call(
+                service='aclmanager',
+                action='inviteUser',
+                parameters=[user],
+                use_cache=False
+            )
+            if response.get('success'):
+                invited_users.append(response)
+        return invited_users
+
+    def archive(self, pk: str):
+        """
+        Archive user on project
+        :param pk: User UUID
+        :return:
+        """
         return self.call(
             service='aclmanager',
-            action='inviteUsers',
-            parameters=users,
+            action='archiveUser',
+            parameters=[{'account_uuid': pk}],
             use_cache=False
         )

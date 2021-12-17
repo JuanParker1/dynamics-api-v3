@@ -152,7 +152,6 @@ class GroupViewSet(ViewSet):
         :param pk: ID of the group
         """
         try:
-            print("users", request.data)
             user_list = map(int, request.data.get('users'))
             resp = Group.add_users(
                 client_id=client_id,
@@ -246,7 +245,6 @@ class GroupViewSet(ViewSet):
                 project_id=project_id,
                 pk=pk
             )
-            print("get authorization list", group_authorizations_list)
             serializer = RightSerializer(group_authorizations_list)
             return Response(serializer.data, content_type="application/json")
         except (KairnialWSServiceError, KeyError) as e:

@@ -86,10 +86,9 @@ class KairnialAuthentication:
         :return:
         """
         logger = logging.getLogger('services')
-        # secrets_header = b64encode(f'{api_key}:{api_secret}'.encode('latin1'))
         payload = {
             'grant_type': 'api_key',
-            'scope': 'direct-login project-list',#' '.join(scopes),
+            'scope': 'direct-login project-list',
             'client_id': self.client_id,
             'api_key': api_key,
             'api_secret': api_secret

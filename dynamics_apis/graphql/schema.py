@@ -98,7 +98,6 @@ def resolve_users(_, info, client_id, project_id, archived=0, full_name='', emai
     :param info: QraphQL request context
     """
     request = info.context.get('request', None)
-    print(request.token)
     if request.token:
         filters = {}
         if archived:

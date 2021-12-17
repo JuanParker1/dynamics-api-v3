@@ -60,7 +60,6 @@ class KairnialProject(KairnialCrossService):
                 message=_(f"Fetching from Kairnial backend failed with response {response.status_code}: {response.content}"),
                 status=response.status_code
             )
-        print(response.json())
         json_response = response.json()
         cache.set(cache_key, json_response)
         return json_response

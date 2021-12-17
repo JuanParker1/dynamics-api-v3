@@ -20,5 +20,4 @@ class KairnialUserPermission(permissions.BasePermission):
             return True
 
         else:
-            print(request.user, obj, request.user == obj)
             return request.user == obj or request.user.is_superuser
