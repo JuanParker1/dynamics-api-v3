@@ -3,7 +3,8 @@ Authentication serializers
 """
 import os
 
-from django.utils.translation import ugettext as _
+from django.conf import settings
+from django.utils.translation import gettext as _
 from rest_framework import serializers
 
 
@@ -19,18 +20,39 @@ class PasswordAuthenticationSerializer(serializers.Serializer):
     """
     Password authentication class
     """
-    client_id = serializers.CharField(label=_("Client ID"), default=os.environ.get('DEFAULT_KAIRNIAL_CLIENT_ID', _('Type your client ID here')))
-    email = serializers.CharField(label=_("User unique identifier"), help_text=_('Type your email here'), default=_('Type your email here'))
-    password = serializers.CharField(label=_("Password"), help_text=_('Type your password here'), default=_('Type your password here'))
+    client_id = serializers.CharField(
+        label=_("Client ID"),
+        help_text=_("Client ID obtain from Kairnial support"),
+        default=os.environ.get('DEFAULT_KAIRNIAL_CLIENT_ID', _('Type your client ID here')))
+    email = serializers.CharField(label=_("User unique identifier"),
+                                  help_text=_('Type your email here'),
+                                  default=_('Type your email here'))
+    password = serializers.CharField(label=_("Password"), help_text=_('Type your password here'),
+                                     default=_('Type your password here'))
 
 
 class APIKeyAuthenticationSerializer(serializers.Serializer):
     """
     API Key / Secret authentication class
     """
-    client_id = serializers.CharField(label=_("Client ID"), default=os.environ.get('DEFAULT_KAIRNIAL_CLIENT_ID', ''))
-    api_key = serializers.CharField(label=_("User API key"), default=os.environ.get('DEFAULT_KAIRNIAL_API_KEY', ''))
-    api_secret = serializers.CharField(label=_("User API secret"),  default=os.environ.get('DEFAULT_KAIRNIAL_API_SECRET', ''))
+    client_id = serializers.CharField(
+        label=_("Client ID"),
+        help_text=_("Client ID obtain from Kairnial support"),
+        default=os.environ.get('DEFAULT_KAIRNIAL_CLIENT_ID', ''))
+    api_key = serializers.CharField(
+        label=_("User API key"),
+        help_text=_("User API Key obtained from Kairnial support"),
+        default=os.environ.get('DEFAULT_KAIRNIAL_API_KEY', ''))
+    api_secret = serializers.CharField(
+        label=_("User API secret"),
+        help_text=_("User API secret obtained from Kairnial support"),
+        default=os.environ.get('DEFAULT_KAIRNIAL_API_SECRET', ''))
+    scopes = serializers.MultipleChoiceField(
+        label=_("Apply to specific scopes"),
+        help_text=_(
+            "Select scopes in {}".format(' '.join(settings.KIARNIAL_AUTHENTICATION_SCOPES))),
+        choices=settings.KIARNIAL_AUTHENTICATION_SCOPES,
+        default=['login-token', 'project-list', 'direct-login'])
 
 
 class AuthResponseSerializer(serializers.Serializer):
@@ -38,7 +60,18 @@ class AuthResponseSerializer(serializers.Serializer):
     Serialize authentication response
     """
     user = AuthUserSerializer()
-    token_type = serializers.CharField(label=_("Type of token to pass to the Authorization header"))
-    access_token = serializers.CharField(label=_("Access token to use in Authentication header, typically 'Authorization: <token_type> <access_token>. Access tokens for APIs last for 24 hours"))
+    token_type = serializers.CharField(
+        label=_("Type of token"),
+        help_text=_("Type of token to pass to the Authorization header")
+    )
+    access_token = serializers.CharField(
+        label=_("Access token"),
+        help_text=_("Access token to use in Authentication header, typically 'Authorization: <token_type> <access_token>. Access tokens for APIs last for 24 hours")
+    )
+    refresh_token = serializers.CharField(
+        label=_("Refresh token"),
+        help_text=_("Refresh token to prolonged acces_token"),
+        required=False
+    )
     expires_in = serializers.IntegerField(label=_("Number of seconds before token exipiration"))
     scope = serializers.CharField(label=_("Functions accessible using this token"))

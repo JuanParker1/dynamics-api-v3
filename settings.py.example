@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -144,11 +147,12 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'dynamics_apis.common.authentication.KairnialTokenAuthentication',
+        'dynamics_apis.authentication.authentication.KairnialTokenAuthentication',
     ),
 
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
+
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Kairnial API',
@@ -156,8 +160,8 @@ SPECTACULAR_SETTINGS = {
 ** Kairnial API version 2
 
 This API is a REST frontend to the Kairnial Web Services.
-To use this API, you must first obtain a token using the authentication endponit for this platform. 
-e.g.: 
+To use this API, you must first obtain a token using the authentication endponit for this platform.
+e.g.:
 - https://auth-support.kairnial.io for pre-production servers
 - or https://auth-eu-1.kairnial.com for european production servers
 
@@ -172,17 +176,18 @@ e.g.: Authenticate: Bearer <Token>
                 "type": "apiKey",
                 "in": "header",
                 "name": "Authentication"
-            }
+            },
         }
     },
-    "SECURITY": [{"ApiKeyAuth": [], }],
+    "SECURITY": [{"ApiKeyAuth": [], 'clientID': []}],
 }
 
-KIARNIAL_AUTH_DOMAIN = 'auth-support.kairnial.io'
-KAIRNIAL_AUTH_PUBLIC_KEY = ""
-KAIRNIAL_AUDIENCE = ''
-KAIRNIAL_WS_SERVER = 'https://ws-support.kairnial.io'
-KAIRNIAL_RVERSION = 8.1
-KAIRNIAL_WEB_SERVICES = {
-    'users': 'users.getUsers'
-}
+from dynamics_apis.settings import *
+
+KIARNIAL_AUTH_DOMAIN = os.environ.get('KAIRNIAL_AUTH_DOMAIN', '')
+# Kairnial auth server public key for token validation
+KAIRNIAL_AUTH_PUBLIC_KEY = load_key(path=os.path.join(os.path.dirname(__file__), os.environ.get('KAIRNIAL_AUTH_PUBLIC_KEY_PATH', '')))
+KAIRNIAL_AUTH_SERVER = 'https://' + KIARNIAL_AUTH_DOMAIN
+KAIRNIAL_CROSS_SERVER = os.environ.get('KAIRNIAL_CROSS_SERVER', '')
+KAIRNIAL_WS_SERVER = os.environ.get('KAIRNIAL_WS_SERVER', '')
+KAIRNIAL_FRONT_SERVER = os.environ.get('KAIRNIAL_FRONT_SERVER', '')
