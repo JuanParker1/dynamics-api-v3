@@ -22,3 +22,11 @@ class FolderService(KairnialWSService):
         if parent_id:
             parameters['asyncFolderId'] = parent_id
         return self.call(action='getFlexDossiers', parameters=parameters)
+
+    def get(self, id: int):
+        """
+        List folders
+        :param parent_id: ID of the parent folder, optional
+        :return:
+        """
+        return self.call(action='getFlexDossiers', parameters=[{'getById': id}])
