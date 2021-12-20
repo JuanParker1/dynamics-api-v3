@@ -20,15 +20,19 @@ from .users import urls as users_urls
 from .authentication import urls as authenticate_urls
 from .authorization import urls as authorization_urls
 from .projects import urls as project_urls
+from .documents import urls as document_urls
 from .graphql import urls as graphql_urls
+
+project_path = '<str:client_id>/<str:project_id>/'
 
 urlpatterns = [
     path('schema/', SpectacularAPIView.as_view(), name='schema'),
     # Optional UI:
     path('', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
     path('redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
-    path('<str:client_id>/<str:project_id>/', include(users_urls)),
-    path('<str:client_id>/<str:project_id>/authorization/', include(authorization_urls)),
+    path(project_path, include(document_urls)),
+    path(project_path, include(users_urls)),
+    path(project_path + '/authorization/', include(authorization_urls)),
     path('<str:client_id>/projects/', include(project_urls)),
     path('authentication/', include(authenticate_urls)),
     path('graphql', include(graphql_urls)),
