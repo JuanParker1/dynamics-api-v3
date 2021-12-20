@@ -14,7 +14,8 @@ from dynamics_apis.common.services import KairnialWSServiceError
 from dynamics_apis.common.viewsets import project_parameters, PaginatedResponse, \
     pagination_parameters, PaginatedViewSet
 from .models import Folder
-from .serializers import FolderQuerySerializer, FolderSerializer, FolderDetailSerializer
+from .serializers import FolderQuerySerializer, FolderSerializer, FolderDetailSerializer, \
+    FolderUpdateSerializer, FolderCreateSerializer
 
 
 class FolderViewSet(PaginatedViewSet):
@@ -41,6 +42,10 @@ class FolderViewSet(PaginatedViewSet):
         :param project_id: Project RGOC ID
         :return:
         """
+        fqs = FolderQuerySerializer(data=request.GET)
+        fqs.is_valid()
+        print("is_valid", fqs.is_valid(), fqs.errors)
+        print("data", fqs.validated_data)
         page_offset, page_limit = self.get_pagination(request=request)
         parent_id = request.GET.get('parent_id')
         try:
@@ -50,7 +55,8 @@ class FolderViewSet(PaginatedViewSet):
                 project_id=project_id,
                 parent_id=parent_id,
                 page_offset=page_offset,
-                page_limit=page_limit
+                page_limit=page_limit,
+                filters=fqs.validated_data
             )
 
             serializer = FolderSerializer(folder_list, many=True)
@@ -98,3 +104,91 @@ class FolderViewSet(PaginatedViewSet):
             return Response(data=serializer.data, content_type='application/json', status=status.HTTP_200_OK)
         else:
             return Response(_("Folder not found"), status=status.HTTP_404_NOT_FOUND)
+
+    @extend_schema(
+        summary=_("Create Kairnial folder"),
+        description=_("Create Kairnial"),
+        parameters=project_parameters,
+        request=FolderCreateSerializer,
+        responses={201: FolderSerializer, 400: ErrorSerializer, 404: OpenApiTypes.STR},
+        methods=["POST"]
+    )
+    def create(self, request: HttpRequest, client_id: str, project_id: str):
+        """
+        Create folder
+        """
+        fcs = FolderCreateSerializer(data=request.data)
+        if not fcs.is_valid():
+            return Response(fcs.errors, content_type='application/json',
+                            status=status.HTTP_400_BAD_REQUEST)
+        folder = Folder.create(
+            client_id=client_id,
+            token=request.token,
+            project_id=project_id,
+            serialized_data=fcs.validated_data
+        )
+        if folder:
+            serializer = FolderDetailSerializer(folder)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(_("Folder could not be created"),
+                            status=status.HTTP_406_NOT_ACCEPTABLE)
+
+
+    @extend_schema(
+        summary=_("Update Kairnial folder"),
+        description=_("Update Kairnial folder by ID"),
+        parameters=project_parameters + [
+            OpenApiParameter(name='id', type=OpenApiTypes.INT, location='path',
+                             required=False, description=_("Folder numeric ID")),
+        ],
+        request=FolderUpdateSerializer,
+        responses={200: OpenApiTypes.STR, 400: ErrorSerializer, 404: OpenApiTypes.STR},
+        methods=["PUT"]
+    )
+    def update(self, request: HttpRequest, client_id: str, project_id: str, pk: int):
+        """
+        Update folder name and description
+        """
+        fus = FolderUpdateSerializer(data=request.data)
+        if not fus.is_valid():
+            return Response(fus.errors, content_type='application/json',
+                            status=status.HTTP_400_BAD_REQUEST)
+        updated = Folder.update(
+            client_id=client_id,
+            token=request.token,
+            project_id=project_id,
+            id=pk,
+            serialized_data=fus.validated_data
+        )
+        if updated:
+            return Response(_("Folder updated"), status=status.HTTP_200_OK)
+        else:
+            return Response(_("Folder could not be updated"),
+                            status=status.HTTP_406_NOT_ACCEPTABLE)
+
+    @extend_schema(
+        summary=_("Archive Kairnial folder"),
+        description=_("Archive Kairnial folder by ID"),
+        parameters=project_parameters + [
+            OpenApiParameter(name='id', type=OpenApiTypes.UUID, location='path',
+                             required=False, description=_("Folder universal ID")),
+        ],
+        responses={204: OpenApiTypes.STR, 400: ErrorSerializer, 404: OpenApiTypes.STR},
+        methods=["DELETE"]
+    )
+    def destroy(self, request: HttpRequest, client_id: str, project_id: str, pk: str):
+        """
+        Archive folder
+        """
+        archived = Folder.archive(
+            client_id=client_id,
+            token=request.token,
+            project_id=project_id,
+            id=pk
+        )
+        if archived:
+            return Response(_("Folder archived"), status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response(_("Folder could not be archived"),
+                            status=status.HTTP_406_NOT_ACCEPTABLE)
