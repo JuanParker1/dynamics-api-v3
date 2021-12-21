@@ -2,7 +2,7 @@
 Services that get and push information to Kairnial WS servers
 """
 import json
-
+from django.conf import settings
 from dynamics_apis.common.services import KairnialWSService
 
 
@@ -22,7 +22,7 @@ class FolderService(KairnialWSService):
         if filters:
             parameters = [{key: value} for key, value in filters.items()]
         if parent_id:
-            parameters['asyncFolderId'] = parent_id
+            parameters.append({'asyncFolderId': parent_id})
         print(parameters)
         return self.call(action='getFlexDossiers', parameters=parameters)
 
@@ -80,3 +80,31 @@ class FolderService(KairnialWSService):
             format='int',
             use_cache=False
         )
+
+
+class DocumentService(KairnialWSService):
+    """
+    Service that fetches and push documents
+    """
+    service_domain = 'fichiers'
+
+    def list(self, parent_id: str = None, filters: dict = None, offset: int = 0, limit: int = getattr(settings, 'PAGE_SIZE', 100)):
+        """
+        List documents
+        :param parent_id: ID of the parent folder, optional
+        :param filters: Dictionnary of filters
+        :param offset: value of first element in a list
+        :param limit: number of elements to fetch
+        :return:
+        """
+        parameters = []
+        if filters:
+            parameters = [{key: value} for key, value in filters.items()]
+        if parent_id:
+            parameters.append({'asyncFolderId': parent_id})
+        parameters += [
+            {'LIMITSKIP': offset},
+            {'LIMITTAKE': limit}
+        ]
+        print(parameters)
+        return self.call(action='getFilesFromCat', parameters=parameters)
