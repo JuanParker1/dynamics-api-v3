@@ -119,6 +119,7 @@ class KairnialService:
             if format == 'json':
                 try:
                     output = response.json()
+                    logger.debug(output.keys())
                 except JSONDecodeError as e:
                     raise KairnialWSServiceError(
                         message=_("Invalid response from Web Services: {}").format(str(e)),

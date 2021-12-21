@@ -5,17 +5,15 @@ from dynamics_apis.users.services.groups import KairnialGroup
 from dynamics_apis.users.services.users import KairnialUser
 
 
+class UserNotFound(Exception):
+    msg = 'User not found'
+
+
 # Create your models here.
 class User:
     """
     Kairnial user class
     """
-    properties = {
-        'email': 'account_email',
-        'full_name': 'account_firstname',
-        'archived': 'account_archive'
-    }
-    filters = ['email', 'full_name']
     @classmethod
     def list(cls, client_id: str, token: str, project_id: str, filters: dict = dict) -> []:
         """
@@ -29,17 +27,16 @@ class User:
         ku = KairnialUser(client_id=client_id, token=token, project_id=project_id)
         if 'groups' in filters:
             try:
-                list_of_groups = [int(a.strip()) for a in filters.get('groups').split(',') if a]
-                users = ku.list_for_groups(list_of_groups=list_of_groups)
+                users = ku.list_for_groups(list_of_groups=filters.get('groups'))
             except ValueError as e:
                 return None
         else:
             users = ku.list().get('items')
-        manual_filters = set(filters.keys()) & set(cls.filters)
-        for m in manual_filters:
-            users = [u for u in users if filters.get(m).lower() in u.get(cls.properties[m]).lower()]
-        if 'archived' in filters:
-            users = [u for u in users if getattr(u, 'account_archive', 0) == 0]
+        for key, value in filters.items():
+            if value == str:
+                users = [u for u in users if value.lower() in u.get(key).lower()]
+            elif value is bool or value is int:
+                users = [u for u in users if value == u.get(key)]
         return users
 
     @classmethod
@@ -64,7 +61,10 @@ class User:
         :param pk: User UUID
         """
         ku = KairnialUser(client_id=client_id, token=token, project_id=project_id)
-        return [user for user in ku.get(pk=pk) if user.get('account_uuid') == pk]
+        try:
+            return [user for user in ku.list() if user.get('account_uuid') == pk][0]
+        except IndexError as e:
+            raise UserNotFound('User not found')
 
     @classmethod
     def groups(self, client_id: str, token: str, project_id: str, pk: int):

@@ -30,25 +30,18 @@ class KairnialUser(KairnialWSService):
             action='getUsers',
             use_cache=True)
 
-    def get(self, pk: int) -> []:
-        """
-        Get user using getFilteredUser
-        """
-        return self.call(
-            service='aclmanager',
-            action='getUsers',
-            use_cache=True)
 
-    def list_for_groups(self, list_of_groups: [str]) -> []:
+    def list_for_groups(self, list_of_groups: []) -> []:
         """
         List users for a set of given groups.
         Having no group will return an empty set
         :param list_of_groups: List of group IDs
         :return:
         """
+        parameters = [{'groupList': {el: True for el in list_of_groups}}]
         return self.call(
             action='getUsersByGroup',
-            parameters=[{'groupList': list_of_groups}],
+            parameters=parameters,
             use_cache=True)
 
     def get_groups(self, pk: int):

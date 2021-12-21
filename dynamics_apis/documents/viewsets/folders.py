@@ -13,8 +13,8 @@ from dynamics_apis.common.serializers import ErrorSerializer
 from dynamics_apis.common.services import KairnialWSServiceError
 from dynamics_apis.common.viewsets import project_parameters, PaginatedResponse, \
     pagination_parameters, PaginatedViewSet
-from .models import Folder
-from .serializers import FolderQuerySerializer, FolderSerializer, FolderDetailSerializer, \
+from ..models import Folder
+from ..serializers.folders import FolderQuerySerializer, FolderSerializer, FolderDetailSerializer, \
     FolderUpdateSerializer, FolderCreateSerializer
 
 
@@ -192,3 +192,4 @@ class FolderViewSet(PaginatedViewSet):
         else:
             return Response(_("Folder could not be archived"),
                             status=status.HTTP_406_NOT_ACCEPTABLE)
+

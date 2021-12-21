@@ -6,7 +6,7 @@ from django.conf import settings
 from dynamics_apis.common.services import KairnialWSService
 
 
-class FolderService(KairnialWSService):
+class KairnialFolderService(KairnialWSService):
     """
     Service that fetches and pushes folders
     """
@@ -82,7 +82,7 @@ class FolderService(KairnialWSService):
         )
 
 
-class DocumentService(KairnialWSService):
+class KairnialDocumentService(KairnialWSService):
     """
     Service that fetches and push documents
     """
@@ -100,11 +100,8 @@ class DocumentService(KairnialWSService):
         parameters = []
         if filters:
             parameters = [{key: value} for key, value in filters.items()]
-        if parent_id:
-            parameters.append({'asyncFolderId': parent_id})
         parameters += [
             {'LIMITSKIP': offset},
             {'LIMITTAKE': limit}
         ]
-        print(parameters)
         return self.call(action='getFilesFromCat', parameters=parameters)
