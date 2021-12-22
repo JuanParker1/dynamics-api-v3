@@ -45,7 +45,7 @@ class ProjectInfoSerializer(serializers.Serializer):
     address = serializers.CharField(
         label=_("Project address"),
         help_text=_("Address of the project"),
-        source='address', required=False,
+        required=False,
         read_only=True)
     region = serializers.CharField(
         label=_("Region of the project"),

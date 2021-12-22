@@ -2,23 +2,21 @@
 Views for Kairnial projects
 """
 import os
+
 from django.utils.translation import gettext as _
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework.viewsets import ViewSet
 
+from dynamics_apis.common.serializers import ErrorSerializer
+from dynamics_apis.common.services import KairnialWSServiceError
+from dynamics_apis.common.viewsets import client_parameters, pagination_parameters, PaginatedViewSet, PaginatedResponse
 from .models import Project
 from .serializers import ProjectSerializer, ProjectCreationSerializer, ProjectUpdateSerializer
-from dynamics_apis.common.serializers import ErrorSerializer
-from .services import KairnialProject
-from dynamics_apis.common.services import KairnialWSServiceError
-from dynamics_apis.common.viewsets import client_parameters
 
 
-class ProjectViewSet(ViewSet):
+class ProjectViewSet(PaginatedViewSet):
     """
     Obtain the list of projects for a connected user
     """
@@ -27,7 +25,7 @@ class ProjectViewSet(ViewSet):
         summary=_("List projects"),
         description=_("Get a list of projects associated to current connected user"),
         request=ProjectSerializer,
-        parameters=client_parameters + [
+        parameters=client_parameters + pagination_parameters + [
             OpenApiParameter("search", OpenApiTypes.STR, OpenApiParameter.QUERY,
                              description=_("Search project name containing")),
         ],
@@ -35,15 +33,22 @@ class ProjectViewSet(ViewSet):
         methods=["GET"]
     )
     def list(self, request, client_id, format=None):
-
+        page_offset, page_limit = self.get_pagination(request=request)
         try:
-            project_list = Project.list(
+            total, project_list, page_offset,page_limit = Project.paginated_list(
                 client_id=client_id,
                 token=request.token,
-                search=request.GET.get('search')
+                search=request.GET.get('search'),
+                page_offset=page_offset,
+                page_limit=page_limit
             )
             serializer = ProjectSerializer(project_list, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return PaginatedResponse(
+                total=total,
+                data=serializer.data,
+                page_offset=page_offset,
+                page_limit=page_limit
+            )
         except KairnialWSServiceError as e:
             error = ErrorSerializer({
                 'status': 400,
@@ -54,7 +59,8 @@ class ProjectViewSet(ViewSet):
 
     @extend_schema(
         summary=_("Create a Kairnial project"),
-        description=_("Create a new project for the current connected user, give a template UUID to copy the configuration from an existing project"),
+        description=_(
+            "Create a new project for the current connected user, give a template UUID to copy the configuration from an existing project"),
         parameters=[
             OpenApiParameter("client_id", OpenApiTypes.STR, OpenApiParameter.PATH,
                              description=_("Client ID token"),

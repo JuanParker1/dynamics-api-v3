@@ -9,11 +9,12 @@ import requests
 from django.conf import settings
 from django.core.cache import cache
 from django.utils.translation import gettext as _
-from dynamics_apis.authentication.services import KairnialAuthentication
+
 from dynamics_apis.common.services import KairnialWSServiceError, KairnialCrossService
 
 PROJECT_LIST_PATH = '/api/v2/projects'
 PROJECT_CREATION_PATH = '/adminEC'
+
 
 class KairnialProject(KairnialCrossService):
     """
@@ -25,17 +26,21 @@ class KairnialProject(KairnialCrossService):
     token_type = 'Bearer'
     logger = logging.getLogger('services')
 
-    def list(self, search: str = None) -> []:
+    def list(self, search: str = None, page_offset: int = 0,
+             page_limit: int = getattr(settings, 'PAGE_SIZE', 100)) -> []:
         """
         List projects
+        :param search: Search into project name and description
+        :param page_offset: list projects starting from this index
+        :param page_limit: number of projects
         :return:
         """
         logger = logging.getLogger('services')
         url = settings.KAIRNIAL_AUTH_SERVER + PROJECT_LIST_PATH
         data = {
             'client_id': self.client_id,
-            'LIMITSKIP': 0,
-            'LIMITTAKE': 1000,
+            'LIMITSKIP': page_offset,
+            'LIMITTAKE': page_limit,
             'onlyUUID': False
         }
         if search:
@@ -53,11 +58,12 @@ class KairnialProject(KairnialCrossService):
         response = requests.post(
             url,
             headers=headers,
-            data=data
+            data=json.dumps(data)
         )
         if response.status_code != 200:
             raise KairnialWSServiceError(
-                message=_(f"Fetching from Kairnial backend failed with response {response.status_code}: {response.content}"),
+                message=_(
+                    f"Fetching from Kairnial backend failed with response {response.status_code}: {response.content}"),
                 status=response.status_code
             )
         json_response = response.json()
@@ -87,4 +93,3 @@ class KairnialProject(KairnialCrossService):
             parameters=[serialized_update_project],
             use_cache=False
         )
-
