@@ -34,7 +34,6 @@ class KairnialClient(APIClient):
 
     def get(self, path, data=None, follow=False, **extra):
         path = f'/{self.client_id}/{self.project_id}/{path}'
-        print(path)
         return super().get(path, data=data, follow=follow, **extra)
 
     def post(self, path, data=None, format=None, content_type=None,

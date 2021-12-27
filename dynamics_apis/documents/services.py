@@ -23,7 +23,6 @@ class KairnialFolderService(KairnialWSService):
             parameters = [{key: value} for key, value in filters.items()]
         if parent_id:
             parameters.append({'asyncFolderId': parent_id})
-        print(parameters)
         return self.call(action='getFlexDossiers', parameters=parameters)
 
     def get(self, id: int):

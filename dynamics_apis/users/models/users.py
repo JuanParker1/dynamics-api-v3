@@ -33,9 +33,9 @@ class User:
         else:
             users = ku.list().get('items')
         for key, value in filters.items():
-            if value == str:
-                users = [u for u in users if value.lower() in u.get(key).lower()]
-            elif value is bool or value is int:
+            if type(value) == str:
+                users = [u for u in users if value.lower() in u.get(key, "").lower()]
+            elif type(value) == bool or type(value) == int:
                 users = [u for u in users if value == u.get(key)]
         return users
 

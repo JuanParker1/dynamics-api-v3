@@ -25,7 +25,6 @@ class Folder(PaginatedModel):
         :param parent_id: ID of the parent folder
         :return:
         """
-        print(filters)
         kf = KairnialFolderService(client_id=client_id, token=token, project_id=project_id)
         return kf.list(parent_id=parent_id, filters=filters).get('brut')
 

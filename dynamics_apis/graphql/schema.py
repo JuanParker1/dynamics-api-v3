@@ -8,9 +8,9 @@ from dynamics_apis.projects.models import Project
 from dynamics_apis.users.models.contacts import Contact
 from dynamics_apis.users.models.groups import Group
 from dynamics_apis.users.models.users import User
-from dynamics_apis.users.serializers.contacts import ContactSerializer
-from dynamics_apis.users.serializers.groups import GroupSerializer
-from dynamics_apis.users.serializers.users import ProjectMemberSerializer
+from dynamics_apis.users.serializers.contacts import ContactSerializer, ContactQuerySerializer
+from dynamics_apis.users.serializers.groups import GroupSerializer, GroupQuerySerializer
+from dynamics_apis.users.serializers.users import ProjectMemberSerializer, UserQuerySerializer
 from .serializers.projects import ProjectGraphQLSerializer
 
 # GraphQL Schema first
@@ -71,9 +71,9 @@ type_defs = '''
         creation_date: String!,
         last_activity: String,
         project_type: String,
-        users: [User],
-        groups: [Group],
-        contacts: [Contact]
+        users(archived: Boolean, full_name: String, email: String): [User],
+        groups(name: String): [Group],
+        contacts(type: String, search: String, ids: [Int], created_start: String, created_end: String, update_start: String, update_end: String): [Contact]
     }
     
     """
@@ -89,8 +89,7 @@ type_defs = '''
         "Searchable list of contacts"
         contacts(client_id: String!, project_id: String!, type: String, search: String, ids: [Int], created_start: String, created_end: String, update_start: String, update_end: String): [Contact],
         "Searchable list of projects"
-        projects(client_id: String!, page_offset: Int = 0, page_limit: Int = 100, search: String): [Project],
-        project_users: [User]
+        projects(client_id: String!, page_offset: Int = 0, page_limit: Int = 100, search: String): [Project]
     }
 '''
 
@@ -125,7 +124,7 @@ def resolve_user(_, info, client_id, project_id):
 
 # Users resolver
 @query.field("users")
-def resolve_users(_, info, client_id, project_id, archived=0, full_name='', email=''):
+def resolve_users(_, info, client_id, project_id, **filters):
     """
     Users resolver, if user is connected
     :param _: all params
@@ -133,18 +132,13 @@ def resolve_users(_, info, client_id, project_id, archived=0, full_name='', emai
     """
     request = info.context.get('request', None)
     if hasattr(request, 'token'):
-        filters = {}
-        if archived:
-            filters['archived'] = archived
-        if full_name:
-            filters['full_name'] = full_name
-        if email:
-            filters['email'] = email
+        usq = UserQuerySerializer(data=filters)
+        usq.is_valid()
         user_list = User.list(
             client_id=client_id,
             token=request.token,
             project_id=project_id,
-            filters=filters
+            filters=usq.validated_data
         )
         serializer = ProjectMemberSerializer(user_list, many=True)
         return serializer.data
@@ -152,22 +146,23 @@ def resolve_users(_, info, client_id, project_id, archived=0, full_name='', emai
 
 # Groups resolver
 @query.field("groups")
-def resolve_groups(_, info, client_id, project_id, name=''):
+def resolve_groups(_, info, client_id, project_id, **filters):
     """
     User resolver, if user is connected
     :param _: all params
     :param info: QraphQL request context
+    :param client_id: ID of the client
+    :param project_id: project RGOC
     """
     request = info.context.get('request', None)
-    filters = {}
-    if name:
-        filters['name'] = name
+    gqs = GroupQuerySerializer(data=filters)
+    gqs.is_valid()
     if hasattr(request, 'token'):
         group_list = Group.list(
             client_id=client_id,
             token=request.token,
             project_id=project_id,
-            filters=filters
+            filters=gqs.validated_data
         )
         serializer = GroupSerializer(group_list, many=True)
         return serializer.data
@@ -182,13 +177,14 @@ def resolve_contacts(_, info, client_id, project_id, **filters):
     :param info: QraphQL request context
     """
     request = info.context.get('request', None)
-    filters = filters
+    cqs = ContactQuerySerializer(data=filters)
+    cqs.is_valid()
     if hasattr(request, 'token'):
         contacts_list = Contact.list(
             client_id=client_id,
             token=request.token,
             project_id=project_id,
-            filters=filters
+            filters=cqs.validated_data
         )
         serializer = ContactSerializer(contacts_list, many=True)
         return serializer.data
@@ -198,21 +194,27 @@ def enhance_project_list(obj_list, client_id, token, selections):
     """
     Inject client_id and token into lists to use in serializer relations
     """
-    contacts_selected = 'contacts' in selections
-    groups_selected = 'groups' in selections
-    users_selected = 'users' in selections
+    node_serializers = {
+        'users': UserQuerySerializer,
+        'groups': GroupQuerySerializer,
+        'contacts': ContactQuerySerializer
+    }
+    filters = {}
+    for sel in [s for s in selections if s in node_serializers]:
+        nss = node_serializers[sel](data=selections.get(sel))
+        nss.is_valid()
+        filters[sel] = nss.validated_data
     for i in range(len(obj_list)):
         obj_list[i]['client_id'] = client_id
         obj_list[i]['token'] = token
-        obj_list[i]['contacts'] = {'client_id': client_id, 'token': token,
-                                   'project_id': obj_list[i]['g_nom'],
-                                   'selected': contacts_selected}
-        obj_list[i]['users'] = {'client_id': client_id, 'token': token,
-                                   'project_id': obj_list[i]['g_nom'],
-                                   'selected': users_selected}
-        obj_list[i]['groups'] = {'client_id': client_id, 'token': token,
-                                'project_id': obj_list[i]['g_nom'],
-                                'selected': groups_selected}
+        for sel in ['contacts', 'groups', 'users']:
+            selected = sel in selections
+            obj_list[i][sel] = {
+                'client_id': client_id, 'token': token,
+                'project_id': obj_list[i]['g_nom'],
+                'selected': selected,
+                'filters': filters.get(sel, {})
+            }
 
 
 # Projects resolver
@@ -233,8 +235,13 @@ def resolve_projects(_, info, client_id: str, page_offset: int = 0, page_limit: 
             page_limit=page_limit,
             search=search
         )
-        selections = [s.name.value for s in info.field_nodes[0].selection_set.selections]
-        enhance_project_list(obj_list=project_list, client_id=client_id, token=request.token, selections=selections)
+        selections = {s.name.value: {a.name.value: a.value.value for a in s.arguments} for s in
+                      info.field_nodes[0].selection_set.selections}
+        enhance_project_list(
+            obj_list=project_list,
+            client_id=client_id,
+            token=request.token,
+            selections=selections)
         serializer = ProjectGraphQLSerializer(project_list, many=True)
         return serializer.data
 

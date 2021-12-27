@@ -44,8 +44,6 @@ class DocumentViewSet(PaginatedViewSet):
         """
         dqs = DocumentQuerySerializer(data=request.GET)
         dqs.is_valid()
-        print("is_valid", dqs.is_valid(), dqs.errors)
-        print("data", dqs.validated_data)
         page_offset, page_limit = self.get_pagination(request=request)
         parent_id = request.GET.get('parent_id')
         try:

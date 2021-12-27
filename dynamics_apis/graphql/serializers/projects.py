@@ -19,13 +19,11 @@ class LazyContactsField(serializers.Field):
 
     def to_representation(self, obj):
         if obj.get('selected'):
-            filters = ContactQuerySerializer(data={})
-            filters.is_valid()
             contacts_list = Contact.list(
                 client_id=obj.get('client_id'),
                 token=obj.get('token'),
                 project_id=obj.get('project_id'),
-                filters=filters.validated_data
+                filters=obj.get('filters')
             )
             return ContactSerializer(contacts_list, many=True).data
         return []
@@ -41,7 +39,8 @@ class LazyGroupsField(serializers.Field):
             group_list = Group.list(
                 client_id=obj.get('client_id'),
                 token=obj.get('token'),
-                project_id=obj.get('project_id')
+                project_id=obj.get('project_id'),
+                filters=obj.get('filters')
             )
             return GroupSerializer(group_list, many=True).data
         return []
@@ -58,7 +57,7 @@ class LazyUsersField(serializers.Field):
                 client_id=obj.get('client_id'),
                 token=obj.get('token'),
                 project_id=obj.get('project_id'),
-                filters={}
+                filters=obj.get('filters')
             )
             return ProjectMemberSerializer(user_list, many=True).data
         else:
