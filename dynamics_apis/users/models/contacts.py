@@ -21,7 +21,9 @@ class Contact:
         """
         parameters = [{key: value} for key, value in filters.items()]
         kc = KairnialContact(client_id=client_id, token=token, project_id=project_id)
-        contacts = kc.list(parameters=parameters).get('items')
+        contacts = kc.list(parameters=parameters)
+        if contacts:
+            return contacts.get('items')
         return contacts
 
     @staticmethod

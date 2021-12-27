@@ -32,6 +32,7 @@ class PaginatedModel:
                 page_limit=page_limit,
                 **kwargs
             )
+            print(response)
             total = response.get('total', 0)
             paginated_list = response.get('items', [])
             page_offset = response.get('LIMITSKIP', page_offset)

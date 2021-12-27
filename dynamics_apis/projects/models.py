@@ -1,9 +1,8 @@
 """
 Kairnial user model classes
 """
-from dynamics_apis.users.services.groups import KairnialGroup
-from dynamics_apis.projects.services import KairnialProject
 from dynamics_apis.common.models import PaginatedModel
+from dynamics_apis.projects.services import KairnialProject
 
 
 # Create your models here.
@@ -11,8 +10,10 @@ class Project(PaginatedModel):
     """
     Kairnial project class
     """
+
     @classmethod
-    def list(cls, client_id: str, token: str, search: str, page_offset: int, page_limit: int, **kwargs) -> []:
+    def list(cls, client_id: str, token: str, search: str, page_offset: int, page_limit: int,
+             **kwargs) -> []:
         """
         Get a list of users for a project
         :param client_id: ClientID Token

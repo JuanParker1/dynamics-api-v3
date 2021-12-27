@@ -51,7 +51,7 @@ class KairnialProject(KairnialCrossService):
         }
         cache_key = sha1(f'{url}||{json.dumps(headers)}||{data}'.encode('latin1')).hexdigest()
         if cache.get(cache_key):
-            return cache_key
+            return cache.get(cache_key)
         logger.debug(url)
         logger.debug(headers)
         logger.debug(data)
