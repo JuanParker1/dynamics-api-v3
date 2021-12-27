@@ -27,7 +27,7 @@ type_defs = '''
     }
     
     type Group   {
-        id: Int!,
+        id: String!,
         name: String!,
         description: String
     }
@@ -36,7 +36,7 @@ type_defs = '''
         id: Int!,
         uuid: String!,
         name: String,
-        alternative_name: String!,
+        alternative_name: String,
         company_name: String,
         company_category: String,
         short_name: String,
@@ -98,15 +98,6 @@ gql(type_defs)
 
 # Root resolver
 query = QueryType()
-
-
-def enhance_list(obj_list, client_id, token):
-    """
-    Inject client_id and token into lists to use in serializer relations
-    """
-    for i in range(len(obj_list)):
-        obj_list[i]['client_id'] = client_id
-        obj_list[i]['token'] = token
 
 
 # User resolver
@@ -203,6 +194,27 @@ def resolve_contacts(_, info, client_id, project_id, **filters):
         return serializer.data
 
 
+def enhance_project_list(obj_list, client_id, token, selections):
+    """
+    Inject client_id and token into lists to use in serializer relations
+    """
+    contacts_selected = 'contacts' in selections
+    groups_selected = 'groups' in selections
+    users_selected = 'users' in selections
+    for i in range(len(obj_list)):
+        obj_list[i]['client_id'] = client_id
+        obj_list[i]['token'] = token
+        obj_list[i]['contacts'] = {'client_id': client_id, 'token': token,
+                                   'project_id': obj_list[i]['g_nom'],
+                                   'selected': contacts_selected}
+        obj_list[i]['users'] = {'client_id': client_id, 'token': token,
+                                   'project_id': obj_list[i]['g_nom'],
+                                   'selected': users_selected}
+        obj_list[i]['groups'] = {'client_id': client_id, 'token': token,
+                                'project_id': obj_list[i]['g_nom'],
+                                'selected': groups_selected}
+
+
 # Projects resolver
 @query.field("projects")
 def resolve_projects(_, info, client_id: str, page_offset: int = 0, page_limit: int = 100,
@@ -221,7 +233,8 @@ def resolve_projects(_, info, client_id: str, page_offset: int = 0, page_limit: 
             page_limit=page_limit,
             search=search
         )
-        enhance_list(obj_list=project_list, client_id=client_id, token=request.token)
+        selections = [s.name.value for s in info.field_nodes[0].selection_set.selections]
+        enhance_project_list(obj_list=project_list, client_id=client_id, token=request.token, selections=selections)
         serializer = ProjectGraphQLSerializer(project_list, many=True)
         return serializer.data
 
