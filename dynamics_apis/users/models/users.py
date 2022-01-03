@@ -61,8 +61,9 @@ class User:
         :param pk: User UUID
         """
         ku = KairnialUser(client_id=client_id, token=token, project_id=project_id)
+        user_list = ku.list().get('items')
         try:
-            return [user for user in ku.list() if user.get('account_uuid') == pk][0]
+            return [user for user in  user_list if user.get('account_uuid') == pk][0]
         except IndexError as e:
             raise UserNotFound('User not found')
 
