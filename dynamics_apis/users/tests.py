@@ -4,6 +4,7 @@ import string
 import uuid
 
 from dynamics_apis.common.tests import CommonTest, KairnialClient
+from .serializers.groups import GroupSerializer
 from .serializers.users import UserUUIDSerializer, UserInviteResponseSerializer
 
 
@@ -110,7 +111,6 @@ class UserTest(CommonTest):
         """
         self._test_user_list_filter(groups=[1, 2, 3, 4])
 
-
     def test_113_user_create(self):
         """
         Test inviting a user
@@ -156,3 +156,63 @@ class UserTest(CommonTest):
             project_id=self.project_id)
         resp = kc.delete(f'users/{self.created_user_id}')
         self.assertEqual(resp.status_code, 204)
+
+
+class GroupTest(CommonTest):
+
+    def setUp(self):
+        super().setUp()
+        self.group_name = str(uuid.uuid4())
+
+    def test_100_group_list(self):
+        """
+        Test standard group list route
+        """
+        kc = KairnialClient(
+            access_token=self.access_token,
+            client_id=self.client_id,
+            project_id=self.project_id)
+        resp = kc.get('groups/')
+        serializer = GroupSerializer(data=resp.json(), many=True)
+        self.assertTrue(serializer.is_valid())
+
+    def test_101_group_list_filter_name(self):
+        """
+        Test standard group list route filtered by name
+        """
+        kc = KairnialClient(
+            access_token=self.access_token,
+            client_id=self.client_id,
+            project_id=self.project_id)
+        resp = kc.get('groups/', data={'name': 'test'})
+        serializer = GroupSerializer(data=resp.json(), many=True)
+        self.assertTrue(serializer.is_valid())
+
+    def test_112_group_get(self):
+        """
+        Test get user with ID
+        """
+        kc = KairnialClient(
+            access_token=self.access_token,
+            client_id=self.client_id,
+            project_id=self.project_id)
+        resp = kc.get('groups/48f944d3-bcb2-11e7-b7a1-fa163e5e5b59/')
+        serializer = GroupSerializer(data=resp.json(), many=True)
+        self.assertTrue(serializer.is_valid())
+
+    def test_113_group_create(self):
+        """
+        Test inviting a user
+        """
+        kc = KairnialClient(
+            access_token=self.access_token,
+            client_id=self.client_id,
+            project_id=self.project_id)
+        resp = kc.post(
+            'groups/',
+            data=json.dumps({
+                "name": self.group_name,
+                "description": "Unit test description"
+            }),
+            content_type='application/json')
+        self.assertEqual(resp.status_code, 201)
