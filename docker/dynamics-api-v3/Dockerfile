@@ -14,4 +14,4 @@ RUN mkdir /var/www
 RUN pipenv install
 RUN pipenv run /var/apps/dynamics-api-v3/manage.py collectstatic --noinput
 EXPOSE 8000
-ENTRYPOINT python3 /var/apps/dynamics-api-v3/manage.py runserver
+ENTRYPOINT pipenv run runserver
