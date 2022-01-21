@@ -619,8 +619,91 @@ class DocumentSerializer(serializers.Serializer):
         required=False
     )
 
-
-
-
-
-
+class DocumentCreateSerializer(serializers.Serializer):
+    """
+    Serializer for document creation
+    """
+    name = serializers.CharField(
+        label=_('Document name'),
+        help_text=_('Name of the document'),
+        source='nom',
+        required=True
+    )
+    description = serializers.CharField(
+        label=_('Document description'),
+        help_text=_('Description of the document'),
+        source='desc',
+        required=True
+    )
+    external_name = serializers.CharField(
+        label=_('Document name as uploaded'),
+        help_text=_('Name of the document when uploaded'),
+        source='entete_oldName',
+        required=False
+    )
+    filename = serializers.CharField(
+        label=_('File name'),
+        help_text=_('Name of the file'),
+        source='file',
+        required=True
+    )
+    filehash = serializers.CharField(
+        label=_('File hash'),
+        help_text=_('MD5 hash of the file'),
+        source='hash',
+        required=True
+    )
+    filesize = serializers.IntegerField(
+        label=_('File size'),
+        help_text=_('Size of the file in bytes'),
+        source='size',
+        required=True
+    )
+    filetype = serializers.CharField(
+        label=_('File type'),
+        help_text=_('Type of file'),
+        source='typeFichier'
+    )
+    extension = serializers.IntegerField(
+        label=_('File extension'),
+        help_text=_('Extension of the file'),
+        source='ext',
+        required=True
+    )
+    counter = serializers.IntegerField(
+        label=_('Document counter'),
+        help_text=_('Counter value of the document'),
+        required=False,
+        default=0
+    )
+    advanced = serializers.BooleanField(
+        label=_('Advanced naming'),
+        help_text=_('Automatic document naming'),
+        required=False
+    )
+    naming_convention = serializers.IntegerField(
+        label=_('Naming convention ID'),
+        help_text=_('Numeric ID of the naming convention'),
+        required=False,
+        default=0,
+        source='nomenclatureID'
+    )
+    parent = serializers.UUIDField(
+        label=_('Parent ID'),
+        help_text=_('UUID of the parent document'),
+        required=False,
+        source='parentUUID'
+    )
+    version = serializers.IntegerField(
+        label=_('Document version'),
+        help_text=_('Numeric version of the document'),
+        required=False,
+        default=0,
+        source='enteteVersion'
+    )
+    workflow = serializers.IntegerField(
+        label=_('Document workflow'),
+        help_text=_('Numeric ID of the document workflow'),
+        required=False,
+        source='circuit'
+    )
