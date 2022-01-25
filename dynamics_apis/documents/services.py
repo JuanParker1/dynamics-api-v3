@@ -104,3 +104,23 @@ class KairnialDocumentService(KairnialWSService):
             {'LIMITTAKE': limit}
         ]
         return self.call(action='getFilesFromCat', parameters=parameters)
+
+    def create(self, document_create_serializer: {}):
+        """
+        Create a Kairnial folder
+        :param folder_create_serializer: validated data from a FolderCreateSerializer
+        """
+        try:
+            document_create_serializer['rfield'] = json.dumps(
+                document_create_serializer['rfield'])
+            document_create_serializer['linkedObjects'] = json.dumps(
+                document_create_serializer['linkedObjects'])
+            document_create_serializer['visas'] = json.dumps(
+                document_create_serializer['visas'])
+        except json.JSONDecodeError:
+            return False
+        return self.call(
+            action='addFichiers',
+            parameters=[document_create_serializer],
+            use_cache=False
+        )
