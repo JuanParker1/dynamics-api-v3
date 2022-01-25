@@ -15,7 +15,7 @@ from dynamics_apis.common.services import KairnialWSServiceError
 from dynamics_apis.common.viewsets import project_parameters, PaginatedResponse, \
     pagination_parameters, PaginatedViewSet
 from ..models import Document
-from ..serializers.documents import DocumentQuerySerializer, DocumentSerializer
+from ..serializers.documents import DocumentQuerySerializer, DocumentSerializer, DocumentCreateSerializer
 
 
 class DocumentViewSet(PaginatedViewSet):
@@ -36,7 +36,7 @@ class DocumentViewSet(PaginatedViewSet):
     )
     def list(self, request: HttpRequest, client_id: str, project_id: str):
         """
-        List users on a projects
+        List documents on a projects
         :param request:
         :param client_id: Client ID token
         :param project_id: Project RGOC ID
@@ -72,3 +72,30 @@ class DocumentViewSet(PaginatedViewSet):
             })
             return Response(error.data, content_type='application/json',
                             status=status.HTTP_400_BAD_REQUEST)
+
+    def create(self, request: HttpRequest, client_id: str, project_id: str):
+        """
+        Create a new document
+        :param request:
+        :param client_id: Client ID token
+        :param project_id: Project RGOC ID
+        :return:
+        """
+        dcs = DocumentCreateSerializer(data=request.POST)
+        if not dcs.is_valid():
+            return Response(dcs.errors, content_type='application/json',
+                            status=status.HTTP_400_BAD_REQUEST)
+        document = Document.create(
+            client_id=client_id,
+            token=request.token,
+            project_id=project_id,
+            serialized_data=dcs.validated_data
+        )
+        if document:
+            serializer = DocumentSerializer(document)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(_("Document could not be created"),
+                            status=status.HTTP_406_NOT_ACCEPTABLE)
+
+

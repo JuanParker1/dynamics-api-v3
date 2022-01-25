@@ -1,8 +1,9 @@
 """
 Kairnial Files module models
 """
-from dynamics_apis.documents.services import KairnialFolderService, KairnialDocumentService
 from dynamics_apis.common.models import PaginatedModel
+from dynamics_apis.documents.services import KairnialFolderService, KairnialDocumentService
+
 
 class Folder(PaginatedModel):
     """
@@ -123,3 +124,21 @@ class Document(PaginatedModel):
         """
         kf = KairnialDocumentService(client_id=client_id, token=token, project_id=project_id)
         return kf.list(parent_id=parent_id, filters=filters).get('fichiers')
+
+    @staticmethod
+    def create(
+            client_id: str,
+            token: str,
+            project_id: str,
+            serialized_data: dict
+    ):
+        """
+        Create a Kairnial Document
+        :param client_id: ID of the client
+        :param token: Access token
+        :param project_id: RGOC Code of the project
+        :param serialized_data: DocumentCreateSerializer validated data
+        :return: DocumentSerializer data
+        """
+        fs = KairnialDocumentService(client_id=client_id, token=token, project_id=project_id)
+        return fs.create(folder_create_serializer=serialized_data)

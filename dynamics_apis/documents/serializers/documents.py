@@ -279,7 +279,7 @@ class DocumentQuerySerializer(serializers.Serializer):
     has_deposit = serializers.ChoiceField(
         label=_('Filter on documents with deposit'),
         help_text=_('0. all documents, 1. only with deposit, 2. only without deposit'),
-        choices=[0,1,2],
+        choices=[0, 1, 2],
         source='statementState',
         required=False
     )
@@ -292,7 +292,7 @@ class DocumentQuerySerializer(serializers.Serializer):
     has_paper_deposit = serializers.ChoiceField(
         label=_('Filter on documents with paper deposit'),
         help_text=_('0. all documents, 1. only with deposit, 2. only without deposit'),
-        choices=[0,1,2],
+        choices=[0, 1, 2],
         source='printStatementState',
         required=False
     )
@@ -619,10 +619,59 @@ class DocumentSerializer(serializers.Serializer):
         required=False
     )
 
+
+class LinkedObjectSerializer(serializers.Serializer):
+    """
+    Serializer for linked objects
+    """
+    uuid = serializers.UUIDField(
+        label=_('Linked Object UUID'),
+        help_text=_('UUID of the object linked to the document'),
+        required=True
+    )
+    type = serializers.CharField(
+        label=_('type of object'),
+        help_text=_('Type of the object linked to the document'),
+        required=True
+    )
+    dest_type = serializers.CharField(
+        label=_('destination type'),
+        help_text=_('Type of the destination object'),  # TODO: What is that ?
+        required=False
+    )
+
+
+class RFieldSerializer(serializers.Serializer):
+    """
+    Serializer for rField attached to a document
+    """
+    uuid = serializers.UUIDField(
+        label=_('rField UUID'),
+        help_text=_('UUID of the metadata'),
+        required=True
+    )
+    value = serializers.CharField(
+        label=_('rField value'),
+        help_text=_('Value of the metadata'),
+        required=True
+    )
+    type = serializers.CharField(
+        label=_('rField type'),
+        help_text=_('Type of the metadata'),
+        required=True
+    )
+
+
 class DocumentCreateSerializer(serializers.Serializer):
     """
     Serializer for document creation
     """
+    category = serializers.IntegerField(
+        label=_('Category'),
+        help_text=_('Optional numeric ID of the category'),
+        required=False,
+        default=0
+    )
     name = serializers.CharField(
         label=_('Document name'),
         help_text=_('Name of the document'),
@@ -706,4 +755,39 @@ class DocumentCreateSerializer(serializers.Serializer):
         help_text=_('Numeric ID of the document workflow'),
         required=False,
         source='circuit'
+    )
+    linked_objects = LinkedObjectSerializer(
+        label=_('List of objects to link'),
+        help_text=_('List of objects from the platform to link to the document'),
+        many=True,
+        required=False
+    )
+    previous_uuid = serializers.UUIDField(
+        label=_('Previous UUID'),
+        help_text=_('UUID of the existing document'),
+        required=False,
+        source='oldUuid'
+    )
+    rfas = serializers.JSONField(
+        label=_('List of RFAs'),
+        help_text=_('Requests for approval for this document'),
+        many=True,
+        source='visas'
+    )
+    rfields = RFieldSerializer(
+        label=_('List off rfields'),
+        help_text=_('Meta data associated with the document'),
+        many=True,
+        required=False,
+        source='rfield'
+    )
+    provisional_file = serializers.UUIDField(
+        label=_('Provisional file UUID'),
+        help_text=_('UUID of the attached provisional file '),
+        source='attachedProvisionalFile'
+    )
+    skip_qr_code = serializers.BooleanField(
+        label=_('Skip QRcode creation'),
+        help_text=_('Do not create a QRCode for this file'),
+        default=False
     )
