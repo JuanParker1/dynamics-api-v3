@@ -7,6 +7,7 @@ from django.utils.translation import gettext as _
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import status
+from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 
 from dynamics_apis.common.serializers import ErrorSerializer
@@ -15,13 +16,15 @@ from dynamics_apis.common.services import KairnialWSServiceError
 from dynamics_apis.common.viewsets import project_parameters, PaginatedResponse, \
     pagination_parameters, PaginatedViewSet
 from ..models import Document
-from ..serializers.documents import DocumentQuerySerializer, DocumentSerializer, DocumentCreateSerializer
+from ..serializers.documents import DocumentQuerySerializer, DocumentSerializer, \
+    DocumentCreateSerializer
 
 
 class DocumentViewSet(PaginatedViewSet):
     """
     A ViewSet for listing or retrieving documents.
     """
+    parser_classes = (MultiPartParser,)
 
     @extend_schema(
         summary=_("List Kairnial documents"),
@@ -73,6 +76,14 @@ class DocumentViewSet(PaginatedViewSet):
             return Response(error.data, content_type='application/json',
                             status=status.HTTP_400_BAD_REQUEST)
 
+    @extend_schema(
+        summary=_("Create Kairnial document with file"),
+        description=_("Create Kairnial"),
+        parameters=project_parameters,
+        request=DocumentCreateSerializer,
+        responses={201: DocumentSerializer, 400: ErrorSerializer, 404: OpenApiTypes.STR},
+        methods=["POST"]
+    )
     def create(self, request: HttpRequest, client_id: str, project_id: str):
         """
         Create a new document
@@ -81,21 +92,23 @@ class DocumentViewSet(PaginatedViewSet):
         :param project_id: Project RGOC ID
         :return:
         """
-        dcs = DocumentCreateSerializer(data=request.POST)
+        print(request.POST, request.FILES)
+        data = request.POST.copy()
+        data.update(request.FILES)
+        print(data)
+        dcs = DocumentCreateSerializer(data=data)
         if not dcs.is_valid():
             return Response(dcs.errors, content_type='application/json',
                             status=status.HTTP_400_BAD_REQUEST)
-        document = Document.create(
-            client_id=client_id,
-            token=request.token,
-            project_id=project_id,
-            serialized_data=dcs.validated_data
-        )
-        if document:
+        try:
+            document = Document.create(
+                client_id=client_id,
+                token=request.token,
+                project_id=project_id,
+                serialized_data=dcs.validated_data,
+                attachment=request.FILES.get('file')
+            )
             serializer = DocumentSerializer(document)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            return Response(_("Document could not be created"),
-                            status=status.HTTP_406_NOT_ACCEPTABLE)
-
-
+        except KairnialWSServiceError as e:
+            return Response(e.message, status=status.HTTP_400_BAD_REQUEST)

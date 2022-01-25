@@ -676,6 +676,11 @@ class DocumentCreateSerializer(serializers.Serializer):
         label=_('Document name'),
         help_text=_('Name of the document'),
         source='nom',
+        required=False
+    )
+    file = serializers.FileField(
+        label=_('File to upload'),
+        help_text=_('File'),
         required=True
     )
     description = serializers.CharField(
@@ -689,35 +694,6 @@ class DocumentCreateSerializer(serializers.Serializer):
         help_text=_('Name of the document when uploaded'),
         source='entete_oldName',
         required=False
-    )
-    filename = serializers.CharField(
-        label=_('File name'),
-        help_text=_('Name of the file'),
-        source='file',
-        required=True
-    )
-    filehash = serializers.CharField(
-        label=_('File hash'),
-        help_text=_('MD5 hash of the file'),
-        source='hash',
-        required=True
-    )
-    filesize = serializers.IntegerField(
-        label=_('File size'),
-        help_text=_('Size of the file in bytes'),
-        source='size',
-        required=True
-    )
-    filetype = serializers.CharField(
-        label=_('File type'),
-        help_text=_('Type of file'),
-        source='typeFichier'
-    )
-    extension = serializers.IntegerField(
-        label=_('File extension'),
-        help_text=_('Extension of the file'),
-        source='ext',
-        required=True
     )
     counter = serializers.IntegerField(
         label=_('Document counter'),
@@ -771,7 +747,7 @@ class DocumentCreateSerializer(serializers.Serializer):
     rfas = serializers.JSONField(
         label=_('List of RFAs'),
         help_text=_('Requests for approval for this document'),
-        many=True,
+        required=False,
         source='visas'
     )
     rfields = RFieldSerializer(
@@ -784,10 +760,43 @@ class DocumentCreateSerializer(serializers.Serializer):
     provisional_file = serializers.UUIDField(
         label=_('Provisional file UUID'),
         help_text=_('UUID of the attached provisional file '),
+        required=False,
         source='attachedProvisionalFile'
     )
     skip_qr_code = serializers.BooleanField(
         label=_('Skip QRcode creation'),
         help_text=_('Do not create a QRCode for this file'),
         default=False
+    )
+    folder_path = serializers.CharField(
+        label=_('Folder path'),
+        help_text=_('Folder path, can be created if not exists using create_folders parameter'),
+        required=False,
+        source='path'
+    )
+    create_folders = serializers.BooleanField(
+        label=_('Create folder if not exists'),
+        help_text=_('Create folder from folder_path if the folder path does not exist'),
+        default=True,
+        source='createFolders'
+    )
+
+
+
+class FileUploadSerializer(serializers.Serializer):
+    uuid = serializers.UUIDField(
+        label=_('file UUID'),
+        help_text=_('UUID of the file'),
+    )
+    files_path = serializers.CharField(
+        label=_('File path'),
+        help_text=_('Technical path of the file')
+    )
+    method = serializers.CharField(
+        label=_('Upload method'),
+        help_text=_('HTTP method for the upload')
+    )
+    url = serializers.URLField(
+        label=_('File upload URL'),
+        help_text=_('URL to uplaod the content to')
     )

@@ -1,6 +1,10 @@
 """
 Kairnial Files module models
 """
+import hashlib
+import os
+from django.core.files.uploadedfile import InMemoryUploadedFile
+
 from dynamics_apis.common.models import PaginatedModel
 from dynamics_apis.documents.services import KairnialFolderService, KairnialDocumentService
 
@@ -125,12 +129,29 @@ class Document(PaginatedModel):
         kf = KairnialDocumentService(client_id=client_id, token=token, project_id=project_id)
         return kf.list(parent_id=parent_id, filters=filters).get('fichiers')
 
-    @staticmethod
+    @classmethod
+    def extract_attachment_data(cls, attachment: InMemoryUploadedFile):
+        """
+        Read attributes from InMemoryUploadFile object
+        """
+        name = os.path.splitext(attachment.name)[0]
+        extension = os.path.splitext(attachment.name)[-1][1:]
+        file_type = attachment.content_type
+        file_handler = attachment.file
+        file_content = attachment.read()
+        file_hash = hashlib.md5(file_content).hexdigest()
+        file_size = attachment.size
+        print(name, extension, file_type, file_handler, file_hash, file_size)
+        return name, extension, file_type, file_handler, file_hash, file_size, file_content
+
+    @classmethod
     def create(
+            cls,
             client_id: str,
             token: str,
             project_id: str,
-            serialized_data: dict
+            serialized_data: dict,
+            attachment
     ):
         """
         Create a Kairnial Document
@@ -140,5 +161,19 @@ class Document(PaginatedModel):
         :param serialized_data: DocumentCreateSerializer validated data
         :return: DocumentSerializer data
         """
+        name, extension, \
+        file_type, \
+        file_handler, \
+        file_hash, \
+        file_size, \
+        file_content = cls.extract_attachment_data(
+            attachment=attachment
+        )
+        if 'nom' not in serialized_data:
+            serialized_data['nom'] = name
+        serialized_data['ext'] = extension
+        serialized_data['hash'] = file_hash
+        serialized_data['size'] = file_size
+        serialized_data['typeFichier'] = file_type
         fs = KairnialDocumentService(client_id=client_id, token=token, project_id=project_id)
-        return fs.create(folder_create_serializer=serialized_data)
+        return fs.create(document_create_serializer=serialized_data, content=file_content)

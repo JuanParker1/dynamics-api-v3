@@ -220,6 +220,7 @@ Use <a href="#/projects/projects_list">project list</a> to select a project.
         }
     },
     "SECURITY": [{"ApiKeyAuth": [], 'clientID': []}],
+    "COMPONENT_SPLIT_REQUEST": True
 }
 
 from dynamics_apis.settings import *

@@ -2,8 +2,20 @@
 Services that get and push information to Kairnial WS servers
 """
 import json
+import uuid
+import time
+
+import requests
 from django.conf import settings
-from dynamics_apis.common.services import KairnialWSService
+
+from .serializers.documents import FileUploadSerializer
+from dynamics_apis.common.services import KairnialWSService, KairnialWSServiceError
+
+REQUESTS_METHODS = {
+   'put': requests.put,
+   'post': requests.post,
+   'get': requests.get
+}
 
 
 class KairnialFolderService(KairnialWSService):
@@ -105,22 +117,80 @@ class KairnialDocumentService(KairnialWSService):
         ]
         return self.call(action='getFilesFromCat', parameters=parameters)
 
-    def create(self, document_create_serializer: {}):
+    def _get_file_link(self, json_data):
         """
-        Create a Kairnial folder
-        :param folder_create_serializer: validated data from a FolderCreateSerializer
+        Get a file link for upload
         """
-        try:
-            document_create_serializer['rfield'] = json.dumps(
-                document_create_serializer['rfield'])
-            document_create_serializer['linkedObjects'] = json.dumps(
-                document_create_serializer['linkedObjects'])
-            document_create_serializer['visas'] = json.dumps(
-                document_create_serializer['visas'])
-        except json.JSONDecodeError:
-            return False
-        return self.call(
-            action='addFichiers',
-            parameters=[document_create_serializer],
+        file_uuid = str(uuid.uuid4())
+        prepare_file_parameters = {
+            'name': json_data.get('nom'),
+            'ext': json_data.get('ext'),
+            'size': json_data.get('size'),
+            'lastModified': int(time.time()),
+            'type': json_data.get('typeFichier'),
+            'guid': file_uuid
+        }
+        # 1. Obtain the upload link
+        response = self.call(
+            action='prepareFileUpload',
+            parameters=[prepare_file_parameters],
             use_cache=False
         )
+        us = FileUploadSerializer(data=response)
+        if not us.is_valid():
+            print(us.errors)
+            raise KairnialWSServiceError(
+                message='Invalid response from file upload',
+                status=0
+            )
+        return us
+
+    def _create_document(self, uuid, json_data):
+        data = json_data.copy()
+        data['uuid'] = uuid
+        try:
+            data['rfield'] = json.dumps(
+                json_data.get('rfield', []))
+            data['linkedObjects'] = json.dumps(
+                json_data.get('linkedObjects', []))
+            data['visas'] = json.dumps(
+                json_data.get('visas', []))
+            data.pop('file')
+        except json.JSONDecodeError:
+            return False
+
+        output = self.call(
+            action='addFile',
+            parameters=[data, ],
+            use_cache=False
+        )
+        if 'error' in output:
+            raise KairnialWSServiceError(
+                message=output.get('error'),
+                status=output.get('errorCode')
+            )
+
+    def create(self, document_create_serializer: dict, content):
+        """
+        Create a Kairnial folder
+        :param document_create_serializer: validated data from a FolderCreateSerializer
+        :param content: Binary file content
+        """
+        # 1. Get file link
+        us = self._get_file_link(json_data=document_create_serializer)
+
+        # 2. Post file to url
+        response = REQUESTS_METHODS[us.validated_data.get('method').lower()](
+            us.validated_data.get('url'),
+            data=content,
+        )
+
+        print(response.status_code, response.content)
+
+        # 3. Create Document with file
+        output = self._create_document(
+            uuid=us.validated_data.get('uuid'),
+            json_data=document_create_serializer
+        )
+
+        return output
