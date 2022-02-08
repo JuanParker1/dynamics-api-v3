@@ -782,7 +782,6 @@ class DocumentCreateSerializer(serializers.Serializer):
     )
 
 
-
 class FileUploadSerializer(serializers.Serializer):
     uuid = serializers.UUIDField(
         label=_('file UUID'),
@@ -800,3 +799,7 @@ class FileUploadSerializer(serializers.Serializer):
         label=_('File upload URL'),
         help_text=_('URL to uplaod the content to')
     )
+
+
+class DocumentReviseSerializer(DocumentCreateSerializer):
+    pass

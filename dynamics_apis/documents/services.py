@@ -2,19 +2,19 @@
 Services that get and push information to Kairnial WS servers
 """
 import json
-import uuid
 import time
+import uuid
 
 import requests
 from django.conf import settings
 
-from .serializers.documents import FileUploadSerializer
 from dynamics_apis.common.services import KairnialWSService, KairnialWSServiceError
+from .serializers.documents import FileUploadSerializer
 
 REQUESTS_METHODS = {
-   'put': requests.put,
-   'post': requests.post,
-   'get': requests.get
+    'put': requests.put,
+    'post': requests.post,
+    'get': requests.get
 }
 
 
@@ -99,7 +99,8 @@ class KairnialDocumentService(KairnialWSService):
     """
     service_domain = 'fichiers'
 
-    def list(self, parent_id: str = None, filters: dict = None, offset: int = 0, limit: int = getattr(settings, 'PAGE_SIZE', 100)):
+    def list(self, parent_id: str = None, filters: dict = None, offset: int = 0,
+             limit: int = getattr(settings, 'PAGE_SIZE', 100)):
         """
         List documents
         :param parent_id: ID of the parent folder, optional
@@ -170,10 +171,18 @@ class KairnialDocumentService(KairnialWSService):
                 status=output.get('errorCode')
             )
 
+    def get(self, id: int):
+        """
+        Retrieve document
+        :param id: ID of the document
+        :return:
+        """
+        return self.call(action='getFilesFromCat', parameters=[{'id': id}])
+
     def create(self, document_create_serializer: dict, content):
         """
         Create a Kairnial folder
-        :param document_create_serializer: validated data from a FolderCreateSerializer
+        :param document_create_serializer: validated data from a DocumentCreateSerializer
         :param content: Binary file content
         """
         # 1. Get file link
@@ -185,12 +194,82 @@ class KairnialDocumentService(KairnialWSService):
             data=content,
         )
 
-        print(response.status_code, response.content)
-
         # 3. Create Document with file
         output = self._create_document(
             uuid=us.validated_data.get('uuid'),
             json_data=document_create_serializer
         )
 
+    def revise(self, document_revise_serializer: dict, content):
+        """
+        Create a Kairnial folder
+        :param document_revise_serializer: validated data from a DocumentReviseSerializer
+        :param content: Binary file content
+        """
+        # 1. Get file link
+        us = self._get_file_link(json_data=document_revise_serializer)
+
+        # 2. Post file to url
+        response = REQUESTS_METHODS[us.validated_data.get('method').lower()](
+            us.validated_data.get('url'),
+            data=content,
+        )
+
+        # 3. Create Document with file
+        output = self._create_document(
+            uuid=us.validated_data.get('uuid'),
+            json_data=document_revise_serializer
+        )
+
         return output
+
+    def archive(self, id: int):
+        """
+        Archive a Kairnial document
+        :param id: Numeric ID of the document
+        """
+        return self.call(
+            action='archiveFile',
+            parameters=[{'id': id}, ],
+            format='int',
+            use_cache=False
+        )
+
+
+class KairnialApprovalService(KairnialWSService):
+    """
+    Kairnial Service for Document Approval
+    """
+
+    def list(self, parent_id: str = None, filters: dict = None, offset: int = 0,
+             limit: int = getattr(settings, 'PAGE_SIZE', 100)):
+        """
+        List documents
+        :param parent_id: ID of the parent folder, optional
+        :param filters: Dictionnary of filters
+        :param offset: value of first element in a list
+        :param limit: number of elements to fetch
+        :return:
+        """
+        # TODO: extract all document approvals from getFilesFromCat
+        parameters = []
+        if filters:
+            parameters = [{key: value} for key, value in filters.items()]
+        parameters += [
+            {'LIMITSKIP': offset},
+            {'LIMITTAKE': limit}
+        ]
+        return self.call(action='getFilesFromCat', parameters=parameters)
+
+
+class KairnialApprovalTypeService(KairnialWSService):
+    """
+    Kairnial Service for Document Approval types
+    """
+
+    def list(self):
+        """
+        List approval types
+        :return:
+        """
+        return self.call(action='getAllCircuitVisa', parameters=[{}])
