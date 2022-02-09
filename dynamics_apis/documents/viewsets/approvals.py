@@ -4,7 +4,7 @@ Viewsets for the Kairnial approvals module
 from django.http import HttpRequest
 from django.utils.translation import gettext as _
 from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import status
 from rest_framework.response import Response
 
@@ -62,3 +62,33 @@ class ApprovalTypeViewSet(PaginatedViewSet):
             })
             return Response(error.data, content_type='application/json',
                             status=status.HTTP_400_BAD_REQUEST)
+
+    @extend_schema(
+        summary=_("Archive Kairnial approval type"),
+        description=_("Archive Kairnial approval type by ID"),
+        parameters=project_parameters + [
+            OpenApiParameter(name='id', type=OpenApiTypes.INT, location='path',
+                             required=False, description=_("Approval type numeric ID")),
+        ],
+        responses={204: OpenApiTypes.STR, 400: ErrorSerializer, 404: OpenApiTypes.STR},
+        methods=["DELETE"]
+    )
+    def destroy(self, request: HttpRequest, client_id: str, project_id: str, pk: int):
+        """
+        Archive document
+        :param request: HTTPRequest
+        :param client_id: ID of the client
+        :param project_id: Project RGOC
+        :param pk: Numeric ID of the document
+        """
+        archived = ApprovalType.archive(
+            client_id=client_id,
+            token=request.token,
+            project_id=project_id,
+            id=pk
+        )
+        if archived:
+            return Response(_("Approval type archived"), status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response(_("Approval type could not be archived"),
+                            status=status.HTTP_406_NOT_ACCEPTABLE)

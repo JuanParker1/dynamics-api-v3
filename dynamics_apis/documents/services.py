@@ -240,6 +240,7 @@ class KairnialApprovalService(KairnialWSService):
     """
     Kairnial Service for Document Approval
     """
+    service_domain = 'fichiers'
 
     def list(self, parent_id: str = None, filters: dict = None, offset: int = 0,
              limit: int = getattr(settings, 'PAGE_SIZE', 100)):
@@ -266,6 +267,7 @@ class KairnialApprovalTypeService(KairnialWSService):
     """
     Kairnial Service for Document Approval types
     """
+    service_domain = 'fichiers'
 
     def list(self):
         """
@@ -273,3 +275,15 @@ class KairnialApprovalTypeService(KairnialWSService):
         :return:
         """
         return self.call(action='getAllCircuitVisa', parameters=[{}])
+
+    def archive(self, id: int):
+        """
+        Archive approval type
+        :param id: Numeric ID of the approval type
+        """
+        return self.call(
+            action='archiveCircuitVisa',
+            parameters=[{'id': id}, ],
+            format='int',
+            use_cache=False
+        )

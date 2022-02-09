@@ -2,6 +2,7 @@
 Kairnial Files module models
 """
 import hashlib
+import json
 import os
 
 from django.core.files.uploadedfile import InMemoryUploadedFile
@@ -265,5 +266,25 @@ class ApprovalType(PaginatedModel):
         :param project_id: RGOC Code of the project
         :return:
         """
-        kf = KairnialApprovalTypeService(client_id=client_id, token=token, project_id=project_id)
-        return kf.list().get('notes')
+        kat = KairnialApprovalTypeService(client_id=client_id, token=token, project_id=project_id)
+        approval_types = kat.list().get('notes')
+        for at in approval_types:
+            at['content'] = json.loads(at.get('content') or '{}')
+        return  approval_types
+
+    @staticmethod
+    def archive(
+            client_id: str,
+            token: str,
+            project_id: str,
+            id: int,
+    ):
+        """
+        Archive a Kairnial Approval type
+        :param client_id: ID of the client
+        :param token: Access token
+        :param project_id: RGOC Code of the project
+        :param id: Numeric ID of the approval type
+        """
+        ats = KairnialApprovalTypeService(client_id=client_id, token=token, project_id=project_id)
+        return ats.archive(id=id)
