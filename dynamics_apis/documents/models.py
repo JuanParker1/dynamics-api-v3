@@ -3,10 +3,11 @@ Kairnial Files module models
 """
 import hashlib
 import os
+
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
 from dynamics_apis.common.models import PaginatedModel
-from dynamics_apis.documents.services import KairnialFolderService, KairnialDocumentService
+from dynamics_apis.documents.services import KairnialFolderService, KairnialDocumentService, KairnialApprovalTypeService
 
 
 class Folder(PaginatedModel):
@@ -92,7 +93,7 @@ class Folder(PaginatedModel):
             client_id: str,
             token: str,
             project_id: str,
-            id: int,
+            id: str,
     ):
         """
         Archive a Kairnial Folder
@@ -129,6 +130,23 @@ class Document(PaginatedModel):
         kf = KairnialDocumentService(client_id=client_id, token=token, project_id=project_id)
         return kf.list(parent_id=parent_id, filters=filters).get('fichiers')
 
+    @staticmethod
+    def get(
+            client_id: str,
+            token: str,
+            project_id: str,
+            id: int
+    ):
+        """
+        Get Document by ID
+        :param client_id: ID of the client
+        :param token: Access token
+        :param project_id: RGOC Code of the project
+        :param id: Numeric ID of the document
+        """
+        kf = KairnialDocumentService(client_id=client_id, token=token, project_id=project_id)
+        return kf.get(id=id)
+
     @classmethod
     def extract_attachment_data(cls, attachment: InMemoryUploadedFile):
         """
@@ -159,6 +177,7 @@ class Document(PaginatedModel):
         :param token: Access token
         :param project_id: RGOC Code of the project
         :param serialized_data: DocumentCreateSerializer validated data
+        :param attachment: File field
         :return: DocumentSerializer data
         """
         name, extension, \
@@ -177,3 +196,74 @@ class Document(PaginatedModel):
         serialized_data['typeFichier'] = file_type
         fs = KairnialDocumentService(client_id=client_id, token=token, project_id=project_id)
         return fs.create(document_create_serializer=serialized_data, content=file_content)
+
+    @classmethod
+    def update(
+            cls,
+            client_id: str,
+            token: str,
+            project_id: str,
+            serialized_data: dict,
+            attachment
+    ):
+        """
+        Revise a Kairnial Document
+        :param client_id: ID of the client
+        :param token: Access token
+        :param project_id: RGOC Code of the project
+        :param serialized_data: DocumentCreateSerializer validated data
+        :param attachment: File field
+        :return: DocumentSerializer data
+        """
+        name, extension, \
+        file_type, \
+        file_handler, \
+        file_hash, \
+        file_size, \
+        file_content = cls.extract_attachment_data(
+            attachment=attachment
+        )
+        if 'nom' not in serialized_data:
+            serialized_data['nom'] = name
+        serialized_data['ext'] = extension
+        serialized_data['hash'] = file_hash
+        serialized_data['size'] = file_size
+        serialized_data['typeFichier'] = file_type
+        fs = KairnialDocumentService(client_id=client_id, token=token, project_id=project_id)
+        return fs.revise(document_create_serializer=serialized_data, content=file_content)
+
+    @staticmethod
+    def archive(
+            client_id: str,
+            token: str,
+            project_id: str,
+            id: int,
+    ):
+        """
+        Archive a Kairnial Document
+        :param client_id: ID of the client
+        :param token: Access token
+        :param project_id: RGOC Code of the project
+        :param id: Numeric ID of the document
+        """
+        fs = KairnialDocumentService(client_id=client_id, token=token, project_id=project_id)
+        return fs.archive(id=id)
+
+
+class ApprovalType(PaginatedModel):
+
+    @staticmethod
+    def list(
+            client_id: str,
+            token: str,
+            project_id: str
+    ):
+        """
+        List document approval types
+        :param client_id: ID of the client
+        :param token: Access token
+        :param project_id: RGOC Code of the project
+        :return:
+        """
+        kf = KairnialApprovalTypeService(client_id=client_id, token=token, project_id=project_id)
+        return kf.list().get('notes')

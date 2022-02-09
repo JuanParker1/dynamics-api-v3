@@ -31,7 +31,7 @@ class FolderViewSet(PaginatedViewSet):
                              required=False, description=_("Parent folder ID")),
             FolderQuerySerializer,  # serializer fields are converted to parameters
         ],
-        responses={200: OpenApiTypes.STR, 400: ErrorSerializer},
+        responses={200: FolderSerializer, 400: ErrorSerializer},
         methods=["GET"]
     )
     def list(self, request: HttpRequest, client_id: str, project_id: str):
@@ -80,7 +80,7 @@ class FolderViewSet(PaginatedViewSet):
             OpenApiParameter(name='id', type=OpenApiTypes.INT, location='path',
                              required=False, description=_("Folder numeric ID")),
         ],
-        responses={200: OpenApiTypes.STR, 400: ErrorSerializer, 404: OpenApiTypes.STR},
+        responses={200: FolderSerializer, 400: ErrorSerializer, 404: OpenApiTypes.STR},
         methods=["GET"]
     )
     def retrieve(self, request: HttpRequest, client_id: str, project_id: str, pk: int):
@@ -178,6 +178,10 @@ class FolderViewSet(PaginatedViewSet):
     def destroy(self, request: HttpRequest, client_id: str, project_id: str, pk: str):
         """
         Archive folder
+        :param request: HTTPRequest
+        :param client_id: ID of the client
+        :param project_id: Project RGOC
+        :param pk: UUID of the folder
         """
         archived = Folder.archive(
             client_id=client_id,
