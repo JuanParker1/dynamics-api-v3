@@ -77,3 +77,69 @@ class ApprovalTypeSerializer(serializers.Serializer):
         required=False,
         read_only=True
     )
+
+
+class ApprovalSerializer(serializers.Serializer):
+    """
+    Serializer for Approval object (Visa from Kairnial)
+    """
+    document_id = serializers.IntegerField(
+        label=_('ID of the document'),
+        help_text=_('Numeric ID of the document'),
+        source='entete_id',
+        read_only=True
+    )
+    archived = serializers.BooleanField(
+        label=_('Archived'),
+        help_text=_('Is approval type archived'),
+        source='archive',
+        default=False,
+        read_only=True
+    )
+    workflow_id = serializers.IntegerField(
+        label=_('ID of the workflow'),
+        help_text=_('Numeric ID of the workflow'),
+        source='fv_circuit',
+        read_only=True
+    )
+    approval_id = serializers.IntegerField(
+        label=_('ID of the approval'),
+        help_text=_('Numeric ID of the approval'),
+        source='fv_visa',
+        read_only=True
+    )
+    approval_step_id = serializers.IntegerField(
+        label=_('ID of the approval step'),
+        help_text=_('Numeric ID of the step of the approval'),
+        source='fv_subvisa',
+        read_only=True
+    )
+    approval_date = serializers.DateField(
+        label=_('Date of the approval step'),
+        help_text=_('Date of the approval step'),
+        source='fv_date',
+        read_only=True
+    )
+    comment = serializers.CharField(
+        label=_('Approval step comment'),
+        help_text=_('Comment on the approval step'),
+        read_only=True
+    )
+    title = serializers.CharField(
+        label=_('Approval title'),
+        help_text=_('Title of the approval'),
+        source='titleVisa',
+        read_only=True
+    )
+    number = serializers.IntegerField(
+        label=_('Approval number'),
+        help_text=_('Approval number'),
+        source='numVisa',
+        read_only=True
+    )
+    chrono_number = serializers.IntegerField(
+        label=_('Approval chronological number'),
+        help_text=_('Approval chronological number'),
+        source='numChronoVisa',
+        read_only=True
+    )

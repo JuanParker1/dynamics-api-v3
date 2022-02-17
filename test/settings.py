@@ -191,7 +191,7 @@ LOGGING = {
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Kairnial API',
     'DESCRIPTION': """
-<h1>Kairnial API version 2</h1>
+<h1>Kairnial API version 3 - Beta</h1>
 
 <p>This API is a REST frontend to the Kairnial Web Services.</p>
 <p>To use this API, you must obtain a client ID, a user API key and an API secret from our customer support.</p>
@@ -208,7 +208,7 @@ e.g.: Authenticate: Bearer <Token>
 Use <a href="#/projects/projects_list">project list</a> to select a project.
 
 """,
-    'VERSION': '1.99.0',
+    'VERSION': '2.90.1',
     # OTHER SETTINGS
     "APPEND_COMPONENTS": {
         "securitySchemes": {
@@ -225,10 +225,12 @@ Use <a href="#/projects/projects_list">project list</a> to select a project.
 
 from dynamics_apis.settings import *
 
-# KAIRNIAL_AUTH_PUBLIC_KEY = load_key(path=os.path.join(os.path.dirname(__file__), os.environ.get(
-#     'KAIRNIAL_AUTH_PUBLIC_KEY_PATH', '')))
-#
-KAIRNIAL_AUTH_PUBLIC_KEY = os.environ.get('KAIRNIAL_AUTH_PUBLIC_KEY')
+if os.environ.get('KAIRNIAL_AUTH_PUBLIC_KEY'):
+    KAIRNIAL_AUTH_PUBLIC_KEY = os.environ.get('KAIRNIAL_AUTH_PUBLIC_KEY')
+else:
+    KAIRNIAL_AUTH_PUBLIC_KEY = load_key(
+        path=os.path.join(os.path.dirname(__file__), os.environ.get('KAIRNIAL_AUTH_PUBLIC_KEY_PATH', ''))
+    )
 
 KIARNIAL_AUTH_DOMAIN = os.environ.get('KAIRNIAL_AUTH_DOMAIN', '')
 # Kairnial auth server public key for token validation
