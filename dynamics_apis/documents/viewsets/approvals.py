@@ -13,8 +13,8 @@ from dynamics_apis.common.serializers import ErrorSerializer
 from dynamics_apis.common.services import KairnialWSServiceError
 from dynamics_apis.common.viewsets import project_parameters, PaginatedResponse, \
     pagination_parameters, PaginatedViewSet
-from ..models import ApprovalType
-from ..serializers.approvals import ApprovalTypeSerializer
+from ..models import ApprovalType, Approval
+from ..serializers.approvals import ApprovalTypeSerializer, ApprovalSerializer
 
 
 class ApprovalTypeViewSet(PaginatedViewSet):
@@ -31,7 +31,7 @@ class ApprovalTypeViewSet(PaginatedViewSet):
     )
     def list(self, request: HttpRequest, client_id: str, project_id: str):
         """
-        List users on a projects
+        List approval types on a projects
         :param request:
         :param client_id: Client ID token
         :param project_id: Project RGOC ID
@@ -92,3 +92,55 @@ class ApprovalTypeViewSet(PaginatedViewSet):
         else:
             return Response(_("Approval type could not be archived"),
                             status=status.HTTP_406_NOT_ACCEPTABLE)
+
+
+@extend_schema(
+        summary=_("List Kairnial approvals for folder"),
+        description=_("List Kairnial approvals on a folder"),
+        parameters=project_parameters + pagination_parameters + [
+            OpenApiParameter(name='folder_id', type=OpenApiTypes.INT, location='path',
+                             required=False, description=_("Folder numeric ID")),
+        ],
+        responses={200: ApprovalTypeSerializer, 400: ErrorSerializer},
+        methods=["GET"]
+    )
+class ApprovalViewSet(PaginatedViewSet):
+    """
+    Viewset for approvals
+    """
+
+    def list(self, request: HttpRequest, client_id: str, project_id: str, folder_id: int):
+        """
+        List approvals  on a folder
+        :param request:
+        :param client_id: Client ID token
+        :param project_id: Project RGOC ID
+        :param folder_id: ID of the folder
+        :return:
+        """
+        page_offset, page_limit = self.get_pagination(request=request)
+        try:
+            total, approval_list, page_offset, page_limit = Approval.paginated_list(
+                client_id=client_id,
+                token=request.token,
+                project_id=project_id,
+                folder_id=folder_id,
+                page_offset=page_offset,
+                page_limit=page_limit
+            )
+
+            serializer = ApprovalSerializer(approval_list, many=True)
+            return PaginatedResponse(
+                data=serializer.data,
+                total=total,
+                page_offset=page_offset,
+                page_limit=page_limit
+            )
+        except (KairnialWSServiceError, KeyError) as e:
+            error = ErrorSerializer({
+                'status': 400,
+                'code': getattr(e, 'status', 0),
+                'description': getattr(e, 'message', str(e))
+            })
+            return Response(error.data, content_type='application/json',
+                            status=status.HTTP_400_BAD_REQUEST)

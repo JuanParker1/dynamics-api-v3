@@ -288,3 +288,29 @@ class ApprovalType(PaginatedModel):
         """
         ats = KairnialApprovalTypeService(client_id=client_id, token=token, project_id=project_id)
         return ats.archive(id=id)
+
+
+class Approval(PaginatedModel):
+    """
+    Model for document approval
+    """
+
+    @staticmethod
+    def list(
+            client_id: str,
+            token: str,
+            project_id: str,
+            folder_id: int
+    ):
+        """
+        List document approval types
+        :param client_id: ID of the client
+        :param token: Access token
+        :param project_id: RGOC Code of the project
+        :param folder_id: Numeric ID of the folder
+        :return:
+        """
+        # Get list of documents for a given folder
+        document_ids = [doc.get['entete_id'] for doc in Document.list(filters=[{'id': folder_id}])]
+        ka = KairnialApprovalService(client_id=client_id, token=token, project_id=project_id)
+        return ka.list(document_ids=document_ids).get('')

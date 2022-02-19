@@ -242,7 +242,7 @@ class KairnialApprovalService(KairnialWSService):
     """
     service_domain = 'fichiers'
 
-    def list(self, parent_id: str = None, filters: dict = None, offset: int = 0,
+    def list(self, folder_id: str = None, filters: dict = None, offset: int = 0,
              limit: int = getattr(settings, 'PAGE_SIZE', 100)):
         """
         List documents
@@ -286,4 +286,27 @@ class KairnialApprovalTypeService(KairnialWSService):
             parameters=[{'id': id}, ],
             format='int',
             use_cache=False
+        )
+
+
+class KairnialApprovalService(KairnialWSService):
+    """
+    Kairnial service for approvals
+    """
+    service_domain = 'fichiers'
+
+    def list(self, document_ids: [int]):
+        """
+        List approvals for a set of documents
+        :param document_ids: List of Numeric document IDs
+        """
+        parameters = [
+            {
+                'filesId': document_ids
+            },
+        ]
+        return self.call(
+            action='getFilesVisas',
+            parameters=parameters,
+            use_cache=True
         )
