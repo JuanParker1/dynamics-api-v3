@@ -148,21 +148,27 @@ class ApprovalSerializer(serializers.Serializer):
 
 
 class ApprovalUpdateSerializer(serializers.Serializer):
+    """
+    Serializer to update visa on document
+    Requires knowledge of workflow_id and step_id.
+    See /{client_id}/{project_id}/approval_types/
+    """
     document_id = serializers.IntegerField(
         label=_('ID of the document'),
         help_text=_('Numeric ID of the document'),
-        source='fv_filesenteteid',
         read_only=True
     )
     approval_id = serializers.IntegerField(
         label=_('ID of the approval'),
         help_text=_('Numeric ID of the approval'),
-        source='fv_id',
         read_only=True
     )
     workflow_id = serializers.IntegerField(
         label=_('ID of the workflow'),
         help_text=_('Numeric ID of the workflow'),
-        source='fv_circuit',
         read_only=True
+    )
+    status = serializers.IntegerField(
+        label=_('Workflow step ID'),
+        help_text=_('ID of the workflow step'),
     )

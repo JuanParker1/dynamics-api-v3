@@ -14,7 +14,9 @@ from dynamics_apis.common.services import KairnialWSServiceError
 from dynamics_apis.common.viewsets import project_parameters, PaginatedResponse, \
     pagination_parameters, PaginatedViewSet
 from ..models import ApprovalType, Approval
-from ..serializers.approvals import ApprovalTypeSerializer, ApprovalSerializer
+from ..serializers.approvals import ApprovalTypeSerializer, ApprovalSerializer, \
+    ApprovalUpdateSerializer
+from ..serializers.documents import DocumentFilterSerializer
 
 
 class ApprovalTypeViewSet(PaginatedViewSet):
@@ -94,21 +96,24 @@ class ApprovalTypeViewSet(PaginatedViewSet):
                             status=status.HTTP_406_NOT_ACCEPTABLE)
 
 
-@extend_schema(
-        summary=_("List Kairnial approvals for folder"),
-        description=_("List Kairnial approvals on a folder"),
-        parameters=project_parameters + pagination_parameters,
-        responses={200: ApprovalSerializer, 400: ErrorSerializer},
-        methods=["GET"]
-    )
+
 class ApprovalViewSet(PaginatedViewSet):
     """
     Viewset for approvals
     """
 
+    @extend_schema(
+        summary=_("List Kairnial approvals for folder"),
+        description=_("List Kairnial approvals on a folder"),
+        parameters=project_parameters + pagination_parameters + [
+            DocumentFilterSerializer
+        ],
+        responses={200: ApprovalSerializer, 400: ErrorSerializer},
+        methods=["GET"]
+    )
     def list(self, request: HttpRequest, client_id: str, project_id: str):
         """
-        List approvals  on a folder
+        List approvals on a project
         :param request:
         :param client_id: Client ID token
         :param project_id: Project RGOC ID
@@ -142,3 +147,32 @@ class ApprovalViewSet(PaginatedViewSet):
             })
             return Response(error.data, content_type='application/json',
                             status=status.HTTP_400_BAD_REQUEST)
+
+
+
+    def retrieve(self, request: HttpRequest, client_id: str, project_id: str, pk: int):
+        """
+        Get approval detail by ID
+        :param request:
+        :param client_id: Client ID token
+        :param project_id: Project RGOC ID
+        :param folder_id: ID of the folder
+        :return:
+        """
+        # TODO: Get only one approval
+        return Response("Not implemented", status=status.HTTP_501_NOT_IMPLEMENTED)
+
+    @extend_schema(
+        summary=_("List Kairnial approvals for folder"),
+        description=_("List Kairnial approvals on a folder"),
+        parameters=project_parameters + pagination_parameters + [
+            ApprovalUpdateSerializer,
+        ],
+        responses={200: ApprovalSerializer, 400: ErrorSerializer},
+        methods=["PUT"]
+    )
+    def update(self, request: HttpRequest, client_id: str, project_id: str, pk: int):
+        """
+        Approval update view
+        """
+

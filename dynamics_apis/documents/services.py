@@ -282,3 +282,14 @@ class KairnialApprovalService(KairnialWSService):
             parameters=parameters,
             use_cache=True
         )
+
+    def update(self, document_id, workflow_id, approval_id, new_status):
+        """
+        Archive existing pproval step and create a new one
+        """
+        parameters = [document_id, workflow_id, approval_id, new_status]
+        return self.call(
+            action='updateVisaNeeded',
+            parameters=parameters,
+            use_cache=True
+        )

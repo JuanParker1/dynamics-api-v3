@@ -231,7 +231,8 @@ class DocumentQuerySerializer(serializers.Serializer):
     )
     archived = serializers.ChoiceField(
         label=_('Only retrieve archived files'),
-        help_text=_('0. Do not filter, 1. Archived documents in folder, 2. fetch archived documents from all folders'),
+        help_text=_(
+            '0. Do not filter, 1. Archived documents in folder, 2. fetch archived documents from all folders'),
         choices=[0, 1, 2],
         source='only_archive',
         required=False
@@ -249,7 +250,8 @@ class DocumentQuerySerializer(serializers.Serializer):
     )
     search_naming_convention = serializers.DictField(
         label=_('Search elements of a naming convention'),
-        help_text=_('Dictionary with the convention ID as key and the value to search for as value'),
+        help_text=_(
+            'Dictionary with the convention ID as key and the value to search for as value'),
         source='searchListNomenclature',
         allow_null=True,
         allow_empty=True,
@@ -638,6 +640,171 @@ class LinkedObjectSerializer(serializers.Serializer):
         label=_('destination type'),
         help_text=_('Type of the destination object'),  # TODO: What is that ?
         required=False
+    )
+
+
+class DocumentFilterSerializer(serializers.Serializer):
+    """
+    Serializer to handle document query filter from $_FILES_FILTERS
+    """
+    approved_documents = serializers.ChoiceField(
+        label=_('Approved documents'),
+        help_text=_('ALL to see al approved documents'),
+        choices=['ALL', ''],
+        required=False,
+        allow_blank=True,
+        allow_null=True,
+        source='filesVised'
+    )
+    approved_workflows = serializers.JSONField(
+        label=_('documents with workflow approved'),
+        help_text=_('{"dictionnary of workflows and steps: workflow_id": [steps], }'),
+        allow_null=True,
+        required=False,
+        source='listeCircuitsVised',
+        default={}
+    )
+    documents_to_approve = serializers.BooleanField(
+        label=_('filter on documents to approve'),
+        help_text=_('Boolean value'),
+        allow_null=True,
+        required=False,
+        default=False,
+        source='filesToVisas'
+    )
+    print_statement = serializers.IntegerField(
+        label=_('Document statement'),
+        help_text=_('0: all statements, 1: with statement, 2: without statement'),
+        default=0,
+        source='printStatementState'
+
+    )
+    statement = serializers.IntegerField(
+        label=_('Document statement'),
+        help_text=_('0: all statements, 1: with statement, 2: without statement'),
+        default=0,
+        source='statementState'
+    )
+    global_check = serializers.BooleanField(
+        label=_('Get all files'),
+        help_text=_('if true, list all files, whether or not they are in the folder'),
+        source='overallCheck',
+        default=False
+    )
+    created_by = serializers.ListSerializer(
+        label=_('createor IDs'),
+        help_text=_('List of creator ids'),
+        required=True,
+        child=serializers.IntegerField(),
+        source='createByUsers'
+    )
+    custom_fields = CustomFieldSerializer(
+        label=_('Custom fields'),
+        help_text=_('List of custom fields'),
+        many=True,
+        required=False,
+        allow_null=True,
+        source='customFields'
+    )
+    uuid = serializers.UUIDField(
+        label=_('Document UUID'),
+        help_text=_('UUID of the document in the string form'),
+        allow_null=True,
+        required=False,
+        source='search_by_uuid'
+    )
+    id = serializers.IntegerField(
+        label=_('Document numeric ID'),
+        help_text=_('Numeric ID of the document'),
+        allow_null=True,
+        required=False,
+        source='getSingleID'
+    )
+    workflow_list = serializers.JSONField(
+        label=_('documents with workflow'),
+        help_text=_('{"dictionnary of workflows and steps: workflow_id": [steps], }'),
+        allow_null=True,
+        required=False,
+        source='listCircuits',
+        default={}
+    )
+    created_after = serializers.DateField(
+        label=_('Documents created after date'),
+        help_text=_('Document with createdate > date'),
+        allow_null=True,
+        required=False,
+        source='fromTimeAllDir'
+    )
+    created_before = serializers.DateField(
+        label=_('Documents created before date'),
+        help_text=_('Document with approval date before date'),
+        allow_null=True,
+        required=False,
+        source='endDate'
+    )
+    to_approval_date = serializers.DateField(
+        label=_('Approval date below'),
+        help_text=_('Document with approval date lower than date'),
+        allow_null=True,
+        required=False,
+        source='endVisaDate'
+    )
+    from_approval_date = serializers.DateField(
+        label=_('Approval date after'),
+        help_text=_('Document with approval date after date'),
+        allow_null=True,
+        required=False,
+        source='startVisaDate'
+    )
+    sent = serializers.ChoiceField(
+        label=_('Sent documents'),
+        help_text=_('0: all values, 1: with paper sent date, 2: without paper sent date'),
+        choices=[0, 1, 2],
+        default=0,
+        source='searchSendDateFlag'
+    )
+    to_send_date = serializers.DateField(
+        label=_('Send date below'),
+        help_text=_('Document with send date lower than date'),
+        allow_null=True,
+        required=False,
+        source='endSendDate'
+    )
+    from_send_date = serializers.DateField(
+        label=_('Send date after'),
+        help_text=_('Document with send date after date'),
+        allow_null=True,
+        required=False,
+        source='startSendDate'
+    )
+    answered_approvals = serializers.JSONField(
+        label=_('documents with answered approvals'),
+        help_text=_('{"dictionnary of workflows and steps: workflow_id": [steps], }'),
+        allow_null=True,
+        required=False,
+        source='typedCircuitAndWithAnswer',
+        default = {}
+    )
+    unanswered_approvals = serializers.JSONField(
+        label=_('documents without answered approvals'),
+        help_text=_('{"dictionnary of workflows and steps: workflow_id": [steps], }'),
+        allow_null=True,
+        required=False,
+        source='typedCircuitAndWithoutAnswer',
+        default={}
+    )
+    approvers = serializers.ListSerializer(
+        label=_('List of approvers'),
+        help_text=_('List of user IDs'),
+        source='userVisaSelected',
+        child=serializers.IntegerField(),
+        required=False
+    )
+    search = serializers.CharField(
+        label=_('Regex search of file'),
+        help_text=_('Search with a regular expression'),
+        source='regex',
+        allow_null=True
     )
 
 

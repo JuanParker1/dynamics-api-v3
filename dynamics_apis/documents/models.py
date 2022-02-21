@@ -314,3 +314,31 @@ class Approval(PaginatedModel):
         for fileid, list_of_approvals in ka.list().get('visas').items():
             output.extend(list_of_approvals)
         return output
+
+    @staticmethod
+    def update(
+            client_id: str,
+            token: str,
+            project_id: str,
+            document_id,
+            workflow_id,
+            approval_id,
+            new_status
+    ) -> [int, int, bool]:
+        """
+        Archive existing approval step and create a new step
+        :param client_id: ID of the client
+        :param token: access token
+        :param project_id: Project RGOC
+        :param document_id: Numeric ID of the document
+        :param workflow_id: Numeric ID of the workflow
+        :param approval_id: Numeric ID of the approval
+        :param new status: Numeric ID of the approval step
+        return: [Approval ID, Step ID, ok?]
+        """
+        ka = KairnialApprovalService(client_id=client_id, token=token, project_id=project_id)
+        return ka.update(
+            document_id=document_id,
+            workflow_id=workflow_id,
+            approval_id=approval_id,
+            new_status=new_status)
