@@ -168,11 +168,23 @@ class ApprovalViewSet(PaginatedViewSet):
         parameters=project_parameters + pagination_parameters + [
             ApprovalUpdateSerializer,
         ],
-        responses={200: ApprovalSerializer, 400: ErrorSerializer},
+        responses={200: OpenApiTypes.INT, 400: ErrorSerializer},
         methods=["PUT"]
     )
     def update(self, request: HttpRequest, client_id: str, project_id: str, pk: int):
         """
         Approval update view
         """
-
+        aus = ApprovalUpdateSerializer(data=request.data)
+        if not aus.is_valid():
+            return Response(aus.errors, content_type='application/json', status=status.HTTP_400_BAD_REQUEST)
+        approval_id, step_id, ok = Approval.update(
+            client_id=client_id,
+            project_id=project_id,
+            document_id=aus.validated_data.get('document_id'),
+            workflow_id=aus.validated_data.get('workflow_id'),
+            approval_id=pk,
+            new_status=aus.validated_data.get('new_status'),
+        )
+        if ok:
+            return Response(step_id, content_type='text/text', status=status.HTTP_200_OK)
