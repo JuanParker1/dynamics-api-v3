@@ -13,7 +13,7 @@ from rest_framework.viewsets import ViewSet
 
 from dynamics_apis.common.viewsets import project_parameters
 from dynamics_apis.common.serializers import ErrorSerializer
-from dynamics_apis.users.models.users import User
+from dynamics_apis.users.models.users import User, UserNotFound
 from dynamics_apis.users.serializers.users import UserSerializer, UserCreationSerializer, UserQuerySerializer, \
     ProjectMemberSerializer, ProjectMemberCountSerializer, UserGroupSerializer, UserInviteSerializer, \
     UserInviteResponseSerializer, UserMultiInviteSerializer, UserMultiInviteResponseSerializer, UserUUIDSerializer
@@ -43,12 +43,14 @@ class UserViewSet(ViewSet):
         :param project_id: Project RGOC ID
         :return:
         """
+        serializer = UserQuerySerializer(data=request.GET)
+        serializer.is_valid()
         try:
             user_list = User.list(
                 client_id=client_id,
                 token=request.token,
                 project_id=project_id,
-                filters=request.GET
+                filters=serializer.validated_data
             )
             serializer = UserUUIDSerializer(user_list, many=True)
             return Response(serializer.data, content_type="application/json")
@@ -119,10 +121,10 @@ class UserViewSet(ViewSet):
                 token=request.token,
                 project_id=project_id,
                 pk=pk
-            )[0]
+            )
             serializer = UserUUIDSerializer(user)
             return Response(serializer.data, content_type="application/json")
-        except IndexError:
+        except UserNotFound:
             return Response(_("User not found"), status=status.HTTP_404_NOT_FOUND)
 
 

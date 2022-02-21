@@ -1,3 +1,4 @@
+import datetime
 import json
 import logging
 from hashlib import sha1
@@ -19,6 +20,17 @@ class KairnialWSServiceError(Exception):
         self.message = message
 
 
+def json_with_dates(obj):
+    """
+    handler for json date serializer
+    """
+    if isinstance(obj, (datetime.datetime, datetime.date)):
+        return obj.isoformat()
+    else:
+        return str(obj)
+
+
+
 class KairnialService:
     service_domain = ''
     client_id = None
@@ -33,7 +45,7 @@ class KairnialService:
             'headers': self._body_headers(),
             'params': parameters,
             'service': self._service(service=service, action=action)
-        })
+        }, default=json_with_dates)
 
     def get_headers(self) -> dict:
         """
@@ -95,7 +107,7 @@ class KairnialService:
             data=data
         )
         logger.debug(response.status_code)
-        logger.debug(response.content)
+        logger.debug(len(response.content))
         if response.status_code != 200:
             logger.debug(response.status_code)
             logger.debug(response.content)
@@ -129,7 +141,6 @@ class KairnialService:
                 output = response.content
             if use_cache:
                 cache.set(cache_key, output, timeout=30)
-            logger.debug(output)
             return output
 
 

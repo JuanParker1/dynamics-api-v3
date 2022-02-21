@@ -1,0 +1,27 @@
+version: '3'
+
+services:
+  rp:
+    image: nginx:latest
+  depends_on:
+    - apis
+  cache:
+    image: redis:latest
+  apis:
+    build: dynamics-api-v3
+    environment:
+      - DEFAULT_KAIRNIAL_API_KEY = ${DEFAULT_KAIRNIAL_API_KEY}
+      - DEFAULT_KAIRNIAL_API_SECRET = ${DEFAULT_KAIRNIAL_API_SECRET}
+      - DEFAULT_KAIRNIAL_CLIENT_ID = ${DEFAULT_KAIRNIAL_CLIENT_ID}
+      - DEFAULT_KAIRNIAL_PROJECT_ID = ${KAIRNIAL_AUTH_DOMAIN}
+      - KAIRNIAL_AUTH_DOMAIN = ${KAIRNIAL_AUTH_DOMAIN}
+      - KAIRNIAL_AUTH_PUBLIC_KEY_PATH = ${KAIRNIAL_AUTH_PUBLIC_KEY_PATH}
+      - KAIRNIAL_AUTH_PUBLIC_KEY = ${KAIRNIAL_AUTH_PUBLIC_KEY}
+      - KAIRNIAL_CROSS_SERVER = ${KAIRNIAL_CROSS_SERVER}
+      - KAIRNIAL_WS_SERVER = ${KAIRNIAL_WS_SERVER}
+      - KAIRNIAL_FRONT_SERVER = ${KAIRNIAL_FRONT_SERVER}
+      - KAIRNIAL_API_SERVER = ${KAIRNIAL_API_SERVER}
+    ports:
+      - "8000:8000"
+    depends_on:
+      - cache

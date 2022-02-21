@@ -62,8 +62,10 @@ class ProjectMemberSerializer(serializers.Serializer):
     """
     id = serializers.IntegerField(label=_("User unique ID"), read_only=True, source='account_id')
     email = serializers.CharField(label=_("User email"), required=True, source='account_email')
-    full_name = serializers.CharField(label=_("User full name"), required=True, source='account_firstname')
-    archived = serializers.CharField(label=_("User has been archived"), required=False, source='account_achive',
+    full_name = serializers.CharField(label=_("User full name"), required=True,
+                                      source='account_firstname')
+    archived = serializers.CharField(label=_("User has been archived"), required=False,
+                                     source='account_achive',
                                      default=0)
 
 
@@ -71,7 +73,8 @@ class ProjectMemberCountSerializer(serializers.Serializer):
     """
     Serializer for number of users on a project
     """
-    count = serializers.IntegerField(label=_("Number of users on this project"), read_only=True, source='nbUsers')
+    count = serializers.IntegerField(label=_("Number of users on this project"), read_only=True,
+                                     source='nbUsers')
 
 
 class UserSerializer(UserCreationSerializer):
@@ -125,18 +128,26 @@ class UserQuerySerializer(serializers.Serializer):
     """
     Serializer for user filtering
     """
-    full_name = serializers.CharField(label=_("Full name case insensitive content filter"),
-                                      help_text=_("Filter by user full name. Case insensitive content filter"),
-                                      read_only=True,
-                                      required=False)
-    email = serializers.CharField(label=_("email case insensitive content filter"),
-                                  help_text=_("Filter by user email. Case insensitive content filter"),
-                                  required=False)
-    archived = serializers.BooleanField(label=_("Boolean filter on archived status"),
-                                        help_text=_("Is user archived, 0 or 1"), required=False)
-    groups = serializers.CharField(label=_("List users for given numerical group IDs separated by a comma"),
-                                   required=False)
-
+    full_name = serializers.CharField(
+        label=_("Full name case insensitive content filter"),
+        help_text=_("Filter by user full name. Case insensitive content filter"),
+        read_only=True,
+        required=False,
+        source='account_firstname')
+    email = serializers.CharField(
+        label=_("email case insensitive content filter"),
+        help_text=_("Filter by user email. Case insensitive content filter"),
+        required=False,
+        source='account_email')
+    archived = serializers.BooleanField(
+        label=_("Boolean filter on archived status"),
+        help_text=_("Is user archived, 0 or 1"),
+        required=False,
+        source='account_achive')
+    groups = serializers.ListField(
+        label=_("List users for given numerical group IDs"),
+        child=serializers.IntegerField(),
+        required=False)
 
 class UserGroupSerializer(serializers.Serializer):
     """
@@ -147,7 +158,6 @@ class UserGroupSerializer(serializers.Serializer):
         help_text=_("List of numeric group IDs"),
         child=serializers.IntegerField()
     )
-
 
 class UserInviteSerializer(serializers.Serializer):
     """
@@ -177,7 +187,6 @@ class UserInviteSerializer(serializers.Serializer):
         source='lng'
     )
 
-
 class UserMultiInviteSerializer(serializers.Serializer):
     users = UserInviteSerializer(
         label=_('List of users'),
@@ -185,7 +194,6 @@ class UserMultiInviteSerializer(serializers.Serializer):
         many=True,
         required=True
     )
-
 
 class InvitedUserSerializer(serializers.Serializer):
     id = serializers.UUIDField(
@@ -219,7 +227,6 @@ class InvitedUserSerializer(serializers.Serializer):
         help_text=_("Language of the user interface"),
         required=False, source='_language',
         default=0)
-
 
 class UserInviteResponseSerializer(serializers.Serializer):
     admin_confirmation = serializers.BooleanField(
@@ -256,7 +263,6 @@ class UserInviteResponseSerializer(serializers.Serializer):
         label=_('Created user'),
         help_text=_('User details')
     )
-
 
 class UserMultiInviteResponseSerializer(serializers.Serializer):
     users = UserInviteResponseSerializer(many=True)
