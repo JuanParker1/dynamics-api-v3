@@ -236,33 +236,6 @@ class KairnialDocumentService(KairnialWSService):
         )
 
 
-class KairnialApprovalService(KairnialWSService):
-    """
-    Kairnial Service for Document Approval
-    """
-    service_domain = 'fichiers'
-
-    def list(self, folder_id: str = None, filters: dict = None, offset: int = 0,
-             limit: int = getattr(settings, 'PAGE_SIZE', 100)):
-        """
-        List documents
-        :param parent_id: ID of the parent folder, optional
-        :param filters: Dictionnary of filters
-        :param offset: value of first element in a list
-        :param limit: number of elements to fetch
-        :return:
-        """
-        # TODO: extract all document approvals from getFilesFromCat
-        parameters = []
-        if filters:
-            parameters = [{key: value} for key, value in filters.items()]
-        parameters += [
-            {'LIMITSKIP': offset},
-            {'LIMITTAKE': limit}
-        ]
-        return self.call(action='getFilesFromCat', parameters=parameters)
-
-
 class KairnialApprovalTypeService(KairnialWSService):
     """
     Kairnial Service for Document Approval types
@@ -295,18 +268,17 @@ class KairnialApprovalService(KairnialWSService):
     """
     service_domain = 'fichiers'
 
-    def list(self, document_ids: [int]):
+    def list(self):
         """
         List approvals for a set of documents
         :param document_ids: List of Numeric document IDs
         """
         parameters = [
             {
-                'filesId': document_ids
             },
         ]
         return self.call(
-            action='getFilesVisas',
+            action='getFilesHeaderAndVisas',
             parameters=parameters,
             use_cache=True
         )

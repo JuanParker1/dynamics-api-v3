@@ -86,13 +86,13 @@ class ApprovalSerializer(serializers.Serializer):
     document_id = serializers.IntegerField(
         label=_('ID of the document'),
         help_text=_('Numeric ID of the document'),
-        source='entete_id',
+        source='fv_filesenteteid',
         read_only=True
     )
     archived = serializers.BooleanField(
         label=_('Archived'),
         help_text=_('Is approval type archived'),
-        source='archive',
+        source='fv_archive',
         default=False,
         read_only=True
     )
@@ -105,7 +105,7 @@ class ApprovalSerializer(serializers.Serializer):
     approval_id = serializers.IntegerField(
         label=_('ID of the approval'),
         help_text=_('Numeric ID of the approval'),
-        source='fv_visa',
+        source='fv_id',
         read_only=True
     )
     approval_step_id = serializers.IntegerField(
@@ -114,10 +114,12 @@ class ApprovalSerializer(serializers.Serializer):
         source='fv_subvisa',
         read_only=True
     )
-    approval_date = serializers.DateField(
+    approval_date = serializers.IntegerField(
         label=_('Date of the approval step'),
         help_text=_('Date of the approval step'),
         source='fv_date',
+        allow_null=True,
+        required=False,
         read_only=True
     )
     comment = serializers.CharField(
@@ -131,7 +133,7 @@ class ApprovalSerializer(serializers.Serializer):
         source='titleVisa',
         read_only=True
     )
-    number = serializers.IntegerField(
+    number = serializers.CharField(
         label=_('Approval number'),
         help_text=_('Approval number'),
         source='numVisa',
@@ -141,5 +143,26 @@ class ApprovalSerializer(serializers.Serializer):
         label=_('Approval chronological number'),
         help_text=_('Approval chronological number'),
         source='numChronoVisa',
+        read_only=True
+    )
+
+
+class ApprovalUpdateSerializer(serializers.Serializer):
+    document_id = serializers.IntegerField(
+        label=_('ID of the document'),
+        help_text=_('Numeric ID of the document'),
+        source='fv_filesenteteid',
+        read_only=True
+    )
+    approval_id = serializers.IntegerField(
+        label=_('ID of the approval'),
+        help_text=_('Numeric ID of the approval'),
+        source='fv_id',
+        read_only=True
+    )
+    workflow_id = serializers.IntegerField(
+        label=_('ID of the workflow'),
+        help_text=_('Numeric ID of the workflow'),
+        source='fv_circuit',
         read_only=True
     )

@@ -97,11 +97,8 @@ class ApprovalTypeViewSet(PaginatedViewSet):
 @extend_schema(
         summary=_("List Kairnial approvals for folder"),
         description=_("List Kairnial approvals on a folder"),
-        parameters=project_parameters + pagination_parameters + [
-            OpenApiParameter(name='folder_id', type=OpenApiTypes.INT, location='path',
-                             required=False, description=_("Folder numeric ID")),
-        ],
-        responses={200: ApprovalTypeSerializer, 400: ErrorSerializer},
+        parameters=project_parameters + pagination_parameters,
+        responses={200: ApprovalSerializer, 400: ErrorSerializer},
         methods=["GET"]
     )
 class ApprovalViewSet(PaginatedViewSet):
@@ -109,7 +106,7 @@ class ApprovalViewSet(PaginatedViewSet):
     Viewset for approvals
     """
 
-    def list(self, request: HttpRequest, client_id: str, project_id: str, folder_id: int):
+    def list(self, request: HttpRequest, client_id: str, project_id: str):
         """
         List approvals  on a folder
         :param request:
@@ -124,10 +121,11 @@ class ApprovalViewSet(PaginatedViewSet):
                 client_id=client_id,
                 token=request.token,
                 project_id=project_id,
-                folder_id=folder_id,
                 page_offset=page_offset,
                 page_limit=page_limit
             )
+
+            print(approval_list[0].keys())
 
             serializer = ApprovalSerializer(approval_list, many=True)
             return PaginatedResponse(

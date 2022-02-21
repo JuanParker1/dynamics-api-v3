@@ -46,5 +46,6 @@ class PaginatedModel:
                 **kwargs
             )
             total = len(obj_list)
+            print(obj_list, page_offset, page_offset + page_limit)
             paginated_list = obj_list[page_offset: page_offset + page_limit]
             return total, paginated_list, page_offset, page_limit
