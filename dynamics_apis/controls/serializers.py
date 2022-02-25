@@ -4,6 +4,7 @@ Serializers for Kairnial Controls module
 
 from django.utils.translation import gettext as _
 from rest_framework import serializers
+from dynamics_apis.common.serializers import CastingIntegerField
 
 
 class ControlQuerySerializer(serializers.Serializer):
@@ -76,19 +77,22 @@ class ControlTemplateElementSerializer(serializers.Serializer):
         help_text=_('It should be a boolean, pass 0 or 1'),
         default=''
     )
-    index = serializers.IntegerField(
+    index = CastingIntegerField(
         label=_('Element index'),
         help_text=_('Position of the element in the list as integer'),
         default=0,
+        allow_null=True,
+        read_only=True
     )
     choices = serializers.CharField(
         label=_('list of choices'),
         help_text=_('List of comma separated values'),
         required=False
     )
-    parent_id = serializers.IntegerField(
+    parent_id = CastingIntegerField(
         label=_('Parent element ID'),
         help_text=_('Numeric ID of the parent element'),
+        allow_null=True,
         read_only=True,
         source='parentId'
     )
@@ -99,7 +103,7 @@ class ControlTemplateElementSerializer(serializers.Serializer):
     )
 
 
-class ControlTemplateContentSetting(serializers.Serializer):
+class ControlTemplateContentSettingSerializer(serializers.Serializer):
     """
     Serializer for Control template content settings
     """
@@ -144,12 +148,18 @@ class ControlTemplateContentSerializer(serializers.Serializer):
         label=_('Group IDs'),
         help_text=_('List of numeric IDs of groups accessing the template content'),
         default=[],
-        child=serializers.IntegerField()
+        child=CastingIntegerField()
     )
     elements = ControlTemplateElementSerializer(
         label=_('Control form elements'),
         help_text=_('List of ControlTemplateElements'),
         many=True,
+        read_only=True
+    )
+    settings = ControlTemplateContentSettingSerializer(
+        label=_('Template settings'),
+        help_text=_('Settings object'),
+        required=False,
         read_only=True
     )
 
@@ -162,13 +172,15 @@ class ControlTemplateSerializer(serializers.Serializer):
         label=_("Control template unique ID"),
         help_text=_("UUID of the control template"),
         source='template_uuid',
-        required=True
+        allow_null=True,
+        read_only=True
     )
-    id = serializers.IntegerField(
+    id = CastingIntegerField(
         label=_("Control template numeric ID"),
         help_text=_("Numeric ID of the control template"),
         source='notes_id',
-        required=True
+        allow_null=True,
+        read_only=True
     ),
     title = serializers.CharField(
         label=_('Control template title'),
@@ -187,10 +199,12 @@ class ControlTemplateSerializer(serializers.Serializer):
         source='creation_date',
         required=True
     )
-    created_by = serializers.IntegerField(
+    created_by = CastingIntegerField(
         label=_('Creator'),
         help_text=_('Numeric ID of the creator'),
-        source='creator_id'
+        source='creator_id',
+        allow_null=True,
+        read_only=True
     )
     created_by_email = serializers.CharField(
         label=_('Creator email'),
