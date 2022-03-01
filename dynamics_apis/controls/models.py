@@ -3,7 +3,8 @@ Kairnial controls module models
 """
 
 from dynamics_apis.common.models import PaginatedModel
-from dynamics_apis.controls.services import KairnialControlTemplateService, KairnialControlInstanceService
+from dynamics_apis.controls.services import KairnialControlTemplateService, KairnialControlInstanceService, \
+    KairnialFormControlInstanceService
 
 
 class ControlTemplate(PaginatedModel):
@@ -73,17 +74,28 @@ class ControlInstance(PaginatedModel):
             project_id: str,
             page_offset: int,
             page_limit: int,
-            filters: dict = None
+            filters: dict = None,
+            template_id: str = None
     ):
         """
         List children folders from a parent
         :param client_id: ID of the client
         :param token: Access token
         :param project_id: RGOC Code of the project
+        :param template_id: UUID of the template
         :return:
         """
-        kf = KairnialControlInstanceService(client_id=client_id, token=token, project_id=project_id)
-        instances = kf.list(filters=filters, limit=page_limit, offset=page_offset)
+
+        if template_id:
+            kf = KairnialFormControlInstanceService(client_id=client_id, token=token, project_id=project_id)
+            instances = kf.list(template_id=template_id, filters=filters, limit=page_limit, offset=page_offset)
+            print(instances)
+        else:
+            kf = KairnialControlInstanceService(client_id=client_id, token=token, project_id=project_id)
+            instances = kf.list(
+                filters=filters, limit=page_limit, offset=page_offset
+            )
+            print(instances)
         for i, instance in enumerate(instances.get('items')):
             if type(instance.get('content')) == list:
                 content = {}

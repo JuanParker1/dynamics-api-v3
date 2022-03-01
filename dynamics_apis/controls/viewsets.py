@@ -118,6 +118,7 @@ class ControlInstanceViewSet(PaginatedViewSet):
         summary=_("List Kairnial instances"),
         description=_("List Kairnial control instances on this project"),
         parameters=project_parameters + pagination_parameters + [
+            OpenApiParameter('template_id', OpenApiTypes.STR, location='query', required=False),
             ControlQuerySerializer,  # serializer fields are converted to parameters
         ],
         responses={200: ControlInstanceSerializer, 400: ErrorSerializer},
@@ -134,6 +135,7 @@ class ControlInstanceViewSet(PaginatedViewSet):
         cqs = ControlQuerySerializer(data=request.GET)
         cqs.is_valid()
         page_offset, page_limit = self.get_pagination(request=request)
+        template_id = request.GET.get('template_id', None)
         try:
             total, instance_list, page_offset, page_limit = ControlInstance.paginated_list(
                 client_id=client_id,
@@ -141,7 +143,8 @@ class ControlInstanceViewSet(PaginatedViewSet):
                 project_id=project_id,
                 page_offset=page_offset,
                 page_limit=page_limit,
-                filters=cqs.validated_data
+                filters=cqs.validated_data,
+                template_id=template_id
             )
             serializer = ControlInstanceSerializer(instance_list, many=True)
             return PaginatedResponse(
