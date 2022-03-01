@@ -85,10 +85,9 @@ class ControlInstance(PaginatedModel):
         kf = KairnialControlInstanceService(client_id=client_id, token=token, project_id=project_id)
         instances = kf.list(filters=filters, limit=page_limit, offset=page_offset)
         for i, instance in enumerate(instances.get('items')):
-            print(instance)
             if type(instance.get('content')) == list:
-                instances['items'][i]['content']['additional_info'] = {}
-                instances['items'][i]['content']['values'] = [
+                content = {}
+                content = [
                     {
                         'position': i,
                         'value': element.get('value', ''),
@@ -96,13 +95,14 @@ class ControlInstance(PaginatedModel):
                     }
                     for i, element in enumerate(instance.get('content'))
                 ]
+                instances['items'][i]['values'] = content
             elif type(instance.get('content')) == dict:
-                instances['items'][i]['content']['additional_info'] = instance.get('additionalInfos', {})
-                instances['items'][i]['content']['values'] = [
+                instances['items'][i]['values'] = [
                     {
                         'position': key,
                         'date': value.get('date'),
                         'value': value.get('value', '')
-                    } for key, value in instance.get('content', {}).items()
+                    } for key, value in instance.get('content', {}).items() if key != 'additionalInfos' and key != 'settings'
                 ]
+                instances['items'][i]['additional_info'] = instances['items'][i]['content'].get('additionalInfos')
         return instances

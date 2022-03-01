@@ -4,7 +4,8 @@ Serializers for Kairnial Controls module
 
 from django.utils.translation import gettext as _
 from rest_framework import serializers
-from dynamics_apis.common.serializers import CastingIntegerField
+
+from dynamics_apis.common.serializers import CastingIntegerField, CastingDateTimeField
 
 
 class ControlQuerySerializer(serializers.Serializer):
@@ -187,13 +188,13 @@ class ControlTemplateSerializer(serializers.Serializer):
         help_text=_('String title of the control template'),
         required=False
     )
-    created_at = serializers.DateField(
+    created_at = CastingDateTimeField(
         label=_('Creation date'),
         help_text=_('Creation timestamp'),
         source='creation_date',
         required=True
     )
-    updated_at = serializers.DateField(
+    updated_at = CastingDateTimeField(
         label=_('Update date'),
         help_text=_('Update timestamp'),
         source='creation_date',
@@ -219,7 +220,7 @@ class ControlTemplateSerializer(serializers.Serializer):
     )
 
 
-class ControlInstanceContentSerializer(serializers.Serializer):
+class ControlInstanceContentValueSerializer(serializers.Serializer):
     """
     Serialize instance content
     """
@@ -228,7 +229,7 @@ class ControlInstanceContentSerializer(serializers.Serializer):
         help_text=_('numeric value'),
         read_only=True
     )
-    input_date = serializers.DateField(
+    input_date = CastingDateTimeField(
         label=_('Input date'),
         help_text=_('Date of the user input'),
         source='date',
@@ -244,12 +245,27 @@ class ControlInstanceContentSerializer(serializers.Serializer):
 
 
 class ControlInstanceAdditionalInfo(serializers.Serializer):
+    """
+    Serialize the additional info of a control instance content
+    """
+    bim_element = serializers.JSONField(
+        label=_('BIM element'),
+        help_text=_('BIM element characteristics'),
+        source='bimElement',
 
-
-
-class ControlInstanceContentSerializer(serializers.Serializer):
-    additional_info = ControlInstanceAdditionalInfo(
-
+        read_only=True
+    )
+    bim_model_id = serializers.IntegerField(
+        label=_('BIM Model ID'),
+        help_text=_('Numeric ID of the BIM model'),
+        source='bimModelId',
+        read_only=True
+    )
+    bim_layer_id = serializers.IntegerField(
+        label=_('BIM Layer ID'),
+        help_text=_('Numeric ID of the BIM layer'),
+        source='bimLayerId',
+        read_only=True
     )
 
 
@@ -290,7 +306,7 @@ class ControlInstanceSerializer(serializers.Serializer):
     )
     status = serializers.IntegerField(
         label=_('Status'),
-        help_text=_('Numeric value of the status.'), # TODO: find possible statuses and meanings,
+        help_text=_('Numeric value of the status.'),  # TODO: find possible statuses and meanings,
         default=0,
         read_only=True
     )
@@ -299,18 +315,18 @@ class ControlInstanceSerializer(serializers.Serializer):
         help_text=_('Numeric ID of the creator'),
         read_only=True
     )
-    position = CastingIntegerField(
+    position = serializers.CharField(
         label=_('Position'),
         help_text=_('Position of the value'),
         read_only=True
     )
-    created_at = serializers.DateField(
+    created_at = CastingDateTimeField(
         label=_('Date of creation'),
         help_text=_('Date the instance was created'),
         source='creation date',
         read_only=True
     )
-    updated_at = serializers.DateField(
+    updated_at = CastingDateTimeField(
         label=_('Date of modification'),
         help_text=_('Date the instance was modified'),
         source='modification_date',
@@ -319,21 +335,26 @@ class ControlInstanceSerializer(serializers.Serializer):
     map_category_name = serializers.CharField(
         label=_('Map category name'),
         help_text=_('Name of the category of the map'),
-        allow_null=True,
-        allow_blank=True,
         read_only=True
     )
     map_name = serializers.CharField(
         label=_('Map name'),
         help_text=_('Name of the map'),
-        allow_null=True,
-        allow_blank=True,
         read_only=True
     )
     plan_uuid = serializers.UUIDField(
         label=_('UUID of the plan'),
         help_text=_('Optionnal link to a plan'),
-        allow_null=True,
+        read_only=True,
+    )
+    additional_info = ControlInstanceAdditionalInfo(
+        label=_('Instance additional information'),
+        help_text=_('Info relative to the instance content'),
         read_only=True
     )
-
+    values = ControlInstanceContentValueSerializer(
+        label=_('Instance values'),
+        help_text=_('Values of the instance as text'),
+        many=True,
+        read_only=True
+    )
