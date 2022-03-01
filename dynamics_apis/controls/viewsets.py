@@ -78,19 +78,12 @@ class ControlTemplateViewSet(PaginatedViewSet):
     @extend_schema(
         summary=_("List Kairnial template elements"),
         description=_("List Kairnial control template elements for one template on this project"),
-        parameters=project_parameters + [
-            OpenApiParameter(
-                "template_id",
-                OpenApiTypes.STR,
-                OpenApiParameter.PATH,
-                description=_("Template UUID")
-            ),
-        ],
+        parameters=project_parameters,
         responses={200: ControlTemplateElementSerializer, 400: ErrorSerializer},
         methods=["GET"]
     )
     @action(methods=["GET"], detail=True, url_path="elements", url_name='template_elements')
-    def elements(self, request: HttpRequest, client_id: str, project_id: str, template_id: str):
+    def elements(self, request: HttpRequest, client_id: str, project_id: str, pk: str):
         """
         View to list template elements
         """
@@ -99,8 +92,9 @@ class ControlTemplateViewSet(PaginatedViewSet):
                 client_id=client_id,
                 token=request.token,
                 project_id=project_id,
-                template_id=template_id
+                template_id=pk
             )
+            print(template_content)
 
             serializer = ControlTemplateContentSerializer(template_content)
             return Response(data=serializer.data, content_type='application/json')
@@ -112,8 +106,6 @@ class ControlTemplateViewSet(PaginatedViewSet):
             })
             return Response(error.data, content_type='application/json',
                             status=status.HTTP_400_BAD_REQUEST)
-
-
 
 
 class ControlInstanceViewSet(PaginatedViewSet):
@@ -151,7 +143,6 @@ class ControlInstanceViewSet(PaginatedViewSet):
                 page_limit=page_limit,
                 filters=cqs.validated_data
             )
-
             serializer = ControlInstanceSerializer(instance_list, many=True)
             return PaginatedResponse(
                 data=serializer.data,

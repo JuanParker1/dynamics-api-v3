@@ -10,7 +10,7 @@ class CastingIntegerField(serializers.IntegerField):
     def to_representation(self, value):
         if not value:
             value = 0
-        super().to_representation(value)
+        return super().to_representation(value)
 
 
 class ErrorSerializer(serializers.Serializer):

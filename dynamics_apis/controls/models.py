@@ -54,7 +54,10 @@ class ControlTemplateContent(PaginatedModel):
         """
         kf = KairnialControlTemplateService(client_id=client_id, token=token, project_id=project_id)
         if template:=kf.list(filters={'template_uuid': template_id}):
-            return template[0].get('content')
+            try:
+                return template.get('items')[0].get('content')
+            except IndexError:
+                return None
         return None
 
 
@@ -80,4 +83,26 @@ class ControlInstance(PaginatedModel):
         :return:
         """
         kf = KairnialControlInstanceService(client_id=client_id, token=token, project_id=project_id)
-        return kf.list(filters=filters, limit=page_limit, offset=page_offset)
+        instances = kf.list(filters=filters, limit=page_limit, offset=page_offset)
+        for i, instance in enumerate(instances.get('items')):
+            print(instance)
+            if type(instance.get('content')) == list:
+                instances['items'][i]['content']['additional_info'] = {}
+                instances['items'][i]['content']['values'] = [
+                    {
+                        'position': i,
+                        'value': element.get('value', ''),
+                        'date': element.get('date', '')
+                    }
+                    for i, element in enumerate(instance.get('content'))
+                ]
+            elif type(instance.get('content')) == dict:
+                instances['items'][i]['content']['additional_info'] = instance.get('additionalInfos', {})
+                instances['items'][i]['content']['values'] = [
+                    {
+                        'position': key,
+                        'date': value.get('date'),
+                        'value': value.get('value', '')
+                    } for key, value in instance.get('content', {}).items()
+                ]
+        return instances

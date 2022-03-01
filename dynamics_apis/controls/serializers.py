@@ -171,7 +171,7 @@ class ControlTemplateSerializer(serializers.Serializer):
     uuid = serializers.UUIDField(
         label=_("Control template unique ID"),
         help_text=_("UUID of the control template"),
-        source='template_uuid',
+        source='notes_uuid',
         allow_null=True,
         read_only=True
     )
@@ -181,7 +181,7 @@ class ControlTemplateSerializer(serializers.Serializer):
         source='notes_id',
         allow_null=True,
         read_only=True
-    ),
+    )
     title = serializers.CharField(
         label=_('Control template title'),
         help_text=_('String title of the control template'),
@@ -206,11 +206,11 @@ class ControlTemplateSerializer(serializers.Serializer):
         allow_null=True,
         read_only=True
     )
-    created_by_email = serializers.CharField(
-        label=_('Creator email'),
-        help_text=_('e-mail of creator'),
-        source='creator_email'
-    )
+    # created_by_email = serializers.CharField(
+    #     label=_('Creator email'),
+    #     help_text=_('e-mail of creator'),
+    #     source='creator_email'
+    # )
     category = serializers.CharField(
         label=_('Category label'),
         help_text=_('Label of the category'),
@@ -219,13 +219,121 @@ class ControlTemplateSerializer(serializers.Serializer):
     )
 
 
+class ControlInstanceContentSerializer(serializers.Serializer):
+    """
+    Serialize instance content
+    """
+    position = serializers.IntegerField(
+        label=_('Position of the element'),
+        help_text=_('numeric value'),
+        read_only=True
+    )
+    input_date = serializers.DateField(
+        label=_('Input date'),
+        help_text=_('Date of the user input'),
+        source='date',
+        read_only=True
+    )
+    value = serializers.CharField(
+        label=_('Value'),
+        help_text=_('Value'),
+        allow_null=True,
+        allow_blank=True,
+        read_only=True
+    )
+
+
+class ControlInstanceAdditionalInfo(serializers.Serializer):
+
+
+
+class ControlInstanceContentSerializer(serializers.Serializer):
+    additional_info = ControlInstanceAdditionalInfo(
+
+    )
+
+
 class ControlInstanceSerializer(serializers.Serializer):
     """
     Serializer for ControlInstance
     """
-    id = serializers.UUIDField(
-        label=_("Control instance ID"),
-        help_text=_("UUID of the control instance"),
-        source='template_uuid',
+    uuid = serializers.UUIDField(
+        label=_("Control instance UUID"),
+        help_text=_("Unique ID of the control insance"),
         required=False
     )
+    id = serializers.IntegerField(
+        label=_("Control instance ID"),
+        help_text=_("Numeric ID of the control instance"),
+        source='notes_id',
+        required=False
+    )
+    template_uuid = serializers.UUIDField(
+        label=_("Control template UUID"),
+        help_text=_("Unique ID of the control template"),
+        required=False
+    )
+    template_id = serializers.IntegerField(
+        label=_("Control template ID"),
+        help_text=_("Numeric ID of the control template"),
+        required=False
+    )
+    element_uuid = serializers.UUIDField(
+        label=_('Element UUID'),
+        help_text=_('UUID of the element in the template content'),
+        read_only=True
+    )
+    title = serializers.CharField(
+        label=_('Instance title'),
+        help_text=_('Title of the instance'),
+        required=False
+    )
+    status = serializers.IntegerField(
+        label=_('Status'),
+        help_text=_('Numeric value of the status.'), # TODO: find possible statuses and meanings,
+        default=0,
+        read_only=True
+    )
+    created_by = serializers.IntegerField(
+        label=_('Creator ID'),
+        help_text=_('Numeric ID of the creator'),
+        read_only=True
+    )
+    position = CastingIntegerField(
+        label=_('Position'),
+        help_text=_('Position of the value'),
+        read_only=True
+    )
+    created_at = serializers.DateField(
+        label=_('Date of creation'),
+        help_text=_('Date the instance was created'),
+        source='creation date',
+        read_only=True
+    )
+    updated_at = serializers.DateField(
+        label=_('Date of modification'),
+        help_text=_('Date the instance was modified'),
+        source='modification_date',
+        read_only=True
+    )
+    map_category_name = serializers.CharField(
+        label=_('Map category name'),
+        help_text=_('Name of the category of the map'),
+        allow_null=True,
+        allow_blank=True,
+        read_only=True
+    )
+    map_name = serializers.CharField(
+        label=_('Map name'),
+        help_text=_('Name of the map'),
+        allow_null=True,
+        allow_blank=True,
+        read_only=True
+    )
+    plan_uuid = serializers.UUIDField(
+        label=_('UUID of the plan'),
+        help_text=_('Optionnal link to a plan'),
+        allow_null=True,
+        read_only=True
+    )
+
