@@ -46,6 +46,15 @@ class KairnialControlTemplateService(KairnialWSService):
         parameters = [{'template_uuid': template_uuid}]
         return self.call(action='getTemplates', parameters=parameters)
 
+    def attachments(self, template_id: str):
+        """
+        Get file attachments on template by ID
+        :param template_id: Numerric ID of the template
+        """
+        #TODO: test function arguments and returned values
+        parameters = {'templateId': template_id}
+        return self.call(action='getAttachedFilesByTemplateId', service='formControls', parameters=parameters)
+
 
 class KairnialControlInstanceService(KairnialWSService):
     """
@@ -106,3 +115,4 @@ class KairnialFormControlInstanceService(KairnialWSService):
         if 'error' in resp:
             return {'items': []}
         return resp
+
