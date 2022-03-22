@@ -39,7 +39,7 @@ class ControlTemplateViewSet(PaginatedViewSet):
     )
     def list(self, request: HttpRequest, client_id: str, project_id: str):
         """
-        List documents on a projects
+        List control templates on a projects
         :param request:
         :param client_id: Client ID token
         :param project_id: Project RGOC ID
@@ -57,8 +57,6 @@ class ControlTemplateViewSet(PaginatedViewSet):
                 page_limit=page_limit,
                 filters=cqs.validated_data
             )
-            print(f"template list has {len(template_list)} elements")
-            print(template_list)
 
             serializer = ControlTemplateSerializer(template_list, many=True)
             return PaginatedResponse(
@@ -95,7 +93,6 @@ class ControlTemplateViewSet(PaginatedViewSet):
                 project_id=project_id,
                 template_id=pk
             )
-            print(template_content)
 
             serializer = ControlTemplateContentSerializer(template_content)
             return Response(data=serializer.data, content_type='application/json')
@@ -159,7 +156,7 @@ class ControlInstanceViewSet(PaginatedViewSet):
     )
     def list(self, request: HttpRequest, client_id: str, project_id: str):
         """
-        List documents on a projects
+        List control instances on a projects
         :param request:
         :param client_id: Client ID token
         :param project_id: Project RGOC ID

@@ -1,16 +1,15 @@
 """
-URLs for Kairnial controls module
+URLs for Kairnial defects module
 """
 
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
-from .viewsets import ControlTemplateViewSet, ControlInstanceViewSet
+from .viewsets import DefectViewSet
 
 # Create a router and register our viewsets with it.
 router = DefaultRouter()
-router.register(r'instances', ControlInstanceViewSet, basename='control_instances')
-router.register(r'templates', ControlTemplateViewSet, basename='control_templates')
+router.register(r'defects', DefectViewSet, basename='defects')
 
 # The API URLs are now determined automatically by the router.
 urlpatterns = [

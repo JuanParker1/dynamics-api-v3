@@ -22,7 +22,7 @@ class ControlTemplate(PaginatedModel):
             filters: dict = None
     ):
         """
-        List children folders from a parent
+        List control templates
         :param client_id: ID of the client
         :param token: Access token
         :param project_id: RGOC Code of the project
@@ -46,7 +46,7 @@ class ControlTemplateContent(PaginatedModel):
             template_id: str
     ):
         """
-        List children folders from a parent
+        List ccontents from a control template
         :param client_id: ID of the client
         :param token: Access token
         :param project_id: RGOC Code of the project
@@ -97,7 +97,7 @@ class ControlInstance(PaginatedModel):
             template_id: str = None
     ):
         """
-        List children folders from a parent
+        List control instances for a template
         :param client_id: ID of the client
         :param token: Access token
         :param project_id: RGOC Code of the project

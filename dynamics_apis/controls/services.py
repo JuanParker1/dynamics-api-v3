@@ -2,16 +2,9 @@
 Services that get and push information to Kairnial WS servers
 """
 
-import requests
 from django.conf import settings
 
 from dynamics_apis.common.services import KairnialWSService
-
-REQUESTS_METHODS = {
-    'put': requests.put,
-    'post': requests.post,
-    'get': requests.get
-}
 
 
 class KairnialControlTemplateService(KairnialWSService):
@@ -51,7 +44,7 @@ class KairnialControlTemplateService(KairnialWSService):
         Get file attachments on template by ID
         :param template_id: Numerric ID of the template
         """
-        #TODO: test function arguments and returned values
+        # TODO: test function arguments and returned values
         parameters = {'templateId': template_id}
         return self.call(action='getAttachedFilesByTemplateId', service='formControls', parameters=parameters)
 
@@ -87,6 +80,7 @@ class KairnialControlInstanceService(KairnialWSService):
         parameters = [{'instance_uuid': instance_uuid}]
         return self.call(action='getInstances', parameters=parameters)
 
+
 class KairnialFormControlInstanceService(KairnialWSService):
     """
     Control Instances service using formControls
@@ -115,4 +109,3 @@ class KairnialFormControlInstanceService(KairnialWSService):
         if 'error' in resp:
             return {'items': []}
         return resp
-
