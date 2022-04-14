@@ -42,7 +42,7 @@ def get_version(app):
     except (subprocess.CalledProcessError, OSError) as e:
         print('git not installed', e)
     try:
-        fp = open(f'{app}/version.py', 'w')
+        fp = open(os.path.join(local_path, app, 'version.py'), 'w')
         if git_commits == -1:
             fp.write(
                 f"api_version = [{branch}]\n")
