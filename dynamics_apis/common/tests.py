@@ -1,12 +1,13 @@
 """
 Common test cases
 """
-
+import datetime
 import os
 
 from django.test import TestCase
 # Create your tests here.
 from dotenv import load_dotenv
+from rest_framework import serializers
 from rest_framework.test import APIClient
 
 from dynamics_apis.authentication.serializers import AuthResponseSerializer
@@ -94,3 +95,69 @@ class CommonTest(TestCase):
         )
         access_token = AuthResponseSerializer(auth_response).data.get('access_token')
         return access_token
+
+
+class HypothesisInput:
+    field_type = None
+    min = None
+    max = None
+    validators = None
+    allow_null = False
+    allow_blank = False
+
+def to_hypothesis_attributes(self):
+    """
+    Convert Serializer field to hypothesis attributes
+    Allows automatic testing via hypothesis
+    1. convert Field to its python
+    2. get min max values and other field attributes
+    """
+    t = type(self)
+    try:
+        func = str(t).lower().replace('field', '_handler')
+        return func(self)
+    except AttributeError as e:
+        print(e)
+        return None
+
+def charfield_handler(self, hi: HypothesisInput):
+    hi = HypothesisInput()
+    hi.field_type = str
+    hi.min = self.min_length
+    hi.max = self.max_length
+    return hi
+
+def integerfield_handler(self, hi: HypothesisInput):
+    hi = HypothesisInput()
+    hi.field_type = int
+    hi.min = self.min_value
+    hi.max = self.max_value
+    return hi
+
+def booleanfield_handler(self, hi: HypothesisInput):
+    hi = HypothesisInput()
+    hi.field_type = bool
+    return hi
+
+def datefield_handler(self, hi: HypothesisInput):
+    hi = HypothesisInput()
+    hi.field_type = datetime.date
+    return hi
+
+def datetimefield_handler(self, hi: HypothesisInput):
+    hi = HypothesisInput()
+    hi.field_type = datetime.datetime
+    return hi
+
+def emailfield_handler(self, hi: HypothesisInput):
+    hi = HypothesisInput()
+    hi.field_type = str
+    return hi
+
+def uuidfield_handler(self, hi: HypothesisInput):
+    hi = HypothesisInput()
+    hi.field_type = str
+    return hi
+
+def listefield_handler(self, hi:HypothesisInput):
+    return self.child.to_hypothesis_attributes()
