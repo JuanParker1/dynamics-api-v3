@@ -104,6 +104,7 @@ setup(
         'dynamics_apis.controls',
         'dynamics_apis.documents',
         'dynamics_apis.graphql',
-        'dynamics_apis.projects'
+        'dynamics_apis.projects',
+        'dynamics_apis.users'
     ],
 )
