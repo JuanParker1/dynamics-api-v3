@@ -4,9 +4,12 @@ import subprocess
 from datetime import date
 
 from setuptools import setup, find_packages
-
-with open("README.md", "r") as fh:
-    long_description = fh.read()
+local_path = os.path.dirname(__file__)
+try:
+    with open(os.path.join(local_path, "README.md"), "r") as fh:
+        long_description = fh.read()
+except FileNotFoundError:
+    long_description = ''
 
 
 def get_version(app):
@@ -21,25 +24,34 @@ def get_version(app):
         git_describe = subprocess.check_output(
             ["git", "describe", "--long"]
         ).rstrip().decode('utf8')
-        git_tag = git_describe.split('-')[0]
-        git_commits = git_describe.split('-')[1]
+        if not 'fatal' in git_describe:
+            git_tag = git_describe.split('-')[0]
+            git_commits = git_describe.split('-')[1]
+        else:
+            git_tag = branch
+            git_commits = -1
         if branch == 'main':
             suffix = ''
         else:
             suffix = 'dev'
         print(branch, git_tag, git_commits, suffix)
-        version = '{}.{}{}'.format(git_tag, git_commits, suffix)
+        if git_commits == -1:
+            version = branch
+        else:
+            version = f'{git_tag}.{git_commits}{suffix}'
     except (subprocess.CalledProcessError, OSError) as e:
         print('git not installed', e)
     try:
-        fp = open('{}/version.py'.format(app), 'w')
-        fp.write(
-            'api_version = [{}, {}, "{}"]\n'.format(
-                git_tag.replace('.', ', '), git_commits, suffix)
-        )
+        fp = open(os.path.join(local_path, app, 'version.py'), 'w')
+        if git_commits == -1:
+            fp.write(
+                f"api_version = [{branch}]\n")
+        else:
+            fp.write(
+                f"api_version = [{git_tag.replace('.', ', ')}, {git_commits}, \"{suffix}\"]\n")
         fp.close()
     except Exception:
-        print('ERROR opening {}/__version__.py'.format(app), os.curdir)
+        print(f'ERROR opening {app}/__version__.py', os.curdir)
     return version
 
 
