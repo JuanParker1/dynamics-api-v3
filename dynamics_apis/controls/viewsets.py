@@ -18,7 +18,8 @@ from dynamics_apis.common.viewsets import project_parameters, PaginatedResponse,
     pagination_parameters, PaginatedViewSet
 from .models import ControlTemplate, ControlInstance, ControlTemplateContent
 from .serializers import ControlQuerySerializer, ControlTemplateSerializer, \
-    ControlInstanceSerializer, ControlTemplateElementSerializer, ControlTemplateContentSerializer
+    ControlInstanceSerializer, ControlTemplateElementSerializer, ControlTemplateContentSerializer, \
+    ControlTemplateQuerySerializer
 
 
 class ControlTemplateViewSet(PaginatedViewSet):
@@ -31,7 +32,7 @@ class ControlTemplateViewSet(PaginatedViewSet):
         summary=_("List Kairnial templates"),
         description=_("List Kairnial control templates on this project"),
         parameters=project_parameters + pagination_parameters + [
-            ControlQuerySerializer,  # serializer fields are converted to parameters
+            ControlTemplateQuerySerializer,  # serializer fields are converted to parameters
         ],
         responses={200: ControlTemplateSerializer, 400: ErrorSerializer},
         methods=["GET"]
@@ -44,7 +45,7 @@ class ControlTemplateViewSet(PaginatedViewSet):
         :param project_id: Project RGOC ID
         :return:
         """
-        cqs = ControlQuerySerializer(data=request.GET)
+        cqs = ControlTemplateQuerySerializer(data=request.GET)
         cqs.is_valid()
         page_offset, page_limit = self.get_pagination(request=request)
         try:
@@ -56,8 +57,6 @@ class ControlTemplateViewSet(PaginatedViewSet):
                 page_limit=page_limit,
                 filters=cqs.validated_data
             )
-            print(f"template list has {len(template_list)} elements")
-            print(template_list)
 
             serializer = ControlTemplateSerializer(template_list, many=True)
             return PaginatedResponse(
@@ -115,27 +114,27 @@ class ControlInstanceViewSet(PaginatedViewSet):
     parser_classes = (MultiPartParser,)
 
     @extend_schema(
-        summary=_("List Kairnial instances"),
-        description=_("List Kairnial control instances on this project"),
+        summary=_("List Kairnial instances by template UUID"),
+        description=_("List Kairnial control instances on this project for a given template UUID"),
         parameters=project_parameters + pagination_parameters + [
-            OpenApiParameter('template_id', OpenApiTypes.STR, location='query', required=False),
+            OpenApiParameter('id', OpenApiTypes.STR, location='path', required=False),
             ControlQuerySerializer,  # serializer fields are converted to parameters
         ],
         responses={200: ControlInstanceSerializer, 400: ErrorSerializer},
         methods=["GET"]
     )
-    def list(self, request: HttpRequest, client_id: str, project_id: str):
+    def list(self, request: HttpRequest, client_id: str, project_id: str, id: str):
         """
         List documents on a projects
         :param request:
         :param client_id: Client ID token
         :param project_id: Project RGOC ID
+        :param pk: template UUID
         :return:
         """
         cqs = ControlQuerySerializer(data=request.GET)
         cqs.is_valid()
         page_offset, page_limit = self.get_pagination(request=request)
-        template_id = request.GET.get('template_id', None)
         try:
             total, instance_list, page_offset, page_limit = ControlInstance.paginated_list(
                 client_id=client_id,
@@ -144,7 +143,7 @@ class ControlInstanceViewSet(PaginatedViewSet):
                 page_offset=page_offset,
                 page_limit=page_limit,
                 filters=cqs.validated_data,
-                template_id=template_id
+                template_id=id
             )
             serializer = ControlInstanceSerializer(instance_list, many=True)
             return PaginatedResponse(

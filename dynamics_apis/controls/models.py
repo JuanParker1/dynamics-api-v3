@@ -30,7 +30,8 @@ class ControlTemplate(PaginatedModel):
         :return:
         """
         kf = KairnialControlTemplateService(client_id=client_id, token=token, project_id=project_id)
-        return kf.list(filters=filters, limit=page_limit, offset=page_offset)
+        output = kf.list(filters=filters, limit=page_limit, offset=page_offset)
+        return output
 
 
 class ControlTemplateContent(PaginatedModel):

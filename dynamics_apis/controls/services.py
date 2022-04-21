@@ -18,7 +18,7 @@ class KairnialControlTemplateService(KairnialWSService):
     """
     Service that fetches and pushes folders
     """
-    service_domain = 'controls'
+    service_domain = 'formControls'
 
     def list(self, filters: dict = None, offset: int = 0,
              limit: int = getattr(settings, 'PAGE_SIZE', 100)):
@@ -32,11 +32,7 @@ class KairnialControlTemplateService(KairnialWSService):
         parameters = []
         if filters:
             parameters = [{key: value} for key, value in filters.items()]
-        parameters += [
-            {'LIMITSKIP': offset},
-            {'LIMITTAKE': limit}
-        ]
-        return self.call(action='getTemplates', parameters=parameters)
+        return self.call(action='listTemplate', parameters=parameters)
 
     def get(self, template_uuid: str):
         """
@@ -67,7 +63,7 @@ class KairnialControlInstanceService(KairnialWSService):
             parameters = [{key: value} for key, value in filters.items()]
         parameters += [
             {'LIMITSKIP': offset},
-            {'LIMITTAKE': limit}
+            {'LIMITAKE': limit}
         ]
         return self.call(action='getInstances', parameters=parameters)
 

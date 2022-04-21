@@ -1,7 +1,6 @@
 """
 Serializers for Kairnial Controls module
 """
-
 from django.utils.translation import gettext as _
 from rest_framework import serializers
 
@@ -10,37 +9,165 @@ from dynamics_apis.common.serializers import CastingIntegerField, CastingDateTim
 
 class ControlQuerySerializer(serializers.Serializer):
     """
-    Serializer for folder query parameters
+    Serializer for control instance query parameters
     """
-    id = serializers.UUIDField(
-        label=_("filter on ID"),
-        help_text=_("retrieve control with given ID"),
-        source='template_uuid',
-        required=False
+    archived = serializers.IntegerField(
+        label=_('Include archived instances'),
+        help_text=_('Include archived instances in result set. 2 includes archived instances.'),
+        required=False,
+        source='archive'
+    )
+    created_at = serializers.IntegerField(
+        label=_('Creation date'),
+        help_text=_('Control instance created at timestamp'),
+        required=False,
+        source='filter_global_stats_date_creation_date'
+    )
+    started_at = serializers.IntegerField(
+        label=_('Start date'),
+        help_text=_('Control instance started at timestamp'),
+        required=False,
+        source='filter_global_stats_date_start_date'
+    )
+    ended_at = serializers.IntegerField(
+        label=_('End date'),
+        help_text=_('Control instance ended at timestamp'),
+        required=False,
+        source='filter_global_stats_date_end_date'
+    )
+    updated_at = serializers.IntegerField(
+        label=_('Update date'),
+        help_text=_('Control instance updated at timestamp'),
+        required=False,
+        source='filter_global_stats_date_modication_date'
     )
     updated_before = serializers.DateField(
-        label=_('folder updated before'),
-        help_text=_('date of latest modification'),
+        label=_('Control updated before'),
+        help_text=_('Control instance created before included timestamp'),
         required=False,
-        source='modification_end'
+        source='filter_global_stats_date_less_modification'
     )
     updated_after = serializers.DateField(
-        label=_('folder updated after'),
-        help_text=_('date of oldest modification'),
+        label=_('Control updated after'),
+        help_text=_('Control instance updated after included timestamp'),
         required=False,
-        source='modification_start'
+        source='filter_global_stats_date_greater_modification'
     )
     created_before = serializers.DateField(
-        label=_('folder created before'),
-        help_text=_('date of latest creation'),
+        label=_('Control created before'),
+        help_text=_('Control instance created before included timestamp'),
         required=False,
-        source='creation_end'
+        source='filter_global_stats_date_less_creation'
     )
     created_after = serializers.DateField(
-        label=_('folder created after'),
-        help_text=_('date of oldest creation'),
+        label=_('Control created after'),
+        help_text=_('Control instance created after included timestamp'),
         required=False,
-        source='creation_start'
+        source='filter_global_stats_date_greater_creation'
+    )
+    started_before = serializers.DateField(
+        label=_('Control created before'),
+        help_text=_('Control instance ended before included timestamp'),
+        required=False,
+        source='filter_global_stats_date_less_start'
+    )
+    started_after = serializers.DateField(
+        label=_('Control created after'),
+        help_text=_('Control instance started after included timestamp'),
+        required=False,
+        source='filter_global_stats_date_greater_start'
+    )
+    ended_before = serializers.DateField(
+        label=_('Control ended before'),
+        help_text=_('Control instance ended before included timestamp'),
+        required=False,
+        source='filter_global_stats_date_less_end'
+    )
+    ended_after = serializers.DateField(
+        label=_('Control ended after'),
+        help_text=_('Control instance ended after included timestamp'),
+        required=False,
+        source='filter_global_stats_date_greater_end'
+    )
+    numbers = serializers.ListSerializer(
+        label=_('Filter by form number'),
+        help_text=_('List of control instance numbers'),
+        child=serializers.IntegerField(),
+        required=False,
+        source='formNumber'
+    )
+    statuses = serializers.ListSerializer(
+        label=_('Filter by list of statuses'),
+        help_text=_('List of control instances with status in list'),
+        child=serializers.IntegerField(),
+        required=False,
+        source='filterFormColors'
+    )
+    users = serializers.ListSerializer(
+        label=_('Filter by list of users'),
+        help_text=_('List of control instances with user numeric id in list'),
+        child=serializers.IntegerField(),
+        required=False
+    )
+    buildings = serializers.ListSerializer(
+        label=_('Filter by list of buildings'),
+        help_text=_('List of control instances with building numeric id in list'),
+        child=serializers.IntegerField(),
+        required=False
+    )
+    levels = serializers.ListSerializer(
+        label=_('Filter by list of levels'),
+        help_text=_('List of control instances with level numeric id in list'),
+        child=serializers.IntegerField(),
+        required=False
+    )
+    plan_id = serializers.UUIDField(
+        label=_('Filter by plan UUID'),
+        help_text=_('Filter by plan UUID'),
+        required=False,
+        source='planUuid'
+    )
+    public = serializers.BooleanField(
+        label=_('Public instances'),
+        help_text=_('Filter on public control instances'),
+        required=False
+    )
+
+
+class ControlTemplateQuerySerializer(serializers.Serializer):
+    """
+    Serializer for ControlTemplate filters
+    """
+    archived = serializers.IntegerField(
+        label=_('Include archived templates'),
+        help_text=_('Include archived templates in result set'),
+        required=False,
+        source='archive'
+    )
+    id = serializers.IntegerField(
+        label=_('Template ID'),
+        help_text=_('Filter on template numeric ID'),
+        required=False,
+        source='templateId'
+    )
+    uuids = serializers.ListSerializer(
+        label=_('Template UUIDs'),
+        help_text=_('List of template UUIDs'),
+        required=False,
+        child=serializers.UUIDField(label=_('Template UUID')),
+        source='templateUuidList'
+    )
+    plan_id = serializers.UUIDField(
+        label=_('Plan ID'),
+        help_text=_('Unique ID of a plan'),
+        required=False,
+        source='planUuid'
+    )
+    tags = serializers.ListSerializer(
+        label=_('Tag UUIDs'),
+        help_text=_('Filter by list of tag UUIDs'),
+        required=False,
+        child=serializers.UUIDField()
     )
 
 
@@ -172,14 +299,12 @@ class ControlTemplateSerializer(serializers.Serializer):
     uuid = serializers.UUIDField(
         label=_("Control template unique ID"),
         help_text=_("UUID of the control template"),
-        source='notes_uuid',
         allow_null=True,
         read_only=True
     )
     id = CastingIntegerField(
         label=_("Control template numeric ID"),
         help_text=_("Numeric ID of the control template"),
-        source='notes_id',
         allow_null=True,
         read_only=True
     )
@@ -188,30 +313,30 @@ class ControlTemplateSerializer(serializers.Serializer):
         help_text=_('String title of the control template'),
         required=False
     )
+    parent_id = serializers.IntegerField(
+        label=_('parent ID'),
+        help_text=_('ID of the parent template'),
+        required=False
+    )
     created_at = CastingDateTimeField(
         label=_('Creation date'),
         help_text=_('Creation timestamp'),
-        source='creation_date',
+        source='createDate',
         required=True
     )
     updated_at = CastingDateTimeField(
         label=_('Update date'),
         help_text=_('Update timestamp'),
-        source='creation_date',
+        source='updateDate',
         required=True
     )
-    created_by = CastingIntegerField(
+    created_by = serializers.CharField(
         label=_('Creator'),
-        help_text=_('Numeric ID of the creator'),
-        source='creator_id',
+        help_text=_('e-mail of the creator'),
+        source='email',
         allow_null=True,
         read_only=True
     )
-    # created_by_email = serializers.CharField(
-    #     label=_('Creator email'),
-    #     help_text=_('e-mail of creator'),
-    #     source='creator_email'
-    # )
     category = serializers.CharField(
         label=_('Category label'),
         help_text=_('Label of the category'),
@@ -358,3 +483,5 @@ class ControlInstanceSerializer(serializers.Serializer):
         many=True,
         read_only=True
     )
+
+
