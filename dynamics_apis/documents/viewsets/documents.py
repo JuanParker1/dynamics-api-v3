@@ -207,5 +207,3 @@ class DocumentViewSet(PaginatedViewSet):
         else:
             return Response(_("Document could not be archived"),
                             status=status.HTTP_406_NOT_ACCEPTABLE)
-
-

@@ -273,7 +273,7 @@ class ApprovalType(PaginatedModel):
         approval_types = kat.list().get('notes')
         for at in approval_types:
             at['content'] = json.loads(at.get('content') or '{}')
-        return  approval_types
+        return approval_types
 
     @staticmethod
     def archive(
