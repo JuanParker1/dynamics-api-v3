@@ -205,6 +205,7 @@ class Document(PaginatedModel):
             client_id: str,
             token: str,
             project_id: str,
+            parent_id: str,
             serialized_data: dict,
             attachment
     ):
@@ -231,8 +232,9 @@ class Document(PaginatedModel):
         serialized_data['hash'] = file_hash
         serialized_data['size'] = file_size
         serialized_data['typeFichier'] = file_type
+        serialized_data['parentUUID'] = parent_id
         fs = KairnialDocumentService(client_id=client_id, token=token, project_id=project_id)
-        return fs.revise(document_create_serializer=serialized_data, content=file_content)
+        return fs.revise(document_revise_serializer=serialized_data, content=file_content)
 
     @staticmethod
     def archive(

@@ -92,7 +92,7 @@ class DocumentViewSet(PaginatedViewSet):
         :param request: HttpRequest
         :param client_id: client ID token
         :param project_id: RGOC ID of the project
-        :param pk: Numeric ID of the folder
+        :param pk: Numeric ID of the document
         """
         document = Document.get(
             client_id=client_id,
@@ -149,12 +149,13 @@ class DocumentViewSet(PaginatedViewSet):
         responses={201: DocumentSerializer, 400: ErrorSerializer, 404: OpenApiTypes.STR},
         methods=["PUT"]
     )
-    def update(self, request: HttpRequest, client_id: str, project_id: str):
+    def update(self, request: HttpRequest, client_id: str, project_id: str, pk: str):
         """
         Update document information
         :param request:
         :param client_id: Client ID token
         :param project_id: Project RGOC ID
+        :param pk: UUID of the document
         :return:
         """
         data = request.POST.copy()
@@ -164,7 +165,8 @@ class DocumentViewSet(PaginatedViewSet):
             return Response(dcs.errors, content_type='application/json',
                             status=status.HTTP_400_BAD_REQUEST)
         try:
-            document = Document.create(
+            document = Document.update(
+                parent_id=pk,
                 client_id=client_id,
                 token=request.token,
                 project_id=project_id,
