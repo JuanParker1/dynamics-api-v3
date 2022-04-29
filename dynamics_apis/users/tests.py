@@ -81,7 +81,7 @@ class UserTest(CommonTest):
         Test user email filter with a very long filter
         """
         letters = string.ascii_letters + string.digits
-        email = ''.join(random.choice(letters) for i in range(10000))
+        email = ''.join(random.choice(letters) for _ in range(10000))
         self._test_user_list_filter(email=email)
 
     def test_108_user_list_filter_full_name(self):

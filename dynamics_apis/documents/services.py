@@ -190,7 +190,7 @@ class KairnialDocumentService(KairnialWSService):
         us = self._get_file_link(json_data=document_create_serializer)
 
         # 2. Post file to url
-        response = REQUESTS_METHODS[us.validated_data.get('method').lower()](
+        REQUESTS_METHODS[us.validated_data.get('method').lower()](
             us.validated_data.get('url'),
             data=content,
         )
@@ -200,6 +200,7 @@ class KairnialDocumentService(KairnialWSService):
             uuid=us.validated_data.get('uuid'),
             json_data=document_create_serializer
         )
+        return output
 
     def revise(self, document_revise_serializer: dict, content):
         """
@@ -211,7 +212,7 @@ class KairnialDocumentService(KairnialWSService):
         us = self._get_file_link(json_data=document_revise_serializer)
 
         # 2. Post file to url
-        response = REQUESTS_METHODS[us.validated_data.get('method').lower()](
+        REQUESTS_METHODS[us.validated_data.get('method').lower()](
             us.validated_data.get('url'),
             data=content,
         )

@@ -28,7 +28,7 @@ class User:
         if 'groups' in filters:
             try:
                 users = ku.list_for_groups(list_of_groups=filters.get('groups'))
-            except ValueError as e:
+            except ValueError:
                 return None
         else:
             users = ku.list().get('items')
@@ -64,7 +64,7 @@ class User:
         user_list = ku.list().get('items')
         try:
             return [user for user in  user_list if user.get('account_uuid') == pk][0]
-        except IndexError as e:
+        except IndexError:
             raise UserNotFound('User not found')
 
     @classmethod

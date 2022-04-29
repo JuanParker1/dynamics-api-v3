@@ -207,11 +207,6 @@ class ControlTemplateSerializer(serializers.Serializer):
         allow_null=True,
         read_only=True
     )
-    # created_by_email = serializers.CharField(
-    #     label=_('Creator email'),
-    #     help_text=_('e-mail of creator'),
-    #     source='creator_email'
-    # )
     category = serializers.CharField(
         label=_('Category label'),
         help_text=_('Label of the category'),
