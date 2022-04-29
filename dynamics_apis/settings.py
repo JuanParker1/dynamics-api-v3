@@ -7,7 +7,7 @@ KIARNIAL_AUTHENTICATION_SCOPES = [
     'direct-login'
 ]
 
-import os
+
 def load_key(path):
     with open(path, 'r') as key:
         return key.read()

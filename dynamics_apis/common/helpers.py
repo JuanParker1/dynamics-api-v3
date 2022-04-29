@@ -1,12 +1,7 @@
 """
 Common objects
 """
-import os
-import json
 
-import jwt
-import requests
-from django.conf import settings
 from django.contrib.auth import authenticate
 
 

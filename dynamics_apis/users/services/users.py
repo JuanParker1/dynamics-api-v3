@@ -30,7 +30,6 @@ class KairnialUser(KairnialWSService):
             action='getUsers',
             use_cache=True)
 
-
     def list_for_groups(self, list_of_groups: []) -> []:
         """
         List users for a set of given groups.
@@ -52,7 +51,7 @@ class KairnialUser(KairnialWSService):
         """
         return self.call(
             action='getUserGroups',
-            parameters=[pk,],
+            parameters=[pk, ],
             use_cache=True
         )
 

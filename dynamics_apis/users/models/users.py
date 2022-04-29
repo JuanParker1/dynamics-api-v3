@@ -68,7 +68,7 @@ class User:
             raise UserNotFound('User not found')
 
     @classmethod
-    def groups(self, client_id: str, token: str, project_id: str, pk: int):
+    def groups(cls, client_id: str, token: str, project_id: str, pk: int):
         """
         Get a specific user
         :param client_id: ClientID Token
@@ -80,7 +80,7 @@ class User:
         return ku.get_groups(pk=pk)
 
     @classmethod
-    def invite(self, client_id: str, token: str, project_id: str, users: list):
+    def invite(cls, client_id: str, token: str, project_id: str, users: list):
         """
         Get a specific user
         :param client_id: ClientID Token
@@ -92,7 +92,7 @@ class User:
         return ku.invite(users=users)
 
     @classmethod
-    def archive(self, client_id: str, token: str, project_id: str, pk: str):
+    def archive(cls, client_id: str, token: str, project_id: str, pk: str):
         """
         Archive a user
         :param client_id: ClientID Token

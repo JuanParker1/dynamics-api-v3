@@ -21,10 +21,12 @@ class Group:
         self.description = description
 
     @classmethod
-    def list(cls, client_id: str, token: str, project_id: str, filters: dict = {}) -> []:
+    def list(cls, client_id: str, token: str, project_id: str, filters: dict = None) -> []:
         """
         Get a filtered list of groups from web services
         """
+        if not filters:
+            filters = {}
         kg = KairnialGroup(client_id=client_id, token=token, project_id=project_id)
         groups = kg.list().get('groups')
         manual_filters = (set(cls.filters) & set(filters.keys())) or []
@@ -77,7 +79,6 @@ class Group:
         kg = KairnialGroup(client_id=client_id, token=token, project_id=project_id)
         return kg.list_authorizations(group_id=pk)
 
-
     @staticmethod
     def add_authorizations(client_id: str, token: str, project_id: str, pk: str, authorizations: {}):
         """group_id
@@ -86,7 +87,7 @@ class Group:
         :param token: Access token
         :param project_id: Project RGOC Code
         :param pk: Group UUID
-        :authorizations: dict of groups with {uuid: type}
+        :param authorizations: dict of groups with {uuid: type}
         """
         kg = KairnialGroup(client_id=client_id, token=token, project_id=project_id)
         return kg.add_authorizations(group_id=pk, authorizations=authorizations)
@@ -99,8 +100,7 @@ class Group:
         :param token: Access token
         :param project_id: Project RGOC Code
         :param pk: Group UUID
-        :authorizations: dict of groups with {uuid: type}
+        :param authorizations: dict of groups with {uuid: type}
         """
         kg = KairnialGroup(client_id=client_id, token=token, project_id=project_id)
         return kg.remove_authorizations(group_id=pk, authorizations=authorizations)
-

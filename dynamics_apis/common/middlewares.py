@@ -13,7 +13,7 @@ class KairnialAuthMiddleware(object):
     def __init__(self, get_response):
         self.get_response = get_response
 
-    def jwt_get_username_from_payload_handler(payload):
+    def jwt_get_username_from_payload_handler(self, payload):
         username = payload.get('sub').replace('|', '.')
         authenticate(remote_user=username)
         return username

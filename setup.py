@@ -4,6 +4,7 @@ import subprocess
 from datetime import date
 
 from setuptools import setup, find_packages
+
 local_path = os.path.dirname(__file__)
 try:
     with open(os.path.join(local_path, "README.md"), "r") as fh:
@@ -24,7 +25,7 @@ def get_version(app):
         git_describe = subprocess.check_output(
             ["git", "describe", "--long"]
         ).rstrip().decode('utf8')
-        if not 'fatal' in git_describe:
+        if 'fatal' not in git_describe:
             git_tag = git_describe.split('-')[0]
             git_commits = git_describe.split('-')[1]
         else:
@@ -83,7 +84,7 @@ setup(
         "ariadne~=0.14.0"
     ],
     extras_require={
-        'prod': ['daphne',],
+        'prod': ['daphne', ],
     },
     packages=find_packages(),
     include_package_data=True,

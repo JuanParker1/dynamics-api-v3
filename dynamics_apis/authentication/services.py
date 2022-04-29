@@ -1,15 +1,15 @@
 """
 Kairnial auth services
 """
+import json
 import logging
-from base64 import b64encode
 
 import requests
-import json
-
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.utils.translation import gettext as _
-from django.conf import settings
+
+from dynamics_apis.common.viewsets import JSON_CONTENT_TYPE
 
 PASSWORD_LOGIN_PATH = '/api/oauth2/login'
 API_AUTHENT_PATH = '/api/oauth2/client_credentials/{clientID}'
@@ -22,7 +22,6 @@ class KairnialAuthenticationError(Exception):
     def __init__(self, message, status):
         self.status = status
         self.message = message
-
 
 
 class KairnialAuthentication:
@@ -40,7 +39,6 @@ class KairnialAuthentication:
     def password_authentication(self, username: str, password: str) -> dict:
         """
         Get atuh token from auth server
-        :param client_id: Client ID, ask Kairnial support for one
         :param username: User unique identifier
         :param password: User password
         :return:
@@ -80,9 +78,9 @@ class KairnialAuthentication:
     def secrets_authentication(self, api_key: str, api_secret: str, scopes: [str]) -> dict:
         """
         Get auth token from auth server
-        :param client_id: Client ID, ask Kairnial support for one
         :param api_key: User API Key
         :param api_secret: User API Secret
+        :param scopes: List of scopes to request
         :return:
         """
         logger = logging.getLogger('services')
@@ -97,7 +95,7 @@ class KairnialAuthentication:
         logger.debug(settings.KAIRNIAL_AUTH_SERVER + PASSWORD_LOGIN_PATH)
         logger.debug(payload)
         headers = {
-            'Content-Type': 'application/json',
+            'Content-Type': JSON_CONTENT_TYPE,
         }
         logger.debug(headers)
         response = requests.post(
@@ -112,7 +110,6 @@ class KairnialAuthentication:
                 message=_(f"Authentication failed with code {response.status_code}: {response.content}"),
                 status=response.status_code
             )
-
 
         try:
             resp = response.json()
@@ -159,4 +156,3 @@ class KairnialAuthentication:
         user.uuid = resp_user.get('uuid')
         self.user = user
         return self.user
-

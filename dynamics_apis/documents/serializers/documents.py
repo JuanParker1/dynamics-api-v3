@@ -783,7 +783,7 @@ class DocumentFilterSerializer(serializers.Serializer):
         allow_null=True,
         required=False,
         source='typedCircuitAndWithAnswer',
-        default = {}
+        default={}
     )
     unanswered_approvals = serializers.JSONField(
         label=_('documents without answered approvals'),

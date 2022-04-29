@@ -12,7 +12,7 @@ from rest_framework.viewsets import ViewSet
 
 from dynamics_apis.common.serializers import ErrorSerializer
 from dynamics_apis.common.services import KairnialWSServiceError
-from dynamics_apis.common.viewsets import project_parameters
+from dynamics_apis.common.viewsets import project_parameters, JSON_CONTENT_TYPE
 from .models import ACL, Module
 from .serializers import ACLSerializer, ACLQuerySerializer, ModuleSerializer
 
@@ -55,7 +55,7 @@ class ACLViewSet(ViewSet):
                 'code': getattr(e, 'status', 0),
                 'description': getattr(e, 'message', str(e))
             })
-            return Response(error.data, content_type='application/json',
+            return Response(error.data, content_type=JSON_CONTENT_TYPE,
                             status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
@@ -115,5 +115,5 @@ class ModuleViewSet(ViewSet):
                 'code': getattr(e, 'status', 0),
                 'description': getattr(e, 'message', str(e))
             })
-            return Response(error.data, content_type='application/json',
+            return Response(error.data, content_type=JSON_CONTENT_TYPE,
                             status=status.HTTP_400_BAD_REQUEST)

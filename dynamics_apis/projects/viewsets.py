@@ -11,7 +11,9 @@ from rest_framework.response import Response
 
 from dynamics_apis.common.serializers import ErrorSerializer
 from dynamics_apis.common.services import KairnialWSServiceError
-from dynamics_apis.common.viewsets import client_parameters, pagination_parameters, PaginatedViewSet, PaginatedResponse
+from dynamics_apis.common.viewsets import client_parameters, pagination_parameters, \
+    PaginatedViewSet, PaginatedResponse, \
+    JSON_CONTENT_TYPE
 from .models import Project
 from .serializers import ProjectSerializer, ProjectCreationSerializer, ProjectUpdateSerializer
 
@@ -35,7 +37,7 @@ class ProjectViewSet(PaginatedViewSet):
     def list(self, request, client_id, format=None):
         page_offset, page_limit = self.get_pagination(request=request)
         try:
-            total, project_list, page_offset,page_limit = Project.paginated_list(
+            total, project_list, page_offset, page_limit = Project.paginated_list(
                 client_id=client_id,
                 token=request.token,
                 search=request.GET.get('search'),
@@ -55,7 +57,7 @@ class ProjectViewSet(PaginatedViewSet):
                 'error': e.status,
                 'description': e.message
             })
-            return Response(error.data, content_type='application/json', status=status.HTTP_400_BAD_REQUEST)
+            return Response(error.data, content_type=JSON_CONTENT_TYPE, status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
         summary=_("Create a Kairnial project"),
@@ -84,7 +86,7 @@ class ProjectViewSet(PaginatedViewSet):
                 return Response(_("Project could not be created"),
                                 status=status.HTTP_406_NOT_ACCEPTABLE)
         else:
-            return Response(pcs.errors, content_type='application/json',
+            return Response(pcs.errors, content_type=JSON_CONTENT_TYPE,
                             status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
@@ -120,5 +122,5 @@ class ProjectViewSet(PaginatedViewSet):
                 return Response(_("Project could not be updated"),
                                 status=status.HTTP_406_NOT_ACCEPTABLE)
         else:
-            return Response(pus.errors, content_type='application/json',
+            return Response(pus.errors, content_type=JSON_CONTENT_TYPE,
                             status=status.HTTP_400_BAD_REQUEST)

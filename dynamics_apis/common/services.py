@@ -9,6 +9,8 @@ from django.conf import settings
 from django.core.cache import cache
 from django.utils.translation import gettext as _
 
+from dynamics_apis.common.viewsets import JSON_CONTENT_TYPE
+
 
 class KairnialWSServiceError(Exception):
     message = _('Error fetching data from Kairnial WebServices')
@@ -28,7 +30,6 @@ def json_with_dates(obj):
         return obj.isoformat()
     else:
         return str(obj)
-
 
 
 class KairnialService:
@@ -52,7 +53,7 @@ class KairnialService:
         Return authentication headers for WebService
         """
         return {
-            'Content-type': 'application/json',
+            'Content-type': JSON_CONTENT_TYPE,
         }
 
     def _body_headers(self) -> dict:
@@ -85,7 +86,7 @@ class KairnialService:
         :param parameters: list of dict to send to server
         :param service: name of service (user, ...). Uses service_domain if not set
         :param format: expected output format from tre Kairnial Web Service
-        :param cache: cache response
+        :param use_cache: cache response
         """
         parameters = parameters or [{}]
         service = service if service else self.service_domain

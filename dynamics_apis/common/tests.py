@@ -10,10 +10,9 @@ from dotenv import load_dotenv
 from rest_framework.test import APIClient
 
 from dynamics_apis.authentication.serializers import AuthResponseSerializer
+from dynamics_apis.authentication.services import KairnialAuthentication
 
 load_dotenv()
-
-from dynamics_apis.authentication.services import KairnialAuthentication
 
 TEST_API_KEY = os.environ.get('DEFAULT_KAIRNIAL_API_KEY', '')
 TEST_API_SECRET = os.environ.get('DEFAULT_KAIRNIAL_API_SECRET', '')

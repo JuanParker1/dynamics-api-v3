@@ -19,6 +19,8 @@ class Project(PaginatedModel):
         :param client_id: ClientID Token
         :param token: Access token
         :param search: Search on project name
+        :param page_offset: # of first record
+        :page_limit: max nb of records per request
         :return:
         """
         kp = KairnialProject(client_id=client_id, token=token)

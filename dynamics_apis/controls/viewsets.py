@@ -15,7 +15,7 @@ from dynamics_apis.common.serializers import ErrorSerializer
 # Create your views here.
 from dynamics_apis.common.services import KairnialWSServiceError
 from dynamics_apis.common.viewsets import project_parameters, PaginatedResponse, \
-    pagination_parameters, PaginatedViewSet
+    pagination_parameters, PaginatedViewSet, JSON_CONTENT_TYPE
 from .models import ControlTemplate, ControlInstance, ControlTemplateContent
 from .serializers import ControlQuerySerializer, ControlTemplateSerializer, \
     ControlInstanceSerializer, ControlTemplateElementSerializer, ControlTemplateContentSerializer
@@ -72,7 +72,7 @@ class ControlTemplateViewSet(PaginatedViewSet):
                 'code': getattr(e, 'status', 0),
                 'description': getattr(e, 'message', str(e))
             })
-            return Response(error.data, content_type='application/json',
+            return Response(error.data, content_type=JSON_CONTENT_TYPE,
                             status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
@@ -97,14 +97,14 @@ class ControlTemplateViewSet(PaginatedViewSet):
             print(template_content)
 
             serializer = ControlTemplateContentSerializer(template_content)
-            return Response(data=serializer.data, content_type='application/json')
+            return Response(data=serializer.data, content_type=JSON_CONTENT_TYPE)
         except (KairnialWSServiceError, KeyError) as e:
             error = ErrorSerializer({
                 'status': 400,
                 'code': getattr(e, 'status', 0),
                 'description': getattr(e, 'message', str(e))
             })
-            return Response(error.data, content_type='application/json',
+            return Response(error.data, content_type=JSON_CONTENT_TYPE,
                             status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -135,7 +135,7 @@ class ControlInstanceViewSet(PaginatedViewSet):
         cqs = ControlQuerySerializer(data=request.GET)
         cqs.is_valid()
         page_offset, page_limit = self.get_pagination(request=request)
-        template_id = request.GET.get('template_id', None)
+        template_id = request.GET.get(key='template_id', default=None)
         try:
             total, instance_list, page_offset, page_limit = ControlInstance.paginated_list(
                 client_id=client_id,
@@ -159,5 +159,5 @@ class ControlInstanceViewSet(PaginatedViewSet):
                 'code': getattr(e, 'status', 0),
                 'description': getattr(e, 'message', str(e))
             })
-            return Response(error.data, content_type='application/json',
+            return Response(error.data, content_type=JSON_CONTENT_TYPE,
                             status=status.HTTP_400_BAD_REQUEST)

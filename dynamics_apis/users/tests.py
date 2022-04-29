@@ -6,6 +6,7 @@ import uuid
 from dynamics_apis.common.tests import CommonTest, KairnialClient
 from .serializers.groups import GroupSerializer
 from .serializers.users import UserUUIDSerializer, UserInviteResponseSerializer
+from ..common.viewsets import JSON_CONTENT_TYPE
 
 
 class UserTest(CommonTest):
@@ -130,7 +131,7 @@ class UserTest(CommonTest):
                         "language": "fr"
                     }]
             }),
-            content_type='application/json')
+            content_type=JSON_CONTENT_TYPE)
         print(resp.json())
         serializer = UserInviteResponseSerializer(data=resp.json(), many=True)
         self.assertTrue(serializer.is_valid())
@@ -214,5 +215,5 @@ class GroupTest(CommonTest):
                 "name": self.group_name,
                 "description": "Unit test description"
             }),
-            content_type='application/json')
+            content_type=JSON_CONTENT_TYPE)
         self.assertEqual(resp.status_code, 201)

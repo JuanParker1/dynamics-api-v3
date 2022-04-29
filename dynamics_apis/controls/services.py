@@ -78,6 +78,7 @@ class KairnialControlInstanceService(KairnialWSService):
         parameters = [{'instance_uuid': instance_uuid}]
         return self.call(action='getInstances', parameters=parameters)
 
+
 class KairnialFormControlInstanceService(KairnialWSService):
     """
     Control Instances service using formControls

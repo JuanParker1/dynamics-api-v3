@@ -31,6 +31,7 @@ class Folder(PaginatedModel):
         :param token: Access token
         :param project_id: RGOC Code of the project
         :param parent_id: ID of the parent folder
+        :param filters: dictionnary of key: value filters
         :return:
         """
         kf = KairnialFolderService(client_id=client_id, token=token, project_id=project_id)
@@ -127,6 +128,7 @@ class Document(PaginatedModel):
         :param token: Access token
         :param project_id: RGOC Code of the project
         :param parent_id: ID of the parent folder
+        :param filters: dictionnary of key: value filters
         :return:
         """
         kf = KairnialDocumentService(client_id=client_id, token=token, project_id=project_id)
@@ -183,13 +185,13 @@ class Document(PaginatedModel):
         :return: DocumentSerializer data
         """
         name, extension, \
-        file_type, \
-        file_handler, \
-        file_hash, \
-        file_size, \
-        file_content = cls.extract_attachment_data(
-            attachment=attachment
-        )
+            file_type, \
+            file_handler, \
+            file_hash, \
+            file_size, \
+            file_content = cls.extract_attachment_data(
+                attachment=attachment
+            )
         if 'nom' not in serialized_data:
             serialized_data['nom'] = name
         serialized_data['ext'] = extension
@@ -214,6 +216,7 @@ class Document(PaginatedModel):
         :param client_id: ID of the client
         :param token: Access token
         :param project_id: RGOC Code of the project
+        :param parant_id: UUID of the document header
         :param serialized_data: DocumentCreateSerializer validated data
         :param attachment: File field
         :return: DocumentSerializer data
@@ -335,7 +338,7 @@ class Approval(PaginatedModel):
         :param document_id: Numeric ID of the document
         :param workflow_id: Numeric ID of the workflow
         :param approval_id: Numeric ID of the approval
-        :param new status: Numeric ID of the approval step
+        :param new_status: Numeric ID of the approval step
         return: [Approval ID, Step ID, ok?]
         """
         ka = KairnialApprovalService(client_id=client_id, token=token, project_id=project_id)

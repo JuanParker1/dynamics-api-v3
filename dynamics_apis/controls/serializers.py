@@ -63,7 +63,7 @@ class ControlTemplateElementSerializer(serializers.Serializer):
         help_text=_('Element type'),
         required=True
     )
-    type = serializers.CharField(
+    color = serializers.CharField(
         label=_('Element color'),
         help_text=_('color name'),
         required=False

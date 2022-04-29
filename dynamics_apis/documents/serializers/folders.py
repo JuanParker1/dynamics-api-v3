@@ -232,7 +232,6 @@ class FolderCreateSerializer(serializers.Serializer):
     infos = FolderInfoSerializer(source='fcat_desc')
 
 
-
 class FolderUpdateSerializer(serializers.Serializer):
     """
     Serializer to update folder name

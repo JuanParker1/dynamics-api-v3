@@ -11,6 +11,7 @@ from dynamics_apis.common.serializers import ErrorSerializer
 from .serializers import PasswordAuthenticationSerializer, APIKeyAuthenticationSerializer, \
     AuthResponseSerializer
 from .services import KairnialAuthentication, KairnialAuthenticationError
+from ..common.viewsets import JSON_CONTENT_TYPE
 
 
 class PasswordAuthenticationView(APIView):
@@ -41,7 +42,7 @@ class PasswordAuthenticationView(APIView):
                 return Response(str(e), content_type='application/text',
                                 status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response(serializer.errors, content_type='application/json',
+            return Response(serializer.errors, content_type=JSON_CONTENT_TYPE,
                             status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -74,5 +75,5 @@ class APIKeyAuthenticationView(APIView):
                 return Response(str(e), content_type='application/text',
                                 status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response(serializer.errors, content_type='application/json',
+            return Response(serializer.errors, content_type=JSON_CONTENT_TYPE,
                             status=status.HTTP_400_BAD_REQUEST)

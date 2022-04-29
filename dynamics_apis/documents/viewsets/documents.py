@@ -14,7 +14,7 @@ from dynamics_apis.common.serializers import ErrorSerializer
 # Create your views here.
 from dynamics_apis.common.services import KairnialWSServiceError
 from dynamics_apis.common.viewsets import project_parameters, PaginatedResponse, \
-    pagination_parameters, PaginatedViewSet
+    pagination_parameters, PaginatedViewSet, JSON_CONTENT_TYPE
 from ..models import Document
 from ..serializers.documents import DocumentQuerySerializer, DocumentSerializer, \
     DocumentCreateSerializer, DocumentReviseSerializer
@@ -31,7 +31,7 @@ class DocumentViewSet(PaginatedViewSet):
         description=_("List Kairnial documents on this project"),
         parameters=project_parameters + pagination_parameters + [
             OpenApiParameter(name='parent_id', type=OpenApiTypes.STR, location='query',
-                             required=False, description=_("Parent folder ID")),
+                             description=_("Parent folder ID")),
             DocumentQuerySerializer,  # serializer fields are converted to parameters
         ],
         responses={200: DocumentSerializer, 400: ErrorSerializer},
@@ -48,7 +48,7 @@ class DocumentViewSet(PaginatedViewSet):
         dqs = DocumentQuerySerializer(data=request.GET)
         dqs.is_valid()
         page_offset, page_limit = self.get_pagination(request=request)
-        parent_id = request.GET.get('parent_id')
+        parent_id = request.GET.get(key='parent_id')
         try:
             total, document_list, page_offset, page_limit = Document.paginated_list(
                 client_id=client_id,
@@ -73,7 +73,7 @@ class DocumentViewSet(PaginatedViewSet):
                 'code': getattr(e, 'status', 0),
                 'description': getattr(e, 'message', str(e))
             })
-            return Response(error.data, content_type='application/json',
+            return Response(error.data, content_type=JSON_CONTENT_TYPE,
                             status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
@@ -81,7 +81,7 @@ class DocumentViewSet(PaginatedViewSet):
         description=_("Retrieve Kairnial document by ID"),
         parameters=project_parameters + [
             OpenApiParameter(name='id', type=OpenApiTypes.INT, location='path',
-                             required=False, description=_("Folder numeric ID")),
+                             description=_("Folder numeric ID")),
         ],
         responses={200: DocumentSerializer, 400: ErrorSerializer, 404: OpenApiTypes.STR},
         methods=["GET"]
@@ -102,7 +102,7 @@ class DocumentViewSet(PaginatedViewSet):
         )
         if document:
             serializer = DocumentSerializer(document)
-            return Response(data=serializer.data, content_type='application/json', status=status.HTTP_200_OK)
+            return Response(data=serializer.data, content_type=JSON_CONTENT_TYPE, status=status.HTTP_200_OK)
         else:
             return Response(_("Document not found"), status=status.HTTP_404_NOT_FOUND)
 
@@ -126,7 +126,7 @@ class DocumentViewSet(PaginatedViewSet):
         data.update(request.FILES)
         dcs = DocumentCreateSerializer(data=data)
         if not dcs.is_valid():
-            return Response(dcs.errors, content_type='application/json',
+            return Response(dcs.errors, content_type=JSON_CONTENT_TYPE,
                             status=status.HTTP_400_BAD_REQUEST)
         try:
             document = Document.create(
@@ -134,7 +134,7 @@ class DocumentViewSet(PaginatedViewSet):
                 token=request.token,
                 project_id=project_id,
                 serialized_data=dcs.validated_data,
-                attachment=request.FILES.get('file')
+                attachment=request.FILES.get(key='file')
             )
             serializer = DocumentSerializer(document)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -162,7 +162,7 @@ class DocumentViewSet(PaginatedViewSet):
         data.update(request.FILES)
         dcs = DocumentCreateSerializer(data=data)
         if not dcs.is_valid():
-            return Response(dcs.errors, content_type='application/json',
+            return Response(dcs.errors, content_type=JSON_CONTENT_TYPE,
                             status=status.HTTP_400_BAD_REQUEST)
         try:
             document = Document.update(
@@ -171,7 +171,7 @@ class DocumentViewSet(PaginatedViewSet):
                 token=request.token,
                 project_id=project_id,
                 serialized_data=dcs.validated_data,
-                attachment=request.FILES.get('file')
+                attachment=request.FILES.get(key='file')
             )
             serializer = DocumentSerializer(document)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -183,7 +183,7 @@ class DocumentViewSet(PaginatedViewSet):
         description=_("Archive Kairnial document by ID"),
         parameters=project_parameters + [
             OpenApiParameter(name='id', type=OpenApiTypes.INT, location='path',
-                             required=False, description=_("Document numeric ID")),
+                             description=_("Document numeric ID")),
         ],
         responses={204: OpenApiTypes.STR, 400: ErrorSerializer, 404: OpenApiTypes.STR},
         methods=["DELETE"]

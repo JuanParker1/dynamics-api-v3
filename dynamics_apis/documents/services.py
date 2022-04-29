@@ -28,6 +28,7 @@ class KairnialFolderService(KairnialWSService):
         """
         List folders
         :param parent_id: ID of the parent folder, optional
+        :param filters: key: value filters
         :return:
         """
         parameters = []
@@ -40,7 +41,7 @@ class KairnialFolderService(KairnialWSService):
     def get(self, id: int):
         """
         List folders
-        :param parent_id: ID of the parent folder, optional
+        :param id: ID of the parent folder, optional
         :return:
         """
         return self.call(action='getFlexDossiers', parameters=[{'getById': id}])
@@ -271,7 +272,6 @@ class KairnialApprovalService(KairnialWSService):
     def list(self):
         """
         List approvals for a set of documents
-        :param document_ids: List of Numeric document IDs
         """
         parameters = [
             {

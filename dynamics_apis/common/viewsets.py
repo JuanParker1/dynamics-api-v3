@@ -2,13 +2,16 @@
 Common code related to viewsets
 """
 import os
-from django.utils.translation import gettext as _
+
 from django.conf import settings
+from django.utils.translation import gettext as _
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiExample, OpenApiParameter
-from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
+
+JSON_CONTENT_TYPE = 'application/json'
 
 default_client_example = OpenApiExample(
     name='Default clientID',
@@ -55,7 +58,6 @@ class PaginatedViewSet(ViewSet):
         return page_offset, page_limit
 
 
-
 class PaginatedResponse:
 
     def __new__(
@@ -73,6 +75,6 @@ class PaginatedResponse:
         }
         return Response(
             output,
-            content_type='application/json',
+            content_type=JSON_CONTENT_TYPE,
             status=status.HTTP_200_OK
         )

@@ -27,6 +27,8 @@ class ControlTemplate(PaginatedModel):
         :param token: Access token
         :param project_id: RGOC Code of the project
         :param filters: serialized values from a ControlTemplateQuerySerializer
+        :param page_offset: # of first record
+        :param page_limit: max nb of records per request
         :return:
         """
         kf = KairnialControlTemplateService(client_id=client_id, token=token, project_id=project_id)
@@ -54,7 +56,7 @@ class ControlTemplateContent(PaginatedModel):
         :return:
         """
         kf = KairnialControlTemplateService(client_id=client_id, token=token, project_id=project_id)
-        if template:=kf.list(filters={'template_uuid': template_id}):
+        if template := kf.list(filters={'template_uuid': template_id}):
             try:
                 return template.get('items')[0].get('content')
             except IndexError:
@@ -81,8 +83,10 @@ class ControlInstance(PaginatedModel):
         List children folders from a parent
         :param client_id: ID of the client
         :param token: Access token
-        :param project_id: RGOC Code of the project
+        :param filters: Instance filters
         :param template_id: UUID of the template
+        :param page_offset: # of first record
+        :param page_limit: max nb of records per request
         :return:
         """
 
@@ -114,7 +118,8 @@ class ControlInstance(PaginatedModel):
                         'position': key,
                         'date': value.get('date'),
                         'value': value.get('value', '')
-                    } for key, value in instance.get('content', {}).items() if key != 'additionalInfos' and key != 'settings'
+                    } for key, value in instance.get('content', {}).items() if
+                    key != 'additionalInfos' and key != 'settings'
                 ]
                 instances['items'][i]['additional_info'] = instances['items'][i]['content'].get('additionalInfos')
         return instances

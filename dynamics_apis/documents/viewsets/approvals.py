@@ -12,7 +12,7 @@ from dynamics_apis.common.serializers import ErrorSerializer
 # Create your views here.
 from dynamics_apis.common.services import KairnialWSServiceError
 from dynamics_apis.common.viewsets import project_parameters, PaginatedResponse, \
-    pagination_parameters, PaginatedViewSet
+    pagination_parameters, PaginatedViewSet, JSON_CONTENT_TYPE
 from ..models import ApprovalType, Approval
 from ..serializers.approvals import ApprovalTypeSerializer, ApprovalSerializer, \
     ApprovalUpdateSerializer
@@ -62,7 +62,7 @@ class ApprovalTypeViewSet(PaginatedViewSet):
                 'code': getattr(e, 'status', 0),
                 'description': getattr(e, 'message', str(e))
             })
-            return Response(error.data, content_type='application/json',
+            return Response(error.data, content_type=JSON_CONTENT_TYPE,
                             status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
@@ -70,7 +70,7 @@ class ApprovalTypeViewSet(PaginatedViewSet):
         description=_("Archive Kairnial approval type by ID"),
         parameters=project_parameters + [
             OpenApiParameter(name='id', type=OpenApiTypes.INT, location='path',
-                             required=False, description=_("Approval type numeric ID")),
+                             description=_("Approval type numeric ID")),
         ],
         responses={204: OpenApiTypes.STR, 400: ErrorSerializer, 404: OpenApiTypes.STR},
         methods=["DELETE"]
@@ -96,7 +96,6 @@ class ApprovalTypeViewSet(PaginatedViewSet):
                             status=status.HTTP_406_NOT_ACCEPTABLE)
 
 
-
 class ApprovalViewSet(PaginatedViewSet):
     """
     Viewset for approvals
@@ -117,7 +116,6 @@ class ApprovalViewSet(PaginatedViewSet):
         :param request:
         :param client_id: Client ID token
         :param project_id: Project RGOC ID
-        :param folder_id: ID of the folder
         :return:
         """
         page_offset, page_limit = self.get_pagination(request=request)
@@ -145,10 +143,8 @@ class ApprovalViewSet(PaginatedViewSet):
                 'code': getattr(e, 'status', 0),
                 'description': getattr(e, 'message', str(e))
             })
-            return Response(error.data, content_type='application/json',
+            return Response(error.data, content_type=JSON_CONTENT_TYPE,
                             status=status.HTTP_400_BAD_REQUEST)
-
-
 
     def retrieve(self, request: HttpRequest, client_id: str, project_id: str, pk: int):
         """
@@ -156,7 +152,7 @@ class ApprovalViewSet(PaginatedViewSet):
         :param request:
         :param client_id: Client ID token
         :param project_id: Project RGOC ID
-        :param folder_id: ID of the folder
+        :param pk: Approval ID
         :return:
         """
         # TODO: Get only one approval
@@ -177,9 +173,10 @@ class ApprovalViewSet(PaginatedViewSet):
         """
         aus = ApprovalUpdateSerializer(data=request.data)
         if not aus.is_valid():
-            return Response(aus.errors, content_type='application/json', status=status.HTTP_400_BAD_REQUEST)
+            return Response(aus.errors, content_type=JSON_CONTENT_TYPE, status=status.HTTP_400_BAD_REQUEST)
         approval_id, step_id, ok = Approval.update(
             client_id=client_id,
+            token=request.token,
             project_id=project_id,
             document_id=aus.validated_data.get('document_id'),
             workflow_id=aus.validated_data.get('workflow_id'),
