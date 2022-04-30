@@ -88,8 +88,7 @@ class CommonTest(TestCase):
         ka = KairnialAuthentication(client_id=cls.client_id)
         auth_response = ka.secrets_authentication(
             api_key=TEST_API_KEY,
-            api_secret=TEST_API_SECRET,
-            scopes="direct-login project-list"
+            api_secret=TEST_API_SECRET
         )
         access_token = AuthResponseSerializer(auth_response).data.get('access_token')
         return access_token

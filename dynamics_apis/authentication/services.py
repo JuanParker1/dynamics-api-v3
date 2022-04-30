@@ -80,7 +80,6 @@ class KairnialAuthentication:
         Get auth token from auth server
         :param api_key: User API Key
         :param api_secret: User API Secret
-        :param scopes: List of scopes to request
         :return:
         """
         logger = logging.getLogger('services')
