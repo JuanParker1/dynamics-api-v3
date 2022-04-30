@@ -1,7 +1,6 @@
 """
 Kairnial user model classes
 """
-from dynamics_apis.users.services.groups import KairnialGroup
 from dynamics_apis.users.services.users import KairnialUser
 
 
@@ -14,6 +13,7 @@ class User:
     """
     Kairnial user class
     """
+
     @classmethod
     def list(cls, client_id: str, token: str, project_id: str, filters: dict = dict) -> []:
         """
@@ -28,7 +28,7 @@ class User:
         if 'groups' in filters:
             try:
                 users = ku.list_for_groups(list_of_groups=filters.get('groups'))
-            except ValueError as e:
+            except ValueError:
                 return None
         else:
             users = ku.list().get('items')
@@ -50,7 +50,6 @@ class User:
         ku = KairnialUser(client_id=client_id, token=token, project_id=project_id)
         return ku.count()
 
-
     @classmethod
     def get(cls, client_id: str, token: str, project_id: str, pk: str):
         """
@@ -63,12 +62,12 @@ class User:
         ku = KairnialUser(client_id=client_id, token=token, project_id=project_id)
         user_list = ku.list().get('items')
         try:
-            return [user for user in  user_list if user.get('account_uuid') == pk][0]
-        except IndexError as e:
+            return [user for user in user_list if user.get('account_uuid') == pk][0]
+        except IndexError:
             raise UserNotFound('User not found')
 
     @classmethod
-    def groups(self, client_id: str, token: str, project_id: str, pk: int):
+    def groups(cls, client_id: str, token: str, project_id: str, pk: int):
         """
         Get a specific user
         :param client_id: ClientID Token
@@ -80,7 +79,7 @@ class User:
         return ku.get_groups(pk=pk)
 
     @classmethod
-    def invite(self, client_id: str, token: str, project_id: str, users: list):
+    def invite(cls, client_id: str, token: str, project_id: str, users: list):
         """
         Get a specific user
         :param client_id: ClientID Token
@@ -92,7 +91,7 @@ class User:
         return ku.invite(users=users)
 
     @classmethod
-    def archive(self, client_id: str, token: str, project_id: str, pk: str):
+    def archive(cls, client_id: str, token: str, project_id: str, pk: str):
         """
         Archive a user
         :param client_id: ClientID Token
@@ -102,4 +101,3 @@ class User:
         """
         ku = KairnialUser(client_id=client_id, token=token, project_id=project_id)
         return ku.archive(pk=pk)
-

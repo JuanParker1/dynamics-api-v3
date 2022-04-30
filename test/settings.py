@@ -11,16 +11,22 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 import os
-import string
 import random
+import string
 from pathlib import Path
 
 from dotenv import load_dotenv
+
+from dynamics_apis.settings import \
+    KAIRNIAL_PROJECT_ENVIRONMENTS, \
+    KIARNIAL_AUTHENTICATION_SCOPES, \
+    load_key
 
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
@@ -28,7 +34,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 
 def generate_secret(nb: int = 128):
-    return ''.join([random.choice(string.printable) for i in range(nb)])
+    return ''.join([random.choice(string.printable) for _ in range(nb)])
+
 
 SECRET_KEY = generate_secret()
 
@@ -199,7 +206,8 @@ SPECTACULAR_SETTINGS = {
 
 
 <h2>1. Obtain a authentication header</h2>
-To use this API, you must first <a href="#/authentication/authentication_key_create">obtain a token</a> using the authentication endpoint for this platform.
+To use this API, you must first <a href="#/authentication/authentication_key_create">obtain a token</a> 
+using the authentication endpoint for this platform.
 
 
 One this token obtain, pass the token in the request header using the Authenticate header.
@@ -223,8 +231,6 @@ Use <a href="#/projects/projects_list">project list</a> to select a project.
     "SECURITY": [{"ApiKeyAuth": [], 'clientID': []}],
     "COMPONENT_SPLIT_REQUEST": True
 }
-
-from dynamics_apis.settings import *
 
 if os.environ.get('KAIRNIAL_AUTH_PUBLIC_KEY'):
     KAIRNIAL_AUTH_PUBLIC_KEY = os.environ.get('KAIRNIAL_AUTH_PUBLIC_KEY')

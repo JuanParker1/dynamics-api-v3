@@ -129,6 +129,8 @@ def resolve_users(_, info, client_id, project_id, **filters):
     Users resolver, if user is connected
     :param _: all params
     :param info: QraphQL request context
+    :param client_id: ID of the client
+    :param project_id: ID of the project
     """
     request = info.context.get('request', None)
     if hasattr(request, 'token'):
@@ -175,6 +177,8 @@ def resolve_contacts(_, info, client_id, project_id, **filters):
     User resolver, if user is connected
     :param _: all params
     :param info: QraphQL request context
+    :param client_id: ID of the client
+    :param project_id: ID of the project
     """
     request = info.context.get('request', None)
     cqs = ContactQuerySerializer(data=filters)
@@ -225,6 +229,10 @@ def resolve_projects(_, info, client_id: str, page_offset: int = 0, page_limit: 
     Projects resolver, if user is connected
     :param _: all params
     :param info: QraphQL request context
+    :param client_id: ID of the client
+    :param page_offset: # of first record
+    :param page_limit: max nb of records per request
+    :param search: full string search
     """
     request = info.context.get('request', None)
     if hasattr(request, 'token'):

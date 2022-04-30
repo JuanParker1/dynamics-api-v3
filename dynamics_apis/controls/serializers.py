@@ -63,7 +63,7 @@ class ControlTemplateElementSerializer(serializers.Serializer):
         help_text=_('Element type'),
         required=True
     )
-    type = serializers.CharField(
+    color = serializers.CharField(
         label=_('Element color'),
         help_text=_('color name'),
         required=False
@@ -207,11 +207,6 @@ class ControlTemplateSerializer(serializers.Serializer):
         allow_null=True,
         read_only=True
     )
-    # created_by_email = serializers.CharField(
-    #     label=_('Creator email'),
-    #     help_text=_('e-mail of creator'),
-    #     source='creator_email'
-    # )
     category = serializers.CharField(
         label=_('Category label'),
         help_text=_('Label of the category'),

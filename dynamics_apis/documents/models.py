@@ -31,6 +31,7 @@ class Folder(PaginatedModel):
         :param token: Access token
         :param project_id: RGOC Code of the project
         :param parent_id: ID of the parent folder
+        :param filters: dictionnary of key: value filters
         :return:
         """
         kf = KairnialFolderService(client_id=client_id, token=token, project_id=project_id)
@@ -127,6 +128,7 @@ class Document(PaginatedModel):
         :param token: Access token
         :param project_id: RGOC Code of the project
         :param parent_id: ID of the parent folder
+        :param filters: dictionnary of key: value filters
         :return:
         """
         kf = KairnialDocumentService(client_id=client_id, token=token, project_id=project_id)
@@ -205,6 +207,7 @@ class Document(PaginatedModel):
             client_id: str,
             token: str,
             project_id: str,
+            parent_id: str,
             serialized_data: dict,
             attachment
     ):
@@ -213,26 +216,28 @@ class Document(PaginatedModel):
         :param client_id: ID of the client
         :param token: Access token
         :param project_id: RGOC Code of the project
+        :param parent_id: UUID of the document header
         :param serialized_data: DocumentCreateSerializer validated data
         :param attachment: File field
         :return: DocumentSerializer data
         """
         name, extension, \
-        file_type, \
-        file_handler, \
-        file_hash, \
-        file_size, \
-        file_content = cls.extract_attachment_data(
-            attachment=attachment
-        )
+            file_type, \
+            file_handler, \
+            file_hash, \
+            file_size, \
+            file_content = cls.extract_attachment_data(
+                attachment=attachment
+            )
         if 'nom' not in serialized_data:
             serialized_data['nom'] = name
         serialized_data['ext'] = extension
         serialized_data['hash'] = file_hash
         serialized_data['size'] = file_size
         serialized_data['typeFichier'] = file_type
+        serialized_data['parentUUID'] = parent_id
         fs = KairnialDocumentService(client_id=client_id, token=token, project_id=project_id)
-        return fs.revise(document_create_serializer=serialized_data, content=file_content)
+        return fs.revise(document_revise_serializer=serialized_data, content=file_content)
 
     @staticmethod
     def archive(
@@ -271,7 +276,7 @@ class ApprovalType(PaginatedModel):
         approval_types = kat.list().get('notes')
         for at in approval_types:
             at['content'] = json.loads(at.get('content') or '{}')
-        return  approval_types
+        return approval_types
 
     @staticmethod
     def archive(
@@ -333,7 +338,7 @@ class Approval(PaginatedModel):
         :param document_id: Numeric ID of the document
         :param workflow_id: Numeric ID of the workflow
         :param approval_id: Numeric ID of the approval
-        :param new status: Numeric ID of the approval step
+        :param new_status: Numeric ID of the approval step
         return: [Approval ID, Step ID, ok?]
         """
         ka = KairnialApprovalService(client_id=client_id, token=token, project_id=project_id)

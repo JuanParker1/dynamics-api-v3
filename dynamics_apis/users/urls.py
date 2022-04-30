@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 
 from .viewsets.contacts import ContactViewSet
 from .viewsets.groups import GroupViewSet
-from  .viewsets.users import UserViewSet
+from .viewsets.users import UserViewSet
 
 # Create a router and register our viewsets with it.
 router = DefaultRouter()

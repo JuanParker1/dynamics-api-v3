@@ -2,7 +2,7 @@
 Control viewsets
 """
 
-from django.http import HttpRequest
+from django.http import TokenRequest
 from django.utils.translation import gettext as _
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema, OpenApiParameter
@@ -15,7 +15,7 @@ from dynamics_apis.common.serializers import ErrorSerializer
 # Create your views here.
 from dynamics_apis.common.services import KairnialWSServiceError
 from dynamics_apis.common.viewsets import project_parameters, PaginatedResponse, \
-    pagination_parameters, PaginatedViewSet
+    pagination_parameters, PaginatedViewSet, JSON_CONTENT_TYPE, TokenRequest
 from .models import ControlTemplate, ControlInstance, ControlTemplateContent
 from .serializers import ControlQuerySerializer, ControlTemplateSerializer, \
     ControlInstanceSerializer, ControlTemplateElementSerializer, ControlTemplateContentSerializer
@@ -36,7 +36,7 @@ class ControlTemplateViewSet(PaginatedViewSet):
         responses={200: ControlTemplateSerializer, 400: ErrorSerializer},
         methods=["GET"]
     )
-    def list(self, request: HttpRequest, client_id: str, project_id: str):
+    def list(self, request: TokenRequest, client_id: str, project_id: str):
         """
         List documents on a projects
         :param request:
@@ -72,7 +72,7 @@ class ControlTemplateViewSet(PaginatedViewSet):
                 'code': getattr(e, 'status', 0),
                 'description': getattr(e, 'message', str(e))
             })
-            return Response(error.data, content_type='application/json',
+            return Response(error.data, content_type=JSON_CONTENT_TYPE,
                             status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
@@ -83,7 +83,7 @@ class ControlTemplateViewSet(PaginatedViewSet):
         methods=["GET"]
     )
     @action(methods=["GET"], detail=True, url_path="elements", url_name='template_elements')
-    def elements(self, request: HttpRequest, client_id: str, project_id: str, pk: str):
+    def elements(self, request: TokenRequest, client_id: str, project_id: str, pk: str):
         """
         View to list template elements
         """
@@ -97,14 +97,14 @@ class ControlTemplateViewSet(PaginatedViewSet):
             print(template_content)
 
             serializer = ControlTemplateContentSerializer(template_content)
-            return Response(data=serializer.data, content_type='application/json')
+            return Response(data=serializer.data, content_type=JSON_CONTENT_TYPE)
         except (KairnialWSServiceError, KeyError) as e:
             error = ErrorSerializer({
                 'status': 400,
                 'code': getattr(e, 'status', 0),
                 'description': getattr(e, 'message', str(e))
             })
-            return Response(error.data, content_type='application/json',
+            return Response(error.data, content_type=JSON_CONTENT_TYPE,
                             status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -118,13 +118,13 @@ class ControlInstanceViewSet(PaginatedViewSet):
         summary=_("List Kairnial instances"),
         description=_("List Kairnial control instances on this project"),
         parameters=project_parameters + pagination_parameters + [
-            OpenApiParameter('template_id', OpenApiTypes.STR, location='query', required=False),
+            OpenApiParameter('template_id', OpenApiTypes.STR, location='query', required=True),
             ControlQuerySerializer,  # serializer fields are converted to parameters
         ],
         responses={200: ControlInstanceSerializer, 400: ErrorSerializer},
         methods=["GET"]
     )
-    def list(self, request: HttpRequest, client_id: str, project_id: str):
+    def list(self, request: TokenRequest, client_id: str, project_id: str):
         """
         List documents on a projects
         :param request:
@@ -135,7 +135,7 @@ class ControlInstanceViewSet(PaginatedViewSet):
         cqs = ControlQuerySerializer(data=request.GET)
         cqs.is_valid()
         page_offset, page_limit = self.get_pagination(request=request)
-        template_id = request.GET.get('template_id', None)
+        template_id = request.GET.get(key='template_id')
         try:
             total, instance_list, page_offset, page_limit = ControlInstance.paginated_list(
                 client_id=client_id,
@@ -159,5 +159,5 @@ class ControlInstanceViewSet(PaginatedViewSet):
                 'code': getattr(e, 'status', 0),
                 'description': getattr(e, 'message', str(e))
             })
-            return Response(error.data, content_type='application/json',
+            return Response(error.data, content_type=JSON_CONTENT_TYPE,
                             status=status.HTTP_400_BAD_REQUEST)

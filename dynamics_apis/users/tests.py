@@ -6,6 +6,7 @@ import uuid
 from dynamics_apis.common.tests import CommonTest, KairnialClient
 from .serializers.groups import GroupSerializer
 from .serializers.users import UserUUIDSerializer, UserInviteResponseSerializer
+from ..common.viewsets import JSON_CONTENT_TYPE
 
 
 class UserTest(CommonTest):
@@ -80,7 +81,7 @@ class UserTest(CommonTest):
         Test user email filter with a very long filter
         """
         letters = string.ascii_letters + string.digits
-        email = ''.join(random.choice(letters) for i in range(10000))
+        email = ''.join(random.choice(letters) for _ in range(10000))
         self._test_user_list_filter(email=email)
 
     def test_108_user_list_filter_full_name(self):
@@ -101,7 +102,6 @@ class UserTest(CommonTest):
         """
         # This test expects a 200 since invalid filters are removed by the serializer
         self._test_user_list_filter(
-            expected_status_code=200,
             groups=','.join(['1', '2', '3', '4'])
         )
 
@@ -130,7 +130,7 @@ class UserTest(CommonTest):
                         "language": "fr"
                     }]
             }),
-            content_type='application/json')
+            content_type=JSON_CONTENT_TYPE)
         print(resp.json())
         serializer = UserInviteResponseSerializer(data=resp.json(), many=True)
         self.assertTrue(serializer.is_valid())
@@ -214,5 +214,5 @@ class GroupTest(CommonTest):
                 "name": self.group_name,
                 "description": "Unit test description"
             }),
-            content_type='application/json')
+            content_type=JSON_CONTENT_TYPE)
         self.assertEqual(resp.status_code, 201)

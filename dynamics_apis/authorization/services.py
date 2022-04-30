@@ -18,7 +18,6 @@ class KairnialACL(KairnialWSService):
         """
         return self.call(
             action='getAclGrants',
-            parameters=[{}],
             use_cache=True)
 
 
@@ -35,5 +34,4 @@ class KairnialModule(KairnialWSService):
         """
         return self.call(
             action='getModules',
-            parameters=[{}],
             use_cache=True)

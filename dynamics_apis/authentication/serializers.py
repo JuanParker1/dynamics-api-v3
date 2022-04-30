@@ -66,7 +66,8 @@ class AuthResponseSerializer(serializers.Serializer):
     )
     access_token = serializers.CharField(
         label=_("Access token"),
-        help_text=_("Access token to use in Authentication header, typically 'Authorization: <token_type> <access_token>. Access tokens for APIs last for 24 hours")
+        help_text=_("Access token to use in Authentication header, typically "
+                    "'Authorization: <token_type> <access_token>. Access tokens for APIs last for 24 hours")
     )
     refresh_token = serializers.CharField(
         label=_("Refresh token"),

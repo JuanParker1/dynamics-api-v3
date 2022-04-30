@@ -9,6 +9,7 @@ class Contact:
     """
     Kairnial contact class
     """
+
     @staticmethod
     def list(client_id: str, token: str, project_id: str, filters: dict = None) -> []:
         """

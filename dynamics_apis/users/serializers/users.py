@@ -149,6 +149,7 @@ class UserQuerySerializer(serializers.Serializer):
         child=serializers.IntegerField(),
         required=False)
 
+
 class UserGroupSerializer(serializers.Serializer):
     """
     Serializer for list of groups for user
@@ -158,6 +159,7 @@ class UserGroupSerializer(serializers.Serializer):
         help_text=_("List of numeric group IDs"),
         child=serializers.IntegerField()
     )
+
 
 class UserInviteSerializer(serializers.Serializer):
     """
@@ -187,6 +189,7 @@ class UserInviteSerializer(serializers.Serializer):
         source='lng'
     )
 
+
 class UserMultiInviteSerializer(serializers.Serializer):
     users = UserInviteSerializer(
         label=_('List of users'),
@@ -194,6 +197,7 @@ class UserMultiInviteSerializer(serializers.Serializer):
         many=True,
         required=True
     )
+
 
 class InvitedUserSerializer(serializers.Serializer):
     id = serializers.UUIDField(
@@ -227,6 +231,7 @@ class InvitedUserSerializer(serializers.Serializer):
         help_text=_("Language of the user interface"),
         required=False, source='_language',
         default=0)
+
 
 class UserInviteResponseSerializer(serializers.Serializer):
     admin_confirmation = serializers.BooleanField(
@@ -263,6 +268,7 @@ class UserInviteResponseSerializer(serializers.Serializer):
         label=_('Created user'),
         help_text=_('User details')
     )
+
 
 class UserMultiInviteResponseSerializer(serializers.Serializer):
     users = UserInviteResponseSerializer(many=True)

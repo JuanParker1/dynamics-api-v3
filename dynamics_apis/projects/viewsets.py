@@ -11,7 +11,9 @@ from rest_framework.response import Response
 
 from dynamics_apis.common.serializers import ErrorSerializer
 from dynamics_apis.common.services import KairnialWSServiceError
-from dynamics_apis.common.viewsets import client_parameters, pagination_parameters, PaginatedViewSet, PaginatedResponse
+from dynamics_apis.common.viewsets import client_parameters, pagination_parameters, \
+    PaginatedViewSet, PaginatedResponse, \
+    JSON_CONTENT_TYPE
 from .models import Project
 from .serializers import ProjectSerializer, ProjectCreationSerializer, ProjectUpdateSerializer
 
@@ -26,16 +28,16 @@ class ProjectViewSet(PaginatedViewSet):
         description=_("Get a list of projects associated to current connected user"),
         request=ProjectSerializer,
         parameters=client_parameters + pagination_parameters + [
-            OpenApiParameter("search", OpenApiTypes.STR, OpenApiParameter.QUERY,
+            OpenApiParameter("search", OpenApiTypes.STR,
                              description=_("Search project name containing")),
         ],
         responses={200: ProjectSerializer, 400: KairnialWSServiceError},
         methods=["GET"]
     )
-    def list(self, request, client_id, format=None):
+    def list(self, request, client_id):
         page_offset, page_limit = self.get_pagination(request=request)
         try:
-            total, project_list, page_offset,page_limit = Project.paginated_list(
+            total, project_list, page_offset, page_limit = Project.paginated_list(
                 client_id=client_id,
                 token=request.token,
                 search=request.GET.get('search'),
@@ -55,12 +57,13 @@ class ProjectViewSet(PaginatedViewSet):
                 'error': e.status,
                 'description': e.message
             })
-            return Response(error.data, content_type='application/json', status=status.HTTP_400_BAD_REQUEST)
+            return Response(error.data, content_type=JSON_CONTENT_TYPE, status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
         summary=_("Create a Kairnial project"),
         description=_(
-            "Create a new project for the current connected user, give a template UUID to copy the configuration from an existing project"),
+            "Create a new project for the current connected user,"
+            " give a template UUID to copy the configuration from an existing project"),
         parameters=[
             OpenApiParameter("client_id", OpenApiTypes.STR, OpenApiParameter.PATH,
                              description=_("Client ID token"),
@@ -84,7 +87,7 @@ class ProjectViewSet(PaginatedViewSet):
                 return Response(_("Project could not be created"),
                                 status=status.HTTP_406_NOT_ACCEPTABLE)
         else:
-            return Response(pcs.errors, content_type='application/json',
+            return Response(pcs.errors, content_type=JSON_CONTENT_TYPE,
                             status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
@@ -120,5 +123,5 @@ class ProjectViewSet(PaginatedViewSet):
                 return Response(_("Project could not be updated"),
                                 status=status.HTTP_406_NOT_ACCEPTABLE)
         else:
-            return Response(pus.errors, content_type='application/json',
+            return Response(pus.errors, content_type=JSON_CONTENT_TYPE,
                             status=status.HTTP_400_BAD_REQUEST)
