@@ -2,6 +2,7 @@
 Services that get and push information to Kairnial WS servers
 """
 import json
+import logging
 import time
 import uuid
 
@@ -36,7 +37,7 @@ class KairnialFolderService(KairnialWSService):
             parameters = [{key: value} for key, value in filters.items()]
         if parent_id:
             parameters.append({'asyncFolderId': parent_id})
-        return self.call(action='getFlexDossiers', parameters=parameters)
+        return self.call(action='getFlexDossiers', parameters=parameters, use_cache=True)
 
     def get(self, id: int):
         """
@@ -44,7 +45,7 @@ class KairnialFolderService(KairnialWSService):
         :param id: ID of the parent folder, optional
         :return:
         """
-        return self.call(action='getFlexDossiers', parameters=[{'getById': id}])
+        return self.call(action='getFlexDossiers', parameters=[{'getById': id}], use_cache=True)
 
     def create(self, folder_create_serializer: {}):
         """
@@ -58,8 +59,7 @@ class KairnialFolderService(KairnialWSService):
             return False
         return self.call(
             action='addDossier',
-            parameters=[folder_create_serializer],
-            use_cache=False
+            parameters=[folder_create_serializer]
         )
 
     def update(self, id: int, folder_update_serializer: {}):
@@ -77,8 +77,7 @@ class KairnialFolderService(KairnialWSService):
         return self.call(
             action='updateDossier',
             parameters=[folder_update_serializer, ],
-            format='int',
-            use_cache=False
+            out_format='int'
         )
 
     def archive(self, id: str):
@@ -89,8 +88,7 @@ class KairnialFolderService(KairnialWSService):
         return self.call(
             action='archiveIt',
             parameters=[{'uuid': id}, ],
-            format='int',
-            use_cache=False
+            out_format='int'
         )
 
 
@@ -111,18 +109,21 @@ class KairnialDocumentService(KairnialWSService):
         :return:
         """
         parameters = []
+        if parent_id:
+            parameters.append({'fcat_id': parent_id})
         if filters:
             parameters = [{key: value} for key, value in filters.items()]
         parameters += [
             {'LIMITSKIP': offset},
             {'LIMITTAKE': limit}
         ]
-        return self.call(action='getFilesFromCat', parameters=parameters)
+        return self.call(action='getFilesFromCat', parameters=parameters, use_cache=True)
 
     def _get_file_link(self, json_data):
         """
         Get a file link for upload
         """
+        logger = logging.getLogger('services')
         file_uuid = str(uuid.uuid4())
         prepare_file_parameters = {
             'name': json_data.get('nom'),
@@ -135,12 +136,11 @@ class KairnialDocumentService(KairnialWSService):
         # 1. Obtain the upload link
         response = self.call(
             action='prepareFileUpload',
-            parameters=[prepare_file_parameters],
-            use_cache=False
+            parameters=[prepare_file_parameters]
         )
         us = FileUploadSerializer(data=response)
         if not us.is_valid():
-            print(us.errors)
+            logger.debug(us.errors)
             raise KairnialWSServiceError(
                 message='Invalid response from file upload',
                 status=0
@@ -163,8 +163,7 @@ class KairnialDocumentService(KairnialWSService):
 
         output = self.call(
             action='addFile',
-            parameters=[data, ],
-            use_cache=False
+            parameters=[data, ]
         )
         if 'error' in output:
             raise KairnialWSServiceError(
@@ -178,7 +177,7 @@ class KairnialDocumentService(KairnialWSService):
         :param id: ID of the document
         :return:
         """
-        return self.call(action='getFilesFromCat', parameters=[{'id': id}])
+        return self.call(action='getFilesFromCat', parameters=[{'id': id}], use_cache=True)
 
     def create(self, document_create_serializer: dict, content):
         """
@@ -214,7 +213,7 @@ class KairnialDocumentService(KairnialWSService):
         # 2. Post file to url
         REQUESTS_METHODS[us.validated_data.get('method').lower()](
             us.validated_data.get('url'),
-            data=content,
+            data=content
         )
 
         # 3. Create Document with file
@@ -233,8 +232,7 @@ class KairnialDocumentService(KairnialWSService):
         return self.call(
             action='archiveFile',
             parameters=[{'id': id}, ],
-            format='int',
-            use_cache=False
+            out_format='int'
         )
 
 
@@ -249,7 +247,7 @@ class KairnialApprovalTypeService(KairnialWSService):
         List approval types
         :return:
         """
-        return self.call(action='getAllCircuitVisa', parameters=[{}])
+        return self.call(action='getAllCircuitVisa', use_cache=True)
 
     def archive(self, id: int):
         """
@@ -259,8 +257,7 @@ class KairnialApprovalTypeService(KairnialWSService):
         return self.call(
             action='archiveCircuitVisa',
             parameters=[{'id': id}, ],
-            format='int',
-            use_cache=False
+            out_format='int'
         )
 
 
@@ -274,13 +271,8 @@ class KairnialApprovalService(KairnialWSService):
         """
         List approvals for a set of documents
         """
-        parameters = [
-            {
-            },
-        ]
         return self.call(
             action='getFilesHeaderAndVisas',
-            parameters=parameters,
             use_cache=True
         )
 
@@ -291,6 +283,5 @@ class KairnialApprovalService(KairnialWSService):
         parameters = [document_id, workflow_id, approval_id, new_status]
         return self.call(
             action='updateVisaNeeded',
-            parameters=parameters,
-            use_cache=True
+            parameters=parameters
         )

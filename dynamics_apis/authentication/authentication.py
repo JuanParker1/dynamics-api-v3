@@ -58,12 +58,12 @@ class KairnialTokenAuthentication(JWTAuthentication):
         except jwt.ExpiredSignatureError:
             logger.error("Token expired")
             return None
-        except (jwt.InvalidIssuerError, jwt.InvalidAudienceError) as e:
+        except (jwt.InvalidIssuerError, jwt.InvalidAudienceError):
             logger.error("incorrect claims, please check the audience and issuer")
             return None
-        except AttributeError as e:
+        except AttributeError:
             logger.error("Unable to get client_id")
             return None
-        except Exception as e:
+        except Exception:
             logger.error("Unable to parse authentication")
             return None

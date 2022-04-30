@@ -34,7 +34,7 @@ class ProjectViewSet(PaginatedViewSet):
         responses={200: ProjectSerializer, 400: KairnialWSServiceError},
         methods=["GET"]
     )
-    def list(self, request, client_id, format=None):
+    def list(self, request, client_id):
         page_offset, page_limit = self.get_pagination(request=request)
         try:
             total, project_list, page_offset, page_limit = Project.paginated_list(

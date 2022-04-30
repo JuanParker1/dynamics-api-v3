@@ -78,8 +78,7 @@ class KairnialProject(KairnialCrossService):
         """
         return self.call(
             action='adminEC.registerProject',
-            parameters=[serialized_project],
-            use_cache=False
+            parameters=[serialized_project]
         )
 
     def update(self, pk, serialized_update_project):
@@ -92,6 +91,5 @@ class KairnialProject(KairnialCrossService):
         serialized_update_project['g_nom'] = pk
         return self.call(
             action='adminEC.updateProjectInfos',
-            parameters=[serialized_update_project],
-            use_cache=False
+            parameters=[serialized_update_project]
         )

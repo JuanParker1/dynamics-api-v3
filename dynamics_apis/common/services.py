@@ -78,8 +78,9 @@ class KairnialService:
             action: str,
             service: str = '',
             parameters: [dict] = None,
-            format: str = 'json',
-            use_cache=False):
+            out_format: str = 'json',
+            use_cache=False
+        ):
         """
         Call the Webservice with parameters
         :param action: Name of the action to perform on a domain (getUsers)
@@ -88,61 +89,94 @@ class KairnialService:
         :param format: expected output format from tre Kairnial Web Service
         :param use_cache: cache response
         """
-        parameters = parameters or [{}]
-        service = service if service else self.service_domain
         logger = logging.getLogger('services')
         url = self.get_url()
         headers = self.get_headers()
-        data = self.get_body(service=service, action=action, parameters=parameters)
-        logger.debug(url)
-        logger.debug(headers)
-        logger.debug(data)
+        data = self.get_body(
+            service=service or self.service_domain,
+            action=action,
+            parameters=parameters or [{}]
+        )
+        logger.debug(f"--- call to {url} with headers {json.dumps(headers)} and data {json.dumps(data)}")
         cache_key = sha1(f'{url}||{json.dumps(headers)}||{data}'.encode('latin1')).hexdigest()
-        if use_cache:
-            output = cache.get(cache_key)
-            if output:
-                return output
+        if use_cache and (cached_data := cache.get(cache_key)):
+            return cached_data
         response = requests.post(
             url=url,
             headers=headers,
             data=data
         )
-        logger.debug(response.status_code)
-        logger.debug(len(response.content))
+        logger.debug(f"<--- response {response.status_code} with length {len(response.content)}")
         if response.status_code != 200:
-            logger.debug(response.status_code)
-            logger.debug(response.content)
+            logger.debug(f"<--- error response content {response.content}")
             raise KairnialWSServiceError(
                 message=response.content or 'General error',
                 status=response.status_code
             )
         else:
-            if format == 'json':
-                try:
-                    output = response.json()
-                except JSONDecodeError as e:
-                    raise KairnialWSServiceError(
-                        message=_("Invalid response from Web Services: {}").format(str(e)),
-                        status=response.status_code
-                    ) from e
-            elif format == 'bool' or format == 'int':
-                try:
-                    val = int(response.content.decode('utf8').replace('"', ''))
-                    if format == 'int':
-                        output = val
-                    else:
-                        output = val != 0
-                except ValueError as e:
-                    logger.debug(e)
-                    raise KairnialWSServiceError(
-                        message=_("Invalid response from Web Services: {}").format(str(e)),
-                        status=response.status_code
-                    ) from e
-            else:  # Return content as string
-                output = response.content
+            output = self._parse_response(response=response, out_format=out_format)
             if use_cache:
                 cache.set(cache_key, output, timeout=30)
             return output
+
+    def _parse_response(self, response, out_format: str = 'json'):
+        """
+        Parse response according to defined format
+        :param response: HTTPResponse
+        :param out_format: expected response format (int, str, json, ...)
+        """
+        if out_format == 'json':
+            output = self._parse_json(response=response)
+        elif out_format == 'int':
+            output = self._parse_int(response=response)
+        elif out_format == 'bool':
+            output = self._parse_bool(response=response)
+        else:
+            output = response.content
+        return output
+
+    def _parse_json(self, response):
+        """
+        Convert response content to json
+        """
+        logger = logging.getLogger('services')
+        try:
+            return response.json()
+        except JSONDecodeError as e:
+            logger.debug(e)
+            raise KairnialWSServiceError(
+                message=_("Invalid response from Web Services: {}").format(),
+                status=response.status_code
+            ) from e
+
+    def _parse_int(self, response):
+        """
+        Convert response content to int
+        """
+        logger = logging.getLogger('services')
+        try:
+            return int(response.content.decode('utf8').replace('"', ''))
+        except ValueError as e:
+            logger.debug(e)
+            raise KairnialWSServiceError(
+                message=_("Invalid response from Web Services: {}").format(str(e)),
+                status=response.status_code
+            ) from e
+
+    def _parse_bool(self, response):
+        """
+        Convert response content to bool
+        """
+        logger = logging.getLogger('services')
+        try:
+            val = int(response.content.decode('utf8').replace('"', ''))
+            return val != 0
+        except ValueError as e:
+            logger.debug(e)
+            raise KairnialWSServiceError(
+                message=_("Invalid response from Web Services: {}").format(str(e)),
+                status=response.status_code
+            ) from e
 
 
 class KairnialCrossService(KairnialService):

@@ -66,8 +66,7 @@ class KairnialUser(KairnialWSService):
             response = self.call(
                 service='aclmanager',
                 action='inviteUser',
-                parameters=[user],
-                use_cache=False
+                parameters=[user]
             )
             if response.get('success'):
                 invited_users.append(response)
@@ -82,6 +81,5 @@ class KairnialUser(KairnialWSService):
         return self.call(
             service='aclmanager',
             action='archiveUser',
-            parameters=[{'account_uuid': pk}],
-            use_cache=False
+            parameters=[{'account_uuid': pk}]
         )
