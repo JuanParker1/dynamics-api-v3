@@ -147,7 +147,7 @@ class KairnialService:
         except JSONDecodeError as e:
             logger.debug(e)
             raise KairnialWSServiceError(
-                message=_("Invalid response from Web Services: {}").format(),
+                message=_("Invalid JSON response from Web Services: {}").format(),
                 status=response.status_code
             ) from e
 
@@ -162,7 +162,7 @@ class KairnialService:
         except ValueError as e:
             logger.debug(e)
             raise KairnialWSServiceError(
-                message=_("Invalid response from Web Services: {}").format(str(e)),
+                message=_("Invalid integer response from Web Services: {}").format(str(e)),
                 status=response.status_code
             ) from e
 
@@ -178,7 +178,7 @@ class KairnialService:
         except ValueError as e:
             logger.debug(e)
             raise KairnialWSServiceError(
-                message=_("Invalid response from Web Services: {}").format(str(e)),
+                message=_("Invalid boolean response from Web Services: {}").format(str(e)),
                 status=response.status_code
             ) from e
 
