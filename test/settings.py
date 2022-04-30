@@ -21,9 +21,8 @@ from dynamics_apis.settings import \
     KAIRNIAL_PROJECT_ENVIRONMENTS, \
     KIARNIAL_AUTHENTICATION_SCOPES, \
     load_key
+
 load_dotenv()
-
-
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -231,6 +230,7 @@ Use <a href="#/projects/projects_list">project list</a> to select a project.
     },
     "SECURITY": [{"ApiKeyAuth": [], 'clientID': []}],
     "COMPONENT_SPLIT_REQUEST": True
+}
 
 if os.environ.get('KAIRNIAL_AUTH_PUBLIC_KEY'):
     KAIRNIAL_AUTH_PUBLIC_KEY = os.environ.get('KAIRNIAL_AUTH_PUBLIC_KEY')
