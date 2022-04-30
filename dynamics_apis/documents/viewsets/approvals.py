@@ -12,7 +12,7 @@ from dynamics_apis.common.serializers import ErrorSerializer
 # Create your views here.
 from dynamics_apis.common.services import KairnialWSServiceError
 from dynamics_apis.common.viewsets import project_parameters, PaginatedResponse, \
-    pagination_parameters, PaginatedViewSet, JSON_CONTENT_TYPE
+    pagination_parameters, PaginatedViewSet, JSON_CONTENT_TYPE, TokenRequest
 from ..models import ApprovalType, Approval
 from ..serializers.approvals import ApprovalTypeSerializer, ApprovalSerializer, \
     ApprovalUpdateSerializer
@@ -31,7 +31,7 @@ class ApprovalTypeViewSet(PaginatedViewSet):
         responses={200: ApprovalTypeSerializer, 400: ErrorSerializer},
         methods=["GET"]
     )
-    def list(self, request: HttpRequest, client_id: str, project_id: str):
+    def list(self, request: TokenRequest, client_id: str, project_id: str):
         """
         List approval types on a projects
         :param request:
@@ -75,7 +75,7 @@ class ApprovalTypeViewSet(PaginatedViewSet):
         responses={204: OpenApiTypes.STR, 400: ErrorSerializer, 404: OpenApiTypes.STR},
         methods=["DELETE"]
     )
-    def destroy(self, request: HttpRequest, client_id: str, project_id: str, pk: int):
+    def destroy(self, request: TokenRequest, client_id: str, project_id: str, pk: int):
         """
         Archive document
         :param request: HTTPRequest
@@ -110,7 +110,7 @@ class ApprovalViewSet(PaginatedViewSet):
         responses={200: ApprovalSerializer, 400: ErrorSerializer},
         methods=["GET"]
     )
-    def list(self, request: HttpRequest, client_id: str, project_id: str):
+    def list(self, request: TokenRequest, client_id: str, project_id: str):
         """
         List approvals on a project
         :param request:
@@ -146,13 +146,10 @@ class ApprovalViewSet(PaginatedViewSet):
             return Response(error.data, content_type=JSON_CONTENT_TYPE,
                             status=status.HTTP_400_BAD_REQUEST)
 
-    def retrieve(self, request: HttpRequest, client_id: str, project_id: str, pk: int):
+    @staticmethod
+    def retrieve(**_):
         """
         Get approval detail by ID
-        :param request:
-        :param client_id: Client ID token
-        :param project_id: Project RGOC ID
-        :param pk: Approval ID
         :return:
         """
         # TODO: Get only one approval
@@ -167,7 +164,7 @@ class ApprovalViewSet(PaginatedViewSet):
         responses={200: OpenApiTypes.INT, 400: ErrorSerializer},
         methods=["PUT"]
     )
-    def update(self, request: HttpRequest, client_id: str, project_id: str, pk: int):
+    def update(self, request: TokenRequest, client_id: str, project_id: str, pk: int):
         """
         Approval update view
         """

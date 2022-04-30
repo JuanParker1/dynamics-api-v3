@@ -4,6 +4,7 @@ Common code related to viewsets
 import os
 
 from django.conf import settings
+from django.http import HttpRequest
 from django.utils.translation import gettext as _
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiExample, OpenApiParameter
@@ -12,6 +13,13 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 
 JSON_CONTENT_TYPE = 'application/json'
+
+
+class TokenRequest(HttpRequest):
+    token = None
+    client_id = None
+    data = None
+
 
 default_client_example = OpenApiExample(
     name='Default clientID',
@@ -36,16 +44,17 @@ project_parameters = client_parameters + [
 ]
 
 pagination_parameters = [
-    OpenApiParameter("page_offset", OpenApiTypes.INT, OpenApiParameter.QUERY,
+    OpenApiParameter("page_offset", OpenApiTypes.INT,
                      description=_("Offset in results for pagination"), default=0),
-    OpenApiParameter("page_limit", OpenApiTypes.INT, OpenApiParameter.QUERY,
+    OpenApiParameter("page_limit", OpenApiTypes.INT,
                      description=_("Number of results per page"), default=getattr(settings, 'PAGE_SIZE', 100)),
 ]
 
 
 class PaginatedViewSet(ViewSet):
 
-    def get_pagination(self, request):
+    @staticmethod
+    def get_pagination(request):
         """
         Extract pagination from request and return page_offset, page_limit
         """

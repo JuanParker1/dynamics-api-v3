@@ -201,7 +201,8 @@ class FolderDetailSerializer(FolderSerializer):
         label=_('additional info'),
     )
 
-    def get_infos(self, obj):
+    @staticmethod
+    def get_infos(obj):
         if obj.get('fcat_desc'):
             try:
                 json_desc = json.loads(obj.get('fcat_desc'))

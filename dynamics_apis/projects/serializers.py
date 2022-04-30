@@ -145,7 +145,8 @@ class ProjectSerializer(serializers.Serializer):
         source='serial',
         read_only=True)
 
-    def get_infos(self, obj):
+    @staticmethod
+    def get_infos(obj):
         return ProjectInfoSerializer(json.loads(obj.get('g_infos'))).data
 
 

@@ -11,7 +11,7 @@ class KairnialContact(KairnialWSService):
     service_domain = 'contacts'
     item_type = 'contact'
 
-    def list(self, parameters: list=None) -> []:
+    def list(self, parameters: list = None) -> []:
         """
         List contacts
         :param parameters: search and filter parameters

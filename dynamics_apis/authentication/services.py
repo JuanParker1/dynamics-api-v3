@@ -75,7 +75,7 @@ class KairnialAuthentication:
 
             )
 
-    def secrets_authentication(self, api_key: str, api_secret: str, scopes: [str]) -> dict:
+    def secrets_authentication(self, api_key: str, api_secret: str) -> dict:
         """
         Get auth token from auth server
         :param api_key: User API Key

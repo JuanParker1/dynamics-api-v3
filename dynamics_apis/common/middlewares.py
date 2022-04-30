@@ -13,7 +13,8 @@ class KairnialAuthMiddleware(object):
     def __init__(self, get_response):
         self.get_response = get_response
 
-    def jwt_get_username_from_payload_handler(self, payload):
+    @staticmethod
+    def jwt_get_username_from_payload_handler(payload):
         username = payload.get('sub').replace('|', '.')
         authenticate(remote_user=username)
         return username
@@ -27,7 +28,8 @@ class KairnialAuthMiddleware(object):
         response = self.get_response(request)
         return response
 
-    def process_view(self, request, view_func, view_args, view_kwargs):
+    @staticmethod
+    def process_view(request, view_kwargs, **kwargs):
         client_id = view_kwargs.get('client_id', None)
         if client_id:
             request.client_id = client_id

@@ -12,15 +12,14 @@ class Project(PaginatedModel):
     """
 
     @classmethod
-    def list(cls, client_id: str, token: str, search: str, page_offset: int, page_limit: int,
-             **kwargs) -> []:
+    def list(cls, client_id: str, token: str, search: str, page_offset: int, page_limit: int, **_) -> []:
         """
         Get a list of users for a project
         :param client_id: ClientID Token
         :param token: Access token
         :param search: Search on project name
         :param page_offset: # of first record
-        :page_limit: max nb of records per request
+        :param page_limit: max nb of records per request
         :return:
         """
         kp = KairnialProject(client_id=client_id, token=token)

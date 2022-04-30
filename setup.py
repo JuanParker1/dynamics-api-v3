@@ -18,6 +18,7 @@ def get_version(app):
     git_tag = "0.0"
     git_commits = "0"
     suffix = "dev"
+    branch = 'develop'
     try:
         branch = subprocess.check_output(
             ["git", "rev-parse", "--abbrev-ref", "HEAD"]
@@ -51,7 +52,7 @@ def get_version(app):
             fp.write(
                 f"api_version = [{git_tag.replace('.', ', ')}, {git_commits}, \"{suffix}\"]\n")
         fp.close()
-    except Exception:
+    except IOError:
         print(f'ERROR opening {app}/__version__.py', os.curdir)
     return version
 

@@ -14,7 +14,7 @@ from dynamics_apis.common.serializers import ErrorSerializer
 # Create your views here.
 from dynamics_apis.common.services import KairnialWSServiceError
 from dynamics_apis.common.viewsets import project_parameters, PaginatedResponse, \
-    pagination_parameters, PaginatedViewSet, JSON_CONTENT_TYPE
+    pagination_parameters, PaginatedViewSet, JSON_CONTENT_TYPE, TokenRequest
 from ..models import Document
 from ..serializers.documents import DocumentQuerySerializer, DocumentSerializer, \
     DocumentCreateSerializer, DocumentReviseSerializer
@@ -37,7 +37,7 @@ class DocumentViewSet(PaginatedViewSet):
         responses={200: DocumentSerializer, 400: ErrorSerializer},
         methods=["GET"]
     )
-    def list(self, request: HttpRequest, client_id: str, project_id: str):
+    def list(self, request: TokenRequest, client_id: str, project_id: str):
         """
         List documents on a projects
         :param request:
@@ -86,7 +86,7 @@ class DocumentViewSet(PaginatedViewSet):
         responses={200: DocumentSerializer, 400: ErrorSerializer, 404: OpenApiTypes.STR},
         methods=["GET"]
     )
-    def retrieve(self, request: HttpRequest, client_id: str, project_id: str, pk: int):
+    def retrieve(self, request: TokenRequest, client_id: str, project_id: str, pk: int):
         """
         Retrieve folder detail
         :param request: HttpRequest
@@ -114,7 +114,7 @@ class DocumentViewSet(PaginatedViewSet):
         responses={201: DocumentSerializer, 400: ErrorSerializer, 404: OpenApiTypes.STR},
         methods=["POST"]
     )
-    def create(self, request: HttpRequest, client_id: str, project_id: str):
+    def create(self, request: TokenRequest, client_id: str, project_id: str):
         """
         Create a new document
         :param request:
@@ -149,7 +149,7 @@ class DocumentViewSet(PaginatedViewSet):
         responses={201: DocumentSerializer, 400: ErrorSerializer, 404: OpenApiTypes.STR},
         methods=["PUT"]
     )
-    def update(self, request: HttpRequest, client_id: str, project_id: str, pk: str):
+    def update(self, request: TokenRequest, client_id: str, project_id: str, pk: str):
         """
         Update document information
         :param request:
@@ -188,7 +188,7 @@ class DocumentViewSet(PaginatedViewSet):
         responses={204: OpenApiTypes.STR, 400: ErrorSerializer, 404: OpenApiTypes.STR},
         methods=["DELETE"]
     )
-    def destroy(self, request: HttpRequest, client_id: str, project_id: str, pk: int):
+    def destroy(self, request: TokenRequest, client_id: str, project_id: str, pk: int):
         """
         Archive document
         :param request: HTTPRequest

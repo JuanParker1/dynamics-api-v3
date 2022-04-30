@@ -68,7 +68,6 @@ class KairnialGroup(KairnialWSService):
             service='aclmanager',
             action='getGroupsAcls',
             parameters=[{'group_uuid': group_id}],
-            out_format='json',
             use_cache=True)
 
     def add_authorizations(self, group_id: str, authorizations: dict):

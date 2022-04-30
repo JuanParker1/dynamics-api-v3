@@ -48,7 +48,8 @@ class KairnialService:
             'service': self._service(service=service, action=action)
         }, default=json_with_dates)
 
-    def get_headers(self) -> dict:
+    @staticmethod
+    def get_headers() -> dict:
         """
         Return authentication headers for WebService
         """
@@ -80,13 +81,13 @@ class KairnialService:
             parameters: [dict] = None,
             out_format: str = 'json',
             use_cache=False
-        ):
+    ):
         """
         Call the Webservice with parameters
         :param action: Name of the action to perform on a domain (getUsers)
         :param parameters: list of dict to send to server
         :param service: name of service (user, ...). Uses service_domain if not set
-        :param format: expected output format from tre Kairnial Web Service
+        :param out_format: expected output format from tre Kairnial Web Service
         :param use_cache: cache response
         """
         logger = logging.getLogger('services')
@@ -135,7 +136,8 @@ class KairnialService:
             output = response.content
         return output
 
-    def _parse_json(self, response):
+    @staticmethod
+    def _parse_json(response):
         """
         Convert response content to json
         """
@@ -149,7 +151,8 @@ class KairnialService:
                 status=response.status_code
             ) from e
 
-    def _parse_int(self, response):
+    @staticmethod
+    def _parse_int(response):
         """
         Convert response content to int
         """
@@ -163,7 +166,8 @@ class KairnialService:
                 status=response.status_code
             ) from e
 
-    def _parse_bool(self, response):
+    @staticmethod
+    def _parse_bool(response):
         """
         Convert response content to bool
         """
@@ -186,7 +190,6 @@ class KairnialCrossService(KairnialService):
         Initialize the Kairnial Auth services library
         :param client_id: ID of the client
         :param token: Access token to pass to header
-        :param project_id: ID of the project
         """
         self.client_id = client_id
         self.token = token

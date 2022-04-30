@@ -28,7 +28,7 @@ class KairnialTokenAuthentication(JWTAuthentication):
     def authenticate(self, request):
         """
         Returns a two-tuple of `User` and token if a valid signature has been
-        supplied using JWT-based authentication.  Otherwise returns `None`.
+        supplied using JWT-based authentication, otherwise, returns `None`.
         """
         logger = logging.getLogger('authentication')
         try:

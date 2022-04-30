@@ -2,6 +2,7 @@
 Common models for all Kairnial objects
 """
 import inspect
+
 from django.conf import settings
 
 
@@ -49,3 +50,16 @@ class PaginatedModel:
             print(obj_list, page_offset, page_offset + page_limit)
             paginated_list = obj_list[page_offset: page_offset + page_limit]
             return total, paginated_list, page_offset, page_limit
+
+    @classmethod
+    def list(
+        cls,
+        client_id: str,
+        token: str,
+        project_id: str,
+        **kwargs
+    ):
+        """
+        Unpaginated list
+        """
+        raise NotImplementedError

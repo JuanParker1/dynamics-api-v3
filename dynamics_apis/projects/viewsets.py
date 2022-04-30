@@ -28,7 +28,7 @@ class ProjectViewSet(PaginatedViewSet):
         description=_("Get a list of projects associated to current connected user"),
         request=ProjectSerializer,
         parameters=client_parameters + pagination_parameters + [
-            OpenApiParameter("search", OpenApiTypes.STR, OpenApiParameter.QUERY,
+            OpenApiParameter("search", OpenApiTypes.STR,
                              description=_("Search project name containing")),
         ],
         responses={200: ProjectSerializer, 400: KairnialWSServiceError},
@@ -62,7 +62,8 @@ class ProjectViewSet(PaginatedViewSet):
     @extend_schema(
         summary=_("Create a Kairnial project"),
         description=_(
-            "Create a new project for the current connected user, give a template UUID to copy the configuration from an existing project"),
+            "Create a new project for the current connected user,"
+            " give a template UUID to copy the configuration from an existing project"),
         parameters=[
             OpenApiParameter("client_id", OpenApiTypes.STR, OpenApiParameter.PATH,
                              description=_("Client ID token"),

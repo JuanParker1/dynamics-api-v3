@@ -3,8 +3,7 @@ version: '3'
 services:
   rp:
     image: nginx:latest
-  depends_on:
-    - apis
+  depends_on: apis
   cache:
     image: redis:latest
   apis:

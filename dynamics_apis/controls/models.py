@@ -82,6 +82,7 @@ class ControlInstance(PaginatedModel):
         """
         List children folders from a parent
         :param client_id: ID of the client
+        :param project_id: RGOC of the project
         :param token: Access token
         :param filters: Instance filters
         :param template_id: UUID of the template
@@ -102,7 +103,6 @@ class ControlInstance(PaginatedModel):
             print(instances)
         for i, instance in enumerate(instances.get('items')):
             if type(instance.get('content')) == list:
-                content = {}
                 content = [
                     {
                         'position': i,

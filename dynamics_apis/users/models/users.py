@@ -1,7 +1,6 @@
 """
 Kairnial user model classes
 """
-from dynamics_apis.users.services.groups import KairnialGroup
 from dynamics_apis.users.services.users import KairnialUser
 
 
@@ -14,6 +13,7 @@ class User:
     """
     Kairnial user class
     """
+
     @classmethod
     def list(cls, client_id: str, token: str, project_id: str, filters: dict = dict) -> []:
         """
@@ -50,7 +50,6 @@ class User:
         ku = KairnialUser(client_id=client_id, token=token, project_id=project_id)
         return ku.count()
 
-
     @classmethod
     def get(cls, client_id: str, token: str, project_id: str, pk: str):
         """
@@ -63,7 +62,7 @@ class User:
         ku = KairnialUser(client_id=client_id, token=token, project_id=project_id)
         user_list = ku.list().get('items')
         try:
-            return [user for user in  user_list if user.get('account_uuid') == pk][0]
+            return [user for user in user_list if user.get('account_uuid') == pk][0]
         except IndexError:
             raise UserNotFound('User not found')
 
@@ -102,4 +101,3 @@ class User:
         """
         ku = KairnialUser(client_id=client_id, token=token, project_id=project_id)
         return ku.archive(pk=pk)
-

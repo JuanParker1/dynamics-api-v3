@@ -102,7 +102,6 @@ class UserTest(CommonTest):
         """
         # This test expects a 200 since invalid filters are removed by the serializer
         self._test_user_list_filter(
-            expected_status_code=200,
             groups=','.join(['1', '2', '3', '4'])
         )
 

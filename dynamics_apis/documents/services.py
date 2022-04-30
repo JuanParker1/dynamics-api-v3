@@ -147,9 +147,9 @@ class KairnialDocumentService(KairnialWSService):
             )
         return us
 
-    def _create_document(self, uuid, json_data):
+    def _create_document(self, file_uuid, json_data):
         data = json_data.copy()
-        data['uuid'] = uuid
+        data['uuid'] = file_uuid
         try:
             data['rfield'] = json.dumps(
                 json_data.get('rfield', []))
@@ -185,10 +185,10 @@ class KairnialDocumentService(KairnialWSService):
         :param document_create_serializer: validated data from a DocumentCreateSerializer
         :param content: Binary file content
         """
-        # 1. Get file link
+        # 1. GET file link
         us = self._get_file_link(json_data=document_create_serializer)
 
-        # 2. Post file to url
+        # 2. POST file to url
         REQUESTS_METHODS[us.validated_data.get('method').lower()](
             us.validated_data.get('url'),
             data=content,
@@ -196,7 +196,7 @@ class KairnialDocumentService(KairnialWSService):
 
         # 3. Create Document with file
         output = self._create_document(
-            uuid=us.validated_data.get('uuid'),
+            file_uuid=us.validated_data.get('uuid'),
             json_data=document_create_serializer
         )
         return output
@@ -210,7 +210,7 @@ class KairnialDocumentService(KairnialWSService):
         # 1. Get file link
         us = self._get_file_link(json_data=document_revise_serializer)
 
-        # 2. Post file to url
+        # 2. POST file to url
         REQUESTS_METHODS[us.validated_data.get('method').lower()](
             us.validated_data.get('url'),
             data=content
@@ -218,7 +218,7 @@ class KairnialDocumentService(KairnialWSService):
 
         # 3. Create Document with file
         output = self._create_document(
-            uuid=us.validated_data.get('uuid'),
+            file_uuid=us.validated_data.get('uuid'),
             json_data=document_revise_serializer
         )
 
