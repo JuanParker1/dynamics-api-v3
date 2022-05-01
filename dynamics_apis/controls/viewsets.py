@@ -2,7 +2,6 @@
 Control viewsets
 """
 
-from django.http import TokenRequest
 from django.utils.translation import gettext as _
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema, OpenApiParameter

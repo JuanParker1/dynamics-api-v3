@@ -1,11 +1,12 @@
 import json
-import random
-import string
 import uuid
 
-from dynamics_apis.common.tests import CommonTest, KairnialClient
+from hypothesis import given
+from hypothesis.strategies import text, booleans, integers, emails, lists
+
+from dynamics_apis.common.tests import CommonTest, KairnialUserClient, KairnialGroupClient
 from .serializers.groups import GroupSerializer
-from .serializers.users import UserUUIDSerializer, UserInviteResponseSerializer
+from .serializers.users import UserUUIDSerializer, UserInviteResponseSerializer, UserQuerySerializer
 from ..common.viewsets import JSON_CONTENT_TYPE
 
 
@@ -13,6 +14,9 @@ class UserTest(CommonTest):
     """
     Test user routes
     """
+    list_service_class = KairnialUserClient
+    list_query_serializer = UserQuerySerializer
+    list_response_serializer = UserUUIDSerializer
 
     def setUp(self) -> None:
         self.email_uuid = str(uuid.uuid4())
@@ -21,11 +25,11 @@ class UserTest(CommonTest):
         """
         Test standard user list route
         """
-        kc = KairnialClient(
+        kc = KairnialUserClient(
             access_token=self.access_token,
             client_id=self.client_id,
             project_id=self.project_id)
-        resp = kc.get('users/')
+        resp = kc.list()
         serializer = UserUUIDSerializer(data=resp.json(), many=True)
         self.assertTrue(serializer.is_valid())
 
@@ -35,99 +39,72 @@ class UserTest(CommonTest):
         The test does not focus on the content of the response but checks that
         the server returns a 200 and that the response is serializable
         """
-        kc = KairnialClient(
+        kc = KairnialUserClient(
             access_token=self.access_token,
             client_id=self.client_id,
             project_id=self.project_id)
-        resp = kc.get('users/', data=filter)
+        resp = kc.list(data=filter)
         if resp.status_code != expected_status_code:
             print(resp.content)
         self.assertEqual(resp.status_code, expected_status_code)
         serializer = UserUUIDSerializer(data=resp.json(), many=True)
         self.assertTrue(serializer.is_valid())
 
-    def test_102_user_list_filter_archived_false(self):
+    @given(booleans())
+    def test_102_user_list_filter_archived(self, b):
         """
         Test unarchived user
         """
-        self._test_user_list_filter(archived=False)
+        self._test_user_list_filter(archived=b)
 
-    def test_103_user_list_filter_archived_true(self):
-        """
-        Test archived user
-        """
-        self._test_user_list_filter(archived=True)
-
-    def test_104_user_list_filter_email(self):
+    @given(emails())
+    def test_104_user_list_filter_email(self, email):
         """
         Test user email filter
         """
-        self._test_user_list_filter(email='me@test.com')
-
-    def test_105_user_list_filter_number_email(self):
-        """
-        Test user email filter with a number as argument
-        """
-        self._test_user_list_filter(email=1)
-
-    def test_106_user_list_filter_email_injection(self):
-        """
-        Test user email filter with a SQL injection pattern
-        """
-        self._test_user_list_filter(email="me \" OR 1")
-
-    def test_107_user_list_filter_email_too_long(self):
-        """
-        Test user email filter with a very long filter
-        """
-        letters = string.ascii_letters + string.digits
-        email = ''.join(random.choice(letters) for _ in range(10000))
         self._test_user_list_filter(email=email)
 
-    def test_108_user_list_filter_full_name(self):
+    @given(text())
+    def test_108_user_list_filter_full_name(self, full_name):
         """
         Test user full_name filter
         """
-        self._test_user_list_filter(full_name="I am a full name")
+        self._test_user_list_filter(full_name=full_name)
 
-    def test_109_user_list_filter_full_name_number(self):
-        """
-        Test user full_name filter with number as argument
-        """
-        self._test_user_list_filter(full_name=1)
-
-    def test_110_user_list_filter_groups(self):
+    @given(lists(integers()))
+    def test_110_user_list_filter_groups(self, groups):
         """
         Test filter on user groups
         """
         # This test expects a 200 since invalid filters are removed by the serializer
         self._test_user_list_filter(
-            groups=','.join(['1', '2', '3', '4'])
+            groups=','.join(map(str, groups))
         )
 
-    def test_111_user_list_filter_groups_list(self):
+    @given(lists(integers(min_value=0)))
+    def test_111_user_list_filter_groups_list(self, groups):
         """
         Test filter on user groups as list of groups
         """
-        self._test_user_list_filter(groups=[1, 2, 3, 4])
+        self._test_user_list_filter(groups=groups)
 
-    def test_113_user_create(self):
+    @given(email=emails(), first_name=text(), last_name=text(), language=lists(['en', 'fr', '', 'pt']))
+    def test_113_user_create(self, email, first_name, last_name, language):
         """
         Test inviting a user
         """
-        kc = KairnialClient(
+        kc = KairnialUserClient(
             access_token=self.access_token,
             client_id=self.client_id,
             project_id=self.project_id)
         resp = kc.post(
-            'users/',
             data=json.dumps({
                 "users": [
                     {
-                        "email": f"{self.email_uuid}@kairnialgroup.com",
-                        "first_name": "Unit",
-                        "last_name": "Test",
-                        "language": "fr"
+                        "email": email,
+                        "first_name": first_name,
+                        "last_name": last_name,
+                        "language": language
                     }]
             }),
             content_type=JSON_CONTENT_TYPE)
@@ -141,20 +118,20 @@ class UserTest(CommonTest):
         """
         Test get user with ID
         """
-        kc = KairnialClient(
+        kc = KairnialUserClient(
             access_token=self.access_token,
             client_id=self.client_id,
             project_id=self.project_id)
-        resp = kc.get('users/0/')
+        resp = kc.retrieve(pk=0)
         serializer = UserUUIDSerializer(data=resp.json(), many=True)
         self.assertTrue(serializer.is_valid())
 
     def test_114_user_delete(self):
-        kc = KairnialClient(
+        kc = KairnialUserClient(
             access_token=self.access_token,
             client_id=self.client_id,
             project_id=self.project_id)
-        resp = kc.delete(f'users/{self.created_user_id}')
+        resp = kc.delete(pk=self.created_user_id)
         self.assertEqual(resp.status_code, 204)
 
 
@@ -168,23 +145,24 @@ class GroupTest(CommonTest):
         """
         Test standard group list route
         """
-        kc = KairnialClient(
+        kc = KairnialGroupClient(
             access_token=self.access_token,
             client_id=self.client_id,
             project_id=self.project_id)
-        resp = kc.get('groups/')
+        resp = kc.list()
         serializer = GroupSerializer(data=resp.json(), many=True)
         self.assertTrue(serializer.is_valid())
 
-    def test_101_group_list_filter_name(self):
+    @given(text())
+    def test_101_group_list_filter_name(self, name):
         """
         Test standard group list route filtered by name
         """
-        kc = KairnialClient(
+        kc = KairnialGroupClient(
             access_token=self.access_token,
             client_id=self.client_id,
             project_id=self.project_id)
-        resp = kc.get('groups/', data={'name': 'test'})
+        resp = kc.list(data={'name': name})
         serializer = GroupSerializer(data=resp.json(), many=True)
         self.assertTrue(serializer.is_valid())
 
@@ -192,27 +170,27 @@ class GroupTest(CommonTest):
         """
         Test get user with ID
         """
-        kc = KairnialClient(
+        kc = KairnialGroupClient(
             access_token=self.access_token,
             client_id=self.client_id,
             project_id=self.project_id)
-        resp = kc.get('groups/48f944d3-bcb2-11e7-b7a1-fa163e5e5b59/')
+        resp = kc.get(pk='48f944d3-bcb2-11e7-b7a1-fa163e5e5b59')
         serializer = GroupSerializer(data=resp.json(), many=True)
         self.assertTrue(serializer.is_valid())
 
-    def test_113_group_create(self):
+    @given(name=text(), description=text())
+    def test_113_group_create(self, name, description):
         """
         Test inviting a user
         """
-        kc = KairnialClient(
+        kc = KairnialGroupClient(
             access_token=self.access_token,
             client_id=self.client_id,
             project_id=self.project_id)
         resp = kc.post(
-            'groups/',
             data=json.dumps({
-                "name": self.group_name,
-                "description": "Unit test description"
+                "name": name,
+                "description": description
             }),
             content_type=JSON_CONTENT_TYPE)
         self.assertEqual(resp.status_code, 201)

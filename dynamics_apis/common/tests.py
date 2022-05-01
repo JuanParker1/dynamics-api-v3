@@ -1,13 +1,14 @@
 """
 Common test cases
 """
-import datetime
 import os
 
 from django.test import TestCase
 # Create your tests here.
 from dotenv import load_dotenv
-from rest_framework import serializers
+from hypothesis import given
+from hypothesis.strategies import text, integers, emails, uuids, lists, dates, datetimes, booleans
+from rest_framework.fields import Field
 from rest_framework.test import APIClient
 
 from dynamics_apis.authentication.serializers import AuthResponseSerializer
@@ -70,10 +71,70 @@ class KairnialClient(APIClient):
                                **extra)
 
 
+class KairnialPathClient(KairnialClient):
+    path = None
+
+    def list(self, data=None, follow=False, **extra):
+        return super().get(self.path, data=data, follow=follow, **extra)
+
+    def retrieve(self, pk, data=None, follow=False, **extra):
+        return super().get(f'{self.path}/{pk}/', data=data, follow=follow, **extra)
+
+    def post(self, data=None, format=None, content_type=None,
+             follow=False, **extra):
+        return super().post(self.path, data=data, format=format, content_type=content_type,
+                            follow=follow, **extra)
+
+    def put(self, pk, data=None, format=None, content_type=None,
+            follow=False, **extra):
+        return super().put(f'{self.path}/{pk}/', data=data, format=format, content_type=content_type,
+                           follow=follow, **extra)
+
+    def patch(self, pk, data=None, format=None, content_type=None,
+              follow=False, **extra):
+        return super().patch(f'{self.path}/{pk}/', data=data, format=format, content_type=content_type,
+                             follow=follow, **extra)
+
+    def delete(self, pk, data=None, format=None, content_type=None,
+               follow=False, **extra):
+        return super().delete(f'{self.path}/{pk}/', data=data, format=format, content_type=content_type,
+                              follow=follow, **extra)
+
+    def options(self, pk, data=None, format=None, content_type=None,
+                follow=False, **extra):
+        return super().options(f'{self.path}/{pk}/', data=data, format=format, content_type=content_type,
+                               follow=follow, **extra)
+
+
+class KairnialUserClient(KairnialPathClient):
+    route = '/users'
+
+
+class KairnialGroupClient(KairnialPathClient):
+    route = '/groups'
+
+
+class KairnialContactClient(KairnialPathClient):
+    route = '/contacts'
+
+
 class CommonTest(TestCase):
     client_id = None
     project_id = None
     access_token = None
+    list_service_class = None
+    list_query_serializer = None
+    list_response_serializer = None
+
+    def __init__(self, *args, **kwargs):
+        if self.list_query_serializer:
+            lqs = self.list_query_serializer()
+            for name, field in lqs.fields.items():
+                fhs = field.hypothesis_strategy()
+                print(f"Field {name} hypothesis strategy", fhs)
+                if fhs:
+                    setattr(self, f'test_list_{name}', given(self.test_list, fhs))
+        super().__init__(*args, **kwargs)
 
     def setUp(self) -> None:
         self.assertIsNotNone(self.access_token)
@@ -94,16 +155,26 @@ class CommonTest(TestCase):
         access_token = AuthResponseSerializer(auth_response).data.get('access_token')
         return access_token
 
+    @classmethod
+    def test_list(self, expected_status_code=200):
+        """
+        common function to test different filters
+        The test does not focus on the content of the response but checks that
+        the server returns a 200 and that the response is serializable
+        """
+        lsc = self.list_service_class(
+            access_token=self.access_token,
+            client_id=self.client_id,
+            project_id=self.project_id)
+        resp = lsc.list(data=filter)
+        if resp.status_code != expected_status_code:
+            print(resp.content)
+        self.assertEqual(resp.status_code, expected_status_code)
+        serializer = self.list_response_serializer(data=resp.json(), many=True)
+        self.assertTrue(serializer.is_valid())
 
-class HypothesisInput:
-    field_type = None
-    min = None
-    max = None
-    validators = None
-    allow_null = False
-    allow_blank = False
 
-def to_hypothesis_attributes(self):
+def hypothesis_strategy(self):
     """
     Convert Serializer field to hypothesis attributes
     Allows automatic testing via hypothesis
@@ -112,50 +183,62 @@ def to_hypothesis_attributes(self):
     """
     t = type(self)
     try:
-        func = str(t).lower().replace('field', '_handler')
-        return func(self)
-    except AttributeError as e:
+        func = str(t).lower().replace('field', '_strategy')
+        strategy = strategies[func]()
+    except (AttributeError, KeyError) as e:
         print(e)
         return None
 
-def charfield_handler(self, hi: HypothesisInput):
-    hi = HypothesisInput()
-    hi.field_type = str
-    hi.min = self.min_length
-    hi.max = self.max_length
-    return hi
 
-def integerfield_handler(self, hi: HypothesisInput):
-    hi = HypothesisInput()
-    hi.field_type = int
-    hi.min = self.min_value
-    hi.max = self.max_value
-    return hi
+def charfield_strategy(self):
+    return text(min_size=self.min_length, max_size=self.max_length)
 
-def booleanfield_handler(self, hi: HypothesisInput):
-    hi = HypothesisInput()
-    hi.field_type = bool
-    return hi
 
-def datefield_handler(self, hi: HypothesisInput):
-    hi = HypothesisInput()
-    hi.field_type = datetime.date
-    return hi
+def integerfield_strategy(self):
+    return integers(min_value=self.min_value, max_value=self.max_value)
 
-def datetimefield_handler(self, hi: HypothesisInput):
-    hi = HypothesisInput()
-    hi.field_type = datetime.datetime
-    return hi
 
-def emailfield_handler(self, hi: HypothesisInput):
-    hi = HypothesisInput()
-    hi.field_type = str
-    return hi
+def booleanfield_strategy(self):
+    return booleans()
 
-def uuidfield_handler(self, hi: HypothesisInput):
-    hi = HypothesisInput()
-    hi.field_type = str
-    return hi
 
-def listefield_handler(self, hi:HypothesisInput):
-    return self.child.to_hypothesis_attributes()
+def datefield_strategy(self):
+    return dates()
+
+
+def datetimefield_strategy(self):
+    return datetimes()
+
+
+def emailfield_strategy(self):
+    return emails()
+
+
+def uuidfield_strategy(self):
+    return uuids()
+
+
+def listfield_strategy(self):
+    return lists(self.child.hypothesis_strategy())
+
+
+setattr(Field, 'hypothesis_strategy', hypothesis_strategy)
+setattr(Field, 'charfield_strategy', charfield_strategy)
+setattr(Field, 'integerfield_strategy', integerfield_strategy)
+setattr(Field, 'booleanfield_strategy', booleanfield_strategy)
+setattr(Field, 'datefield_strategy', datefield_strategy)
+setattr(Field, 'datetimefield_strategy', datetimefield_strategy)
+setattr(Field, 'emailfield_strategy', emailfield_strategy)
+setattr(Field, 'uuidfield_strategy', uuidfield_strategy)
+setattr(Field, 'listfield_strategy', listfield_strategy)
+
+strategies = {
+    'charfield_strategy': charfield_strategy,
+    'integerfield_strategy': integerfield_strategy,
+    'booleanfield_strategy': booleanfield_strategy,
+    'datefield_strategy': datefield_strategy,
+    'datetimefield_strategy': datetimefield_strategy,
+    'emailfield_strategy': emailfield_strategy,
+    'uuidfield_strategy': uuidfield_strategy,
+    'listfield_strategy': listfield_strategy
+}
