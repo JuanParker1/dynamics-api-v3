@@ -7,13 +7,15 @@ from django.utils.translation import gettext as _
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import status
+from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from dynamics_apis.common.serializers import ErrorSerializer
 from dynamics_apis.common.services import KairnialWSServiceError
 from dynamics_apis.common.viewsets import client_parameters, pagination_parameters, PaginatedViewSet, PaginatedResponse
 from .models import Project
-from .serializers import ProjectSerializer, ProjectCreationSerializer, ProjectUpdateSerializer
+from .serializers import ProjectSerializer, ProjectCreationSerializer, ProjectUpdateSerializer, \
+    ProjectIntegrationSerializer
 
 
 class ProjectViewSet(PaginatedViewSet):
@@ -43,6 +45,47 @@ class ProjectViewSet(PaginatedViewSet):
                 page_limit=page_limit
             )
             serializer = ProjectSerializer(project_list, many=True)
+            return PaginatedResponse(
+                total=total,
+                data=serializer.data,
+                page_offset=page_offset,
+                page_limit=page_limit
+            )
+        except KairnialWSServiceError as e:
+            error = ErrorSerializer({
+                'status': 400,
+                'error': e.status,
+                'description': e.message
+            })
+            return Response(error.data, content_type='application/json', status=status.HTTP_400_BAD_REQUEST)
+
+    @extend_schema(
+        summary=_("List projects"),
+        description=_("Get a list of projects associated to current connected user"),
+        request=ProjectSerializer,
+        parameters=client_parameters + pagination_parameters + [
+            OpenApiParameter("search", OpenApiTypes.STR, OpenApiParameter.QUERY,
+                             description=_("Search project name containing")),
+        ],
+        responses={200: ProjectIntegrationSerializer, 400: KairnialWSServiceError},
+        methods=["GET"]
+    )
+    @action(methods=['GET', ], detail=False, url_path='integrate', url_name='integrate')
+    def integrate(self, request, client_id):
+        """
+        Integrate into CIC project
+        """
+        page_offset, page_limit = self.get_pagination(request=request)
+        try:
+            total, project_list, page_offset, page_limit = Project.integration_list(
+                client_id=client_id,
+                token=request.token,
+                search=request.GET.get('search'),
+                page_offset=page_offset,
+                page_limit=page_limit
+            )
+            print(project_list)
+            serializer = ProjectIntegrationSerializer(project_list, many=True)
             return PaginatedResponse(
                 total=total,
                 data=serializer.data,
