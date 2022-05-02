@@ -10,6 +10,7 @@ from hypothesis import given
 from hypothesis.strategies import text, integers, emails, uuids, lists, dates, datetimes, booleans
 from rest_framework.fields import Field
 from rest_framework.test import APIClient
+from hypothesis.extra.django._impl import HypothesisTestCase
 
 from dynamics_apis.authentication.serializers import AuthResponseSerializer
 from dynamics_apis.authentication.services import KairnialAuthentication
@@ -118,7 +119,7 @@ class KairnialContactClient(KairnialPathClient):
     route = '/contacts'
 
 
-class CommonTest(TestCase):
+class CommonTest(TestCase, HypothesisTestCase):
     client_id = None
     project_id = None
     access_token = None
