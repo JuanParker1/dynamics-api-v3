@@ -60,7 +60,7 @@ class ProjectViewSet(PaginatedViewSet):
             return Response(error.data, content_type='application/json', status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
-        summary=_("List projects"),
+        summary=_("Project discovery for Thinkproject integration"),
         description=_("Get a list of projects associated to current connected user"),
         request=ProjectSerializer,
         parameters=client_parameters + pagination_parameters + [
@@ -70,8 +70,8 @@ class ProjectViewSet(PaginatedViewSet):
         responses={200: ProjectIntegrationSerializer, 400: KairnialWSServiceError},
         methods=["GET"]
     )
-    @action(methods=['GET', ], detail=False, url_path='integrate', url_name='integrate')
-    def integrate(self, request, client_id):
+    @action(methods=['GET', ], detail=False, url_path='discovery', url_name='discovery')
+    def discover(self, request, client_id):
         """
         Integrate into CIC project
         """
