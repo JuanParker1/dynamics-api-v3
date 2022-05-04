@@ -28,6 +28,7 @@ class ControlTemplate(PaginatedModel):
         :param token: Access token
         :param project_id: RGOC Code of the project
         :param filters: serialized values from a ControlTemplateQuerySerializer
+        :param user_id: Optional User ID
         :return:
         """
         kf = KairnialControlTemplateService(client_id=client_id, token=token, user_id=user_id, project_id=project_id)
@@ -53,6 +54,7 @@ class ControlTemplateContent(PaginatedModel):
         :param token: Access token
         :param project_id: RGOC Code of the project
         :param template_id: UUID of the template to fetch
+        :param user_id: Optional User ID
         :return:
         """
         kf = KairnialControlTemplateService(client_id=client_id, token=token, user_id=user_id, project_id=project_id)
@@ -86,6 +88,7 @@ class ControlInstance(PaginatedModel):
         :param token: Access token
         :param project_id: RGOC Code of the project
         :param template_id: UUID of the template
+        :param user_id: Optional User ID
         :return:
         """
 

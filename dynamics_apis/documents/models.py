@@ -32,6 +32,8 @@ class Folder(PaginatedModel):
         :param token: Access token
         :param project_id: RGOC Code of the project
         :param parent_id: ID of the parent folder
+        :param filters: Dictionary of filters
+        :param user_id: ID of the user
         :return:
         """
         kf = KairnialFolderService(client_id=client_id, token=token, user_id=user_id, project_id=project_id)
@@ -51,6 +53,7 @@ class Folder(PaginatedModel):
         :param token: Access token
         :param project_id: RGOC Code of the project
         :param id: Numeric ID of the folder
+        :param user_id: ID of the user
         """
         kf = KairnialFolderService(client_id=client_id, token=token, user_id=user_id, project_id=project_id)
         return kf.get(id=id)
@@ -69,6 +72,7 @@ class Folder(PaginatedModel):
         :param token: Access token
         :param project_id: RGOC Code of the project
         :param serialized_data: FolderCreateSerializer validated data
+        :param user_id: ID of the user
         :return: FolderSerializer data
         """
         fs = KairnialFolderService(client_id=client_id, token=token, user_id=user_id, project_id=project_id)
@@ -90,6 +94,7 @@ class Folder(PaginatedModel):
         :param project_id: RGOC Code of the project
         :param id: Numeric ID of the folder
         :param serialized_data: FolderUpdateSerializer validated data
+        :param user_id: ID of the user
         """
         fs = KairnialFolderService(client_id=client_id, token=token, user_id=user_id, project_id=project_id)
         return fs.update(id=id, folder_update_serializer=serialized_data)
@@ -108,6 +113,7 @@ class Folder(PaginatedModel):
         :param token: Access token
         :param project_id: RGOC Code of the project
         :param id: Universal ID of the folder
+        :param user_id: ID of the user
         """
         fs = KairnialFolderService(client_id=client_id, token=token, user_id=user_id, project_id=project_id)
         return fs.archive(id=id)
@@ -133,6 +139,8 @@ class Document(PaginatedModel):
         :param token: Access token
         :param project_id: RGOC Code of the project
         :param parent_id: ID of the parent folder
+        :param filters: Dictionary of filters
+        :param user_id: ID of the user
         :return:
         """
         kf = KairnialDocumentService(client_id=client_id, token=token, user_id=user_id, project_id=project_id)
@@ -152,6 +160,7 @@ class Document(PaginatedModel):
         :param token: Access token
         :param project_id: RGOC Code of the project
         :param id: Numeric ID of the document
+        :param user_id: ID of the user
         """
         kf = KairnialDocumentService(client_id=client_id, token=token, user_id=user_id, project_id=project_id)
         return kf.get(id=id)
@@ -188,6 +197,7 @@ class Document(PaginatedModel):
         :param project_id: RGOC Code of the project
         :param serialized_data: DocumentCreateSerializer validated data
         :param attachment: File field
+        :param user_id: ID of the user
         :return: DocumentSerializer data
         """
         name, extension, \
@@ -225,6 +235,7 @@ class Document(PaginatedModel):
         :param project_id: RGOC Code of the project
         :param serialized_data: DocumentCreateSerializer validated data
         :param attachment: File field
+        :param user_id: ID of the user
         :return: DocumentSerializer data
         """
         name, extension, \
