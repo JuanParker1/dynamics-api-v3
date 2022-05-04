@@ -44,6 +44,7 @@ class ApprovalTypeViewSet(PaginatedViewSet):
             total, approval_type_list, page_offset, page_limit = ApprovalType.paginated_list(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 project_id=project_id,
                 page_offset=page_offset,
                 page_limit=page_limit
@@ -86,6 +87,7 @@ class ApprovalTypeViewSet(PaginatedViewSet):
         archived = ApprovalType.archive(
             client_id=client_id,
             token=request.token,
+            user_id=request.user_id,
             project_id=project_id,
             id=pk
         )
@@ -125,6 +127,7 @@ class ApprovalViewSet(PaginatedViewSet):
             total, approval_list, page_offset, page_limit = Approval.paginated_list(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 project_id=project_id,
                 page_offset=page_offset,
                 page_limit=page_limit
@@ -181,6 +184,8 @@ class ApprovalViewSet(PaginatedViewSet):
         approval_id, step_id, ok = Approval.update(
             client_id=client_id,
             project_id=project_id,
+            token=request.token,
+            user_id=request.user_id,
             document_id=aus.validated_data.get('document_id'),
             workflow_id=aus.validated_data.get('workflow_id'),
             approval_id=pk,

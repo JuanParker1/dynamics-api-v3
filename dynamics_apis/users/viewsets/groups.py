@@ -53,6 +53,7 @@ class GroupViewSet(ViewSet):
             group_list = Group.list(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 project_id=project_id,
                 filters=request.GET
             )
@@ -92,6 +93,7 @@ class GroupViewSet(ViewSet):
             group_list = Group.list(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 project_id=project_id,
                 filters=request.GET
             )
@@ -122,6 +124,7 @@ class GroupViewSet(ViewSet):
             created = group.create(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 project_id=project_id
             )
             if created:
@@ -156,6 +159,7 @@ class GroupViewSet(ViewSet):
             resp = Group.add_users(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 project_id=project_id,
                 pk=pk,
                 user_list=user_list)
@@ -200,6 +204,7 @@ class GroupViewSet(ViewSet):
             resp = Group.remove_users(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 project_id=project_id,
                 pk=pk,
                 user_list=user_list)
@@ -242,6 +247,7 @@ class GroupViewSet(ViewSet):
             group_authorizations_list = Group.list_authorizations(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 project_id=project_id,
                 pk=pk
             )
@@ -281,6 +287,7 @@ class GroupViewSet(ViewSet):
             resp = Group.add_authorizations(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 project_id=project_id,
                 pk=pk,
                 authorizations=request.data)
@@ -325,6 +332,7 @@ class GroupViewSet(ViewSet):
             resp = Group.remove_authorzations(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 project_id=project_id,
                 pk=pk,
                 authorizations=request.data)

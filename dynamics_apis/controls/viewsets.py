@@ -51,6 +51,7 @@ class ControlTemplateViewSet(PaginatedViewSet):
             total, template_list, page_offset, page_limit = ControlTemplate.paginated_list(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 project_id=project_id,
                 page_offset=page_offset,
                 page_limit=page_limit,
@@ -91,6 +92,7 @@ class ControlTemplateViewSet(PaginatedViewSet):
             template_content = ControlTemplateContent.list(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 project_id=project_id,
                 template_id=pk
             )
@@ -140,6 +142,7 @@ class ControlInstanceViewSet(PaginatedViewSet):
             total, instance_list, page_offset, page_limit = ControlInstance.paginated_list(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 project_id=project_id,
                 page_offset=page_offset,
                 page_limit=page_limit,

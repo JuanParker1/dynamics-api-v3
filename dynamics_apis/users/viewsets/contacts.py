@@ -44,6 +44,7 @@ class ContactViewSet(ViewSet):
             contact_list = Contact.list(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 project_id=project_id,
                 filters=filters
             )
@@ -78,6 +79,7 @@ class ContactViewSet(ViewSet):
             created = Contact.create(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 project_id=project_id,
                 serialized_data=ccs.validated_data
             )
@@ -114,6 +116,7 @@ class ContactViewSet(ViewSet):
             updated = Contact.update(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 project_id=project_id,
                 pk=pk,
                 serialized_data=cus.validated_data
@@ -144,6 +147,7 @@ class ContactViewSet(ViewSet):
         deleted = Contact.delete(
             client_id=client_id,
             token=request.token,
+            user_id=request.user_id,
             project_id=project_id,
             pk=pk
         )

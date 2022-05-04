@@ -53,6 +53,7 @@ class DocumentViewSet(PaginatedViewSet):
             total, document_list, page_offset, page_limit = Document.paginated_list(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 project_id=project_id,
                 parent_id=parent_id,
                 page_offset=page_offset,
@@ -97,6 +98,7 @@ class DocumentViewSet(PaginatedViewSet):
         document = Document.get(
             client_id=client_id,
             token=request.token,
+            user_id=request.user_id,
             project_id=project_id,
             id=pk
         )
@@ -132,6 +134,7 @@ class DocumentViewSet(PaginatedViewSet):
             document = Document.create(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 project_id=project_id,
                 serialized_data=dcs.validated_data,
                 attachment=request.FILES.get('file')
@@ -169,6 +172,7 @@ class DocumentViewSet(PaginatedViewSet):
                 parent_id=pk,
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 project_id=project_id,
                 serialized_data=dcs.validated_data,
                 attachment=request.FILES.get('file')
@@ -199,6 +203,7 @@ class DocumentViewSet(PaginatedViewSet):
         archived = Document.archive(
             client_id=client_id,
             token=request.token,
+            user_id=request.user_id,
             project_id=project_id,
             id=pk
         )

@@ -40,6 +40,7 @@ class ProjectViewSet(PaginatedViewSet):
             total, project_list, page_offset,page_limit = Project.paginated_list(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 search=request.GET.get('search'),
                 page_offset=page_offset,
                 page_limit=page_limit
@@ -80,6 +81,7 @@ class ProjectViewSet(PaginatedViewSet):
             total, project_list, page_offset, page_limit = Project.integration_list(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 search=request.GET.get('search'),
                 page_offset=page_offset,
                 page_limit=page_limit
@@ -119,6 +121,7 @@ class ProjectViewSet(PaginatedViewSet):
             created = Project.create(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 serialized_project=pcs.validated_data
             )
             if created:
@@ -154,6 +157,7 @@ class ProjectViewSet(PaginatedViewSet):
             created = Project.update(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 pk=pk,
                 serialized_project=pus.validated_data
             )

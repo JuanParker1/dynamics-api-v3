@@ -44,6 +44,7 @@ class ACLViewSet(ViewSet):
             acl_list = ACL.list(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 project_id=project_id,
                 **filters
             )
@@ -105,6 +106,7 @@ class ModuleViewSet(ViewSet):
             module_list = Module.list(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 project_id=project_id
             )
             serializer = ModuleSerializer(module_list, many=True)

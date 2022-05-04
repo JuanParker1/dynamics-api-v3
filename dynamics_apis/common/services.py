@@ -36,6 +36,7 @@ class KairnialService:
     client_id = None
     token = None
     token_type = 'Bearer'
+    user_id = None
 
     def get_url(self):
         raise NotImplementedError
@@ -62,6 +63,7 @@ class KairnialService:
         """
         return {
             'BearerToken': self.token,
+            'UserAppID': self.user_id,
             'UserLanguage': 'fr'
         }
 
@@ -146,7 +148,7 @@ class KairnialService:
 
 class KairnialCrossService(KairnialService):
 
-    def __init__(self, client_id: str, token: str):
+    def __init__(self, client_id: str, token: str, user_id: str = None):
         """
         Initialize the Kairnial Auth services library
         :param client_id: ID of the client
@@ -155,6 +157,7 @@ class KairnialCrossService(KairnialService):
         """
         self.client_id = client_id
         self.token = token
+        self.user_id = user_id
 
     def get_url(self):
         return f'{settings.KAIRNIAL_CROSS_SERVER}/gateway.php'
@@ -163,7 +166,7 @@ class KairnialCrossService(KairnialService):
 class KairnialWSService(KairnialService):
     project_id = None
 
-    def __init__(self, client_id: str, token: str, project_id: str):
+    def __init__(self, client_id: str, token: str, project_id: str, user_id: str = None):
         """
         Initialize the Kairnial Web Services library
         :param client_id: ID of the client
@@ -173,6 +176,7 @@ class KairnialWSService(KairnialService):
         self.client_id = client_id.strip()
         self.token = token.strip()
         self.project_id = project_id.strip()
+        self.user_id = user_id
 
     def get_url(self):
         return f'{settings.KAIRNIAL_WS_SERVER}/gateway.php'

@@ -50,6 +50,7 @@ class FolderViewSet(PaginatedViewSet):
             total, folder_list, page_offset, page_limit = Folder.paginated_list(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 project_id=project_id,
                 parent_id=parent_id,
                 page_offset=page_offset,
@@ -94,6 +95,7 @@ class FolderViewSet(PaginatedViewSet):
         folder = Folder.get(
             client_id=client_id,
             token=request.token,
+            user_id=request.user_id,
             project_id=project_id,
             id=pk
         )
@@ -122,6 +124,7 @@ class FolderViewSet(PaginatedViewSet):
         folder = Folder.create(
             client_id=client_id,
             token=request.token,
+            user_id=request.user_id,
             project_id=project_id,
             serialized_data=fcs.validated_data
         )
@@ -155,6 +158,7 @@ class FolderViewSet(PaginatedViewSet):
         updated = Folder.update(
             client_id=client_id,
             token=request.token,
+            user_id=request.user_id,
             project_id=project_id,
             id=pk,
             serialized_data=fus.validated_data
@@ -186,6 +190,7 @@ class FolderViewSet(PaginatedViewSet):
         archived = Folder.archive(
             client_id=client_id,
             token=request.token,
+            user_id=request.user_id,
             project_id=project_id,
             id=pk
         )

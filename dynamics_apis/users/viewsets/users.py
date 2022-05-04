@@ -83,6 +83,7 @@ class UserViewSet(ViewSet):
             user_count = User.count(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 project_id=project_id
             )
             serializer = ProjectMemberCountSerializer(user_count)
@@ -119,6 +120,7 @@ class UserViewSet(ViewSet):
             user = User.get(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 project_id=project_id,
                 pk=pk
             )
@@ -144,6 +146,7 @@ class UserViewSet(ViewSet):
             user_list = User.list(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 project_id=project_id
             )
             for user in user_list:
@@ -191,6 +194,7 @@ class UserViewSet(ViewSet):
             user_groups = User.groups(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 project_id=project_id,
                 pk=pk
             )
@@ -229,6 +233,7 @@ class UserViewSet(ViewSet):
             invites = User.invite(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 project_id=project_id,
                 users=user_list.validated_data.get('users')
             )
@@ -265,6 +270,7 @@ class UserViewSet(ViewSet):
         archived = User.archive(
             client_id=client_id,
             token=request.token,
+            user_id=request.user_id,
             project_id=project_id,
             pk=pk
         )
