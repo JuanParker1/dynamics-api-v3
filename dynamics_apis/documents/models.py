@@ -278,6 +278,33 @@ class Document(PaginatedModel):
             project_id=project_id)
         return fs.archive(id=id)
 
+    @staticmethod
+    def check_revision(
+            cls,
+            client_id: str,
+            token: str,
+            project_id: str,
+            document_serialized_data: dict,
+            supplementary_serialized_data: dict,
+            user_id: str = None
+    ):
+        """
+        Create a Kairnial Document
+        :param client_id: ID of the client
+        :param token: Access token
+        :param project_id: RGOC Code of the project
+        :param document_serialized_data: DocumentSearchRevisionSerializer validated data
+        :param supplementary_serialized_data: DocumentSearchRevisionSupplementaryArguments validated data
+        :param user_id: ID of the user
+        :return: DocumentSerializer data
+        """
+        fs = KairnialDocumentService(client_id=client_id, token=token, user_id=user_id, project_id=project_id)
+        return fs.check_revision(
+            document_search_revision_serializer=document_serialized_data,
+            supplementary_info_serializer=supplementary_serialized_data
+        )
+
+
 
 class ApprovalType(PaginatedModel):
 

@@ -235,6 +235,14 @@ class KairnialDocumentService(KairnialWSService):
             use_cache=False
         )
 
+    def check_revision(self, document_search_revision_serializer, supplementary_info_serializer):
+        """
+        Check if a document exists
+        """
+        parameters = [{key: value} for key, value in document_search_revision_serializer.items()] + \
+                     [{key: value} for key, value in supplementary_info_serializer.items()]
+        return self.call(action='getFilesForRevision', parameters=parameters)
+
 
 class KairnialApprovalTypeService(KairnialWSService):
     """

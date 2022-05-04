@@ -829,6 +829,58 @@ class RFieldSerializer(serializers.Serializer):
     )
 
 
+class DocumentSearchRevisionSerializer(serializers.Serializer):
+    """
+    Serializer to search for existing document when
+    """
+    name = serializers.CharField(
+        label=_('Document name'),
+        help_text=_('Name of the document'),
+        required=True,
+    )
+    naming_convention = serializers.IntegerField(
+        label=_('Naming convention ID'),
+        help_text=_('Numeric ID of the naming convention'),
+        required=False,
+        default=0,
+        source='entete_nomenclature'
+    )
+    parent = serializers.UUIDField(
+        label=_('Main document ID'),
+        help_text=_('UUID of the parent document'),
+        required=False,
+        source='parent_uuid'
+    )
+    id = serializers.IntegerField(
+        label=_('Document numeric ID'),
+        help_text=_('Numeric ID of the document'),
+        source='item_id',
+        read_only=True,
+        required=False
+    )
+
+
+class DocumentSearchRevisionSupplementaryArguments(serializers.Serializer):
+    """
+    Serializer for revision search additional arguments (folder id)
+    """
+    folder_id = serializers.IntegerField(
+        label=_('Folder ID'),
+        help_text=_('Restrict search on folder ID'),
+        source='folderRestricionId',
+        read_only=True,
+        required=False
+    )
+    is_sending = serializers.BooleanField(
+        label=_('Is sending'),
+        help_text=_('Check all files before sending'),
+        source='isSending',
+        read_only=True,
+        required=False
+    )
+
+
+
 class DocumentCreateSerializer(serializers.Serializer):
     """
     Serializer for document creation

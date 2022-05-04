@@ -17,7 +17,8 @@ from dynamics_apis.common.viewsets import project_parameters, PaginatedResponse,
     pagination_parameters, PaginatedViewSet
 from ..models import Document
 from ..serializers.documents import DocumentQuerySerializer, DocumentSerializer, \
-    DocumentCreateSerializer, DocumentReviseSerializer
+    DocumentCreateSerializer, DocumentReviseSerializer, DocumentSearchRevisionSerializer, \
+    DocumentSearchRevisionSupplementaryArguments
 
 
 class DocumentViewSet(PaginatedViewSet):
@@ -125,6 +126,21 @@ class DocumentViewSet(PaginatedViewSet):
         :return:
         """
         data = request.POST.copy()
+        drs = DocumentSearchRevisionSerializer(data=data)
+        dss = DocumentSearchRevisionSupplementaryArguments(data=data)
+        if drs.is_valid() and dss.is_valid():
+            revisions = Document.check_revision(
+                client_id=client_id,
+                token=request.token,
+                user_id=request.user_id,
+                project_id=project_id,
+                document_serialized_data=drs.validated_data,
+                supplementary_serialized_data=dss.validated_data
+            )
+            print(revisions)
+        else:
+            return Response(drs.errors + dss.errors, content_type='application/json',
+                            status=status.HTTP_400_BAD_REQUEST)
         data.update(request.FILES)
         dcs = DocumentCreateSerializer(data=data)
         if not dcs.is_valid():
