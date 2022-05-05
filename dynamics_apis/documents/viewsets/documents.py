@@ -132,12 +132,16 @@ class DocumentViewSet(PaginatedViewSet, ):
         :param project_id: Project RGOC ID
         :return:
         """
-        data = request.POST.copy()
+        data = request.GET.copy()
         drs = DocumentSearchRevisionSerializer(data=data)
         dss = DocumentSearchRevisionSupplementaryArguments(data=data)
         if not drs.is_valid() or not dss.is_valid():
-            errors = drs.errors
-            errors.update(dss.errors)
+            errors = {}
+            try:
+                errors.update(drs.errors)
+                errors.update(dss.errors)
+            except AssertionError:
+                pass
             return Response(errors, content_type="application/json", status=status.HTTP_400_BAD_REQUEST)
         directory_name = drs.validated_data.get('path').split('/')[-1]
         folder_list = Folder.list(
@@ -160,9 +164,10 @@ class DocumentViewSet(PaginatedViewSet, ):
             document_serialized_data=drs.validated_data,
             supplementary_serialized_data=dss.validated_data
         )
+        print(revisions)
         if not revisions:
             return Response(_("File not found"), status=status.HTTP_404_NOT_FOUND)
-        drs = DocumentRevisionSerializer(revisions, many=True)
+        drs = DocumentRevisionSerializer(revisions)
         return Response(drs.data, content_type="application/json")
 
     @extend_schema(
@@ -183,38 +188,10 @@ class DocumentViewSet(PaginatedViewSet, ):
         :return:
         """
         data = request.POST.copy()
-        drs = DocumentSearchRevisionSerializer(data=data)
-        dss = DocumentSearchRevisionSupplementaryArguments(data=data)
         data.update(request.FILES)
         dcs = DocumentCreateSerializer(data=data)
         if not dcs.is_valid():
             return Response(dcs.errors, content_type='application/json',
-                            status=status.HTTP_400_BAD_REQUEST)
-        if drs.is_valid() and dss.is_valid():
-            directory_name = dcs.validated_data.get('path').split('/')[-1]
-            folder_list = Folder.list(
-                client_id=client_id,
-                token=request.token,
-                user_id=request.user_id,
-                project_id=project_id,
-                filters={
-                    'path': dcs.validated_data.get('path'),
-                    'name': directory_name
-                }
-            )
-            if folder_list:
-                dss.validated_data['folderRestricionId'] = folder_list[0].get('fcat_id')
-                revisions = Document.check_revision(
-                    client_id=client_id,
-                    token=request.token,
-                    user_id=request.user_id,
-                    project_id=project_id,
-                    document_serialized_data=drs.validated_data,
-                    supplementary_serialized_data=dss.validated_data
-                )
-                print(revisions)
-        else:
-            return Response(drs.errors + dss.errors, content_type='application/json',
                             status=status.HTTP_400_BAD_REQUEST)
         try:
             document = Document.create(

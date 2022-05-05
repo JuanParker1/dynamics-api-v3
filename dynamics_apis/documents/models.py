@@ -321,10 +321,14 @@ class Document(PaginatedModel):
         :return: DocumentSerializer data
         """
         fs = KairnialDocumentService(client_id=client_id, token=token, user_id=user_id, project_id=project_id)
-        return fs.check_revision(
+        revisions = fs.check_revision(
             document_search_revision_serializer=document_serialized_data,
             supplementary_info_serializer=supplementary_serialized_data
-        ).get('').get('')
+        )
+        if revisions and revisions.get(''):
+            return revisions.get('').get('')
+        else:
+            return {}
 
 
 
