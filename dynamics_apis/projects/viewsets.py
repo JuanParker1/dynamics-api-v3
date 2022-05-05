@@ -102,6 +102,7 @@ class ProjectViewSet(PaginatedViewSet):
             })
             return Response(error.data, content_type='application/json', status=status.HTTP_400_BAD_REQUEST)
 
+
     @extend_schema(
         summary=_("Create a Kairnial project"),
         description=_(

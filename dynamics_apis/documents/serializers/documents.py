@@ -836,6 +836,7 @@ class DocumentSearchRevisionSerializer(serializers.Serializer):
     name = serializers.CharField(
         label=_('Document name'),
         help_text=_('Name of the document'),
+        source='entete_nom',
         required=True,
     )
     naming_convention = serializers.IntegerField(
@@ -856,6 +857,7 @@ class DocumentSearchRevisionSerializer(serializers.Serializer):
         help_text=_('Numeric ID of the document'),
         source='item_id',
         read_only=True,
+        default=0,
         required=False
     )
 

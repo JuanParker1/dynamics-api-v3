@@ -7,6 +7,7 @@ from django.utils.translation import gettext as _
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import status
+from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser
 from rest_framework.response import Response
 
@@ -15,13 +16,13 @@ from dynamics_apis.common.serializers import ErrorSerializer
 from dynamics_apis.common.services import KairnialWSServiceError
 from dynamics_apis.common.viewsets import project_parameters, PaginatedResponse, \
     pagination_parameters, PaginatedViewSet
-from ..models import Document
+from ..models import Document, Folder
 from ..serializers.documents import DocumentQuerySerializer, DocumentSerializer, \
     DocumentCreateSerializer, DocumentReviseSerializer, DocumentSearchRevisionSerializer, \
     DocumentSearchRevisionSupplementaryArguments
 
 
-class DocumentViewSet(PaginatedViewSet):
+class DocumentViewSet(PaginatedViewSet, ):
     """
     A ViewSet for listing or retrieving documents.
     """
@@ -111,7 +112,54 @@ class DocumentViewSet(PaginatedViewSet):
 
     @extend_schema(
         summary=_("Create Kairnial document with file"),
-        description=_("Create Kairnial"),
+        description=_("Get document allowed options"),
+        parameters=project_parameters,
+        request=DocumentCreateSerializer,
+        responses={200: DocumentSerializer, 400: ErrorSerializer, 404: OpenApiTypes.STR},
+        methods=["OPTIONS"]
+    )
+    def options(self, request, client_id, project_id, *args, **kwargs):
+        """
+        Create a new document
+        :param request:
+        :param client_id: Client ID token
+        :param project_id: Project RGOC ID
+        :return:
+        """
+        data = request.POST.copy()
+        drs = DocumentSearchRevisionSerializer(data=data)
+        dss = DocumentSearchRevisionSupplementaryArguments(data=data)
+        data.update(request.FILES)
+        dcs = DocumentCreateSerializer(data=data)
+        if not dcs.is_valid():
+            return Response(dcs.errors, content_type='application/json',
+                            status=status.HTTP_400_BAD_REQUEST)
+        if drs.is_valid() and dss.is_valid():
+            directory_name = dcs.validated_data.get('path').split('/')[-1]
+            folder_list = Folder.list(
+                client_id=client_id,
+                token=request.token,
+                user_id=request.user_id,
+                project_id=project_id,
+                filters={
+                    'path': dcs.validated_data.get('path'),
+                    'name': directory_name
+                }
+            )
+            if folder_list:
+                dss.validated_data['folderRestricionId'] = folder_list[0].get('fcat_id')
+            revisions = Document.check_revision(
+                client_id=client_id,
+                token=request.token,
+                user_id=request.user_id,
+                project_id=project_id,
+                document_serialized_data=drs.validated_data,
+                supplementary_serialized_data=dss.validated_data
+            )
+
+    @extend_schema(
+        summary=_("Create Kairnial document with file"),
+        description=_("Create Kairnial document"),
         parameters=project_parameters,
         request=DocumentCreateSerializer,
         responses={201: DocumentSerializer, 400: ErrorSerializer, 404: OpenApiTypes.STR},
@@ -128,23 +176,36 @@ class DocumentViewSet(PaginatedViewSet):
         data = request.POST.copy()
         drs = DocumentSearchRevisionSerializer(data=data)
         dss = DocumentSearchRevisionSupplementaryArguments(data=data)
-        if drs.is_valid() and dss.is_valid():
-            revisions = Document.check_revision(
-                client_id=client_id,
-                token=request.token,
-                user_id=request.user_id,
-                project_id=project_id,
-                document_serialized_data=drs.validated_data,
-                supplementary_serialized_data=dss.validated_data
-            )
-            print(revisions)
-        else:
-            return Response(drs.errors + dss.errors, content_type='application/json',
-                            status=status.HTTP_400_BAD_REQUEST)
         data.update(request.FILES)
         dcs = DocumentCreateSerializer(data=data)
         if not dcs.is_valid():
             return Response(dcs.errors, content_type='application/json',
+                            status=status.HTTP_400_BAD_REQUEST)
+        if drs.is_valid() and dss.is_valid():
+            directory_name = dcs.validated_data.get('path').split('/')[-1]
+            folder_list = Folder.list(
+                client_id=client_id,
+                token=request.token,
+                user_id=request.user_id,
+                project_id=project_id,
+                filters={
+                    'path': dcs.validated_data.get('path'),
+                    'name': directory_name
+                }
+            )
+            if folder_list:
+                dss.validated_data['folderRestricionId'] = folder_list[0].get('fcat_id')
+                revisions = Document.check_revision(
+                    client_id=client_id,
+                    token=request.token,
+                    user_id=request.user_id,
+                    project_id=project_id,
+                    document_serialized_data=drs.validated_data,
+                    supplementary_serialized_data=dss.validated_data
+                )
+                print(revisions)
+        else:
+            return Response(drs.errors + dss.errors, content_type='application/json',
                             status=status.HTTP_400_BAD_REQUEST)
         try:
             document = Document.create(
