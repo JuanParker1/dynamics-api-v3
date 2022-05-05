@@ -34,6 +34,7 @@ class ControlTemplateViewSet(PaginatedViewSet):
             ControlQuerySerializer,  # serializer fields are converted to parameters
         ],
         responses={200: ControlTemplateSerializer, 400: ErrorSerializer},
+        tags=['controls/templates', ],
         methods=["GET"]
     )
     def list(self, request: HttpRequest, client_id: str, project_id: str):
@@ -81,6 +82,7 @@ class ControlTemplateViewSet(PaginatedViewSet):
         description=_("List Kairnial control template elements for one template on this project"),
         parameters=project_parameters,
         responses={200: ControlTemplateElementSerializer, 400: ErrorSerializer},
+        tags=['controls/templates', ],
         methods=["GET"]
     )
     @action(methods=["GET"], detail=True, url_path="elements", url_name='template_elements')
@@ -124,6 +126,7 @@ class ControlInstanceViewSet(PaginatedViewSet):
             ControlQuerySerializer,  # serializer fields are converted to parameters
         ],
         responses={200: ControlInstanceSerializer, 400: ErrorSerializer},
+        tags=['controls/instances', ],
         methods=["GET"]
     )
     def list(self, request: HttpRequest, client_id: str, project_id: str):

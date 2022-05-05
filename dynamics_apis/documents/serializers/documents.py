@@ -860,6 +860,19 @@ class DocumentSearchRevisionSerializer(serializers.Serializer):
         default=0,
         required=False
     )
+    folder_path = serializers.CharField(
+        label=_('Folder path'),
+        help_text=_('Folder path, can be created if not exists using create_folders parameter'),
+        required=False,
+        source='path'
+    )
+
+
+class DocumentRevisionSerializer(serializers.Serializer):
+    """
+    Serialize result of GetFileRevision
+    """
+    pass
 
 
 class DocumentSearchRevisionSupplementaryArguments(serializers.Serializer):

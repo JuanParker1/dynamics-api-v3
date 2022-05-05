@@ -40,6 +40,7 @@ class GroupViewSet(ViewSet):
             GroupQuerySerializer,  # serializer fields are converted to parameters
         ],
         responses={200: GroupSerializer, 500: ErrorSerializer},
+        tags=['admin/groups', ],
         methods=["GET"]
     )
     def list(self, request, client_id, project_id):
@@ -77,6 +78,7 @@ class GroupViewSet(ViewSet):
 
         ],
         responses={200: GroupSerializer, 500: ErrorSerializer},
+        tags=['admin/groups', ],
         methods=["GET"]
     )
     def retrieve(self, request, client_id: str, project_id: str, pk: str):
@@ -109,6 +111,7 @@ class GroupViewSet(ViewSet):
         parameters=project_parameters,
         request=GroupCreationSerializer,
         responses={201: OpenApiTypes.STR, 400: OpenApiTypes.STR, 406: OpenApiTypes.STR},
+        tags=['admin/groups', ],
         methods=["POST"]
     )
     def create(self, request,  client_id: str, project_id: str):
@@ -143,6 +146,7 @@ class GroupViewSet(ViewSet):
         ],
         request=GroupAddUserSerializer,
         responses={201: OpenApiTypes.STR, 400: OpenApiTypes.STR, 406: OpenApiTypes.STR},
+        tags=['admin/groups', ],
         methods=["POST"]
     )
     @action(['POST'], detail=True, url_path='users/add', url_name="add_users_to_group")
@@ -188,6 +192,7 @@ class GroupViewSet(ViewSet):
         ],
         request=GroupAddUserSerializer,
         responses={201: OpenApiTypes.STR, 400: OpenApiTypes.STR, 406: OpenApiTypes.STR},
+        tags=['admin/groups', ],
         methods=["POST"]
     )
     @action(['POST'], detail=True, url_path='users/remove', url_name="remove_users_from_group")
@@ -232,6 +237,7 @@ class GroupViewSet(ViewSet):
                              description=_("UUID of the group")),
         ],
         responses={200: RightSerializer, 400: OpenApiTypes.STR, 406: OpenApiTypes.STR},
+        tags=['admin/groups', ],
         methods=["GET"]
     )
     @action(['GET'], detail=True, url_path='authorizations', url_name="list_authorizations_for_group")
@@ -272,6 +278,7 @@ class GroupViewSet(ViewSet):
         request=GroupAddAuthorizationSerializer,
         examples=[add_authorization_example,],
         responses={201: OpenApiTypes.STR, 400: OpenApiTypes.STR, 406: OpenApiTypes.STR},
+        tags=['admin/groups', ],
         methods=["POST"]
     )
     @action(['POST'], detail=True, url_path='authorization/add', url_name="add_authorization_to_group")
@@ -317,6 +324,7 @@ class GroupViewSet(ViewSet):
         examples=[add_authorization_example, ],
         request=GroupAddAuthorizationSerializer,
         responses={201: OpenApiTypes.STR, 400: OpenApiTypes.STR, 406: OpenApiTypes.STR},
+        tags=['admin/groups', ],
         methods=["POST"]
     )
     @action(['POST'], detail=True, url_path='authorization/remove', url_name="remove_authorization_from_group")

@@ -32,6 +32,7 @@ class ContactViewSet(ViewSet):
             ContactQuerySerializer,  # serializer fields are converted to parameters
         ],
         responses={200: ContactSerializer, 500: ErrorSerializer},
+        tags=['admin/contacts', ],
         methods=["GET"]
     )
     def list(self, request, client_id, project_id):
@@ -65,6 +66,7 @@ class ContactViewSet(ViewSet):
         parameters=project_parameters,
         request=ContactCreationSerializer,
         responses={201: OpenApiTypes.STR, 400: OpenApiTypes.STR, 406: OpenApiTypes.STR},
+        tags=['admin/contacts', ],
         methods=["POST"]
     )
     def create(self, request, client_id: str, project_id: str):
@@ -101,6 +103,7 @@ class ContactViewSet(ViewSet):
         ],
         request=ContactUpdateSerializer,
         responses={200: OpenApiTypes.STR, 400: OpenApiTypes.STR, 406: OpenApiTypes.STR},
+        tags=['admin/contacts', ],
         methods=["PUT"]
     )
     def update(self, request, client_id: str, project_id: str, pk: str):
@@ -138,6 +141,7 @@ class ContactViewSet(ViewSet):
                              description=_("Numerical ID of the contact")),
         ],
         responses={204: OpenApiTypes.STR, 400: OpenApiTypes.STR, 406: OpenApiTypes.STR},
+        tags=['admin/contacts', ],
         methods=["DELETE"]
     )
     def destroy(self, request, client_id: str, project_id: str, pk: int):

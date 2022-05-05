@@ -19,7 +19,7 @@ from dynamics_apis.common.viewsets import project_parameters, PaginatedResponse,
 from ..models import Document, Folder
 from ..serializers.documents import DocumentQuerySerializer, DocumentSerializer, \
     DocumentCreateSerializer, DocumentReviseSerializer, DocumentSearchRevisionSerializer, \
-    DocumentSearchRevisionSupplementaryArguments
+    DocumentSearchRevisionSupplementaryArguments, DocumentRevisionSerializer
 
 
 class DocumentViewSet(PaginatedViewSet, ):
@@ -37,6 +37,7 @@ class DocumentViewSet(PaginatedViewSet, ):
             DocumentQuerySerializer,  # serializer fields are converted to parameters
         ],
         responses={200: DocumentSerializer, 400: ErrorSerializer},
+        tags=['dms/documents', ],
         methods=["GET"]
     )
     def list(self, request: HttpRequest, client_id: str, project_id: str):
@@ -87,6 +88,7 @@ class DocumentViewSet(PaginatedViewSet, ):
                              required=False, description=_("Folder numeric ID")),
         ],
         responses={200: DocumentSerializer, 400: ErrorSerializer, 404: OpenApiTypes.STR},
+        tags=['dms/documents', ],
         methods=["GET"]
     )
     def retrieve(self, request: HttpRequest, client_id: str, project_id: str, pk: int):
@@ -111,14 +113,18 @@ class DocumentViewSet(PaginatedViewSet, ):
             return Response(_("Document not found"), status=status.HTTP_404_NOT_FOUND)
 
     @extend_schema(
-        summary=_("Create Kairnial document with file"),
-        description=_("Get document allowed options"),
-        parameters=project_parameters,
-        request=DocumentCreateSerializer,
-        responses={200: DocumentSerializer, 400: ErrorSerializer, 404: OpenApiTypes.STR},
-        methods=["OPTIONS"]
+        summary=_("Check if a document exists "),
+        description=_("Returns existing document and revisions"),
+        parameters=project_parameters + [
+            DocumentSearchRevisionSerializer,
+            DocumentSearchRevisionSupplementaryArguments
+        ],
+        responses={200: DocumentRevisionSerializer, 400: ErrorSerializer, 404: OpenApiTypes.STR},
+        methods=["GET"],
+        tags=['dms/documents',]
     )
-    def options(self, request, client_id, project_id, *args, **kwargs):
+    @action(methods=['GET'], detail=False, url_path='check_version', url_name='check_version')
+    def check_version(self, request, client_id, project_id, *args, **kwargs):
         """
         Create a new document
         :param request:
@@ -129,33 +135,35 @@ class DocumentViewSet(PaginatedViewSet, ):
         data = request.POST.copy()
         drs = DocumentSearchRevisionSerializer(data=data)
         dss = DocumentSearchRevisionSupplementaryArguments(data=data)
-        data.update(request.FILES)
-        dcs = DocumentCreateSerializer(data=data)
-        if not dcs.is_valid():
-            return Response(dcs.errors, content_type='application/json',
-                            status=status.HTTP_400_BAD_REQUEST)
-        if drs.is_valid() and dss.is_valid():
-            directory_name = dcs.validated_data.get('path').split('/')[-1]
-            folder_list = Folder.list(
-                client_id=client_id,
-                token=request.token,
-                user_id=request.user_id,
-                project_id=project_id,
-                filters={
-                    'path': dcs.validated_data.get('path'),
-                    'name': directory_name
-                }
-            )
-            if folder_list:
-                dss.validated_data['folderRestricionId'] = folder_list[0].get('fcat_id')
-            revisions = Document.check_revision(
-                client_id=client_id,
-                token=request.token,
-                user_id=request.user_id,
-                project_id=project_id,
-                document_serialized_data=drs.validated_data,
-                supplementary_serialized_data=dss.validated_data
-            )
+        if not drs.is_valid() or not dss.is_valid():
+            errors = drs.errors
+            errors.update(dss.errors)
+            return Response(errors, content_type="application/json", status=status.HTTP_400_BAD_REQUEST)
+        directory_name = drs.validated_data.get('path').split('/')[-1]
+        folder_list = Folder.list(
+            client_id=client_id,
+            token=request.token,
+            user_id=request.user_id,
+            project_id=project_id,
+            filters={
+                'path': drs.validated_data.get('path'),
+                'name': directory_name
+            }
+        )
+        if folder_list:
+            dss.validated_data['folderRestricionId'] = folder_list[0].get('fcat_id')
+        revisions = Document.check_revision(
+            client_id=client_id,
+            token=request.token,
+            user_id=request.user_id,
+            project_id=project_id,
+            document_serialized_data=drs.validated_data,
+            supplementary_serialized_data=dss.validated_data
+        )
+        if not revisions:
+            return Response(_("File not found"), status=status.HTTP_404_NOT_FOUND)
+        drs = DocumentRevisionSerializer(revisions, many=True)
+        return Response(drs.data, content_type="application/json")
 
     @extend_schema(
         summary=_("Create Kairnial document with file"),
@@ -163,6 +171,7 @@ class DocumentViewSet(PaginatedViewSet, ):
         parameters=project_parameters,
         request=DocumentCreateSerializer,
         responses={201: DocumentSerializer, 400: ErrorSerializer, 404: OpenApiTypes.STR},
+        tags=['dms/documents', ],
         methods=["POST"]
     )
     def create(self, request: HttpRequest, client_id: str, project_id: str):
@@ -227,6 +236,7 @@ class DocumentViewSet(PaginatedViewSet, ):
         parameters=project_parameters,
         request=DocumentReviseSerializer,
         responses={201: DocumentSerializer, 400: ErrorSerializer, 404: OpenApiTypes.STR},
+        tags=['dms/documents', ],
         methods=["PUT"]
     )
     def update(self, request: HttpRequest, client_id: str, project_id: str, pk: str):
@@ -267,6 +277,7 @@ class DocumentViewSet(PaginatedViewSet, ):
                              required=False, description=_("Document numeric ID")),
         ],
         responses={204: OpenApiTypes.STR, 400: ErrorSerializer, 404: OpenApiTypes.STR},
+        tags=['dms/documents', ],
         methods=["DELETE"]
     )
     def destroy(self, request: HttpRequest, client_id: str, project_id: str, pk: int):
