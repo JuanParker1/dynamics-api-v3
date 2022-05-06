@@ -175,7 +175,10 @@ class DocumentViewSet(PaginatedViewSet, ):
         description=_("Create Kairnial document"),
         parameters=project_parameters,
         request=DocumentCreateSerializer,
-        responses={201: DocumentSerializer, 400: ErrorSerializer, 404: OpenApiTypes.STR},
+        responses={201: DocumentSerializer,
+                   400: ErrorSerializer,
+                   404: OpenApiTypes.STR,
+                   417: OpenApiTypes.STR},
         tags=['dms/documents', ],
         methods=["POST"]
     )
@@ -202,6 +205,9 @@ class DocumentViewSet(PaginatedViewSet, ):
                 serialized_data=dcs.validated_data,
                 attachment=request.FILES.get('file')
             )
+            if not document:
+                return Response("Could not fetch resulting document",
+                                status=status.HTTP_417_EXPECTATION_FAILED)
             serializer = DocumentSerializer(document)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         except KairnialWSServiceError as e:
@@ -212,7 +218,10 @@ class DocumentViewSet(PaginatedViewSet, ):
         description=_("Revise Kairnial document"),
         parameters=project_parameters,
         request=DocumentReviseSerializer,
-        responses={201: DocumentSerializer, 400: ErrorSerializer, 404: OpenApiTypes.STR},
+        responses={201: DocumentSerializer,
+                   400: ErrorSerializer,
+                   404: OpenApiTypes.STR,
+                   417: OpenApiTypes.STR},
         tags=['dms/documents', ],
         methods=["PUT"]
     )
@@ -241,6 +250,9 @@ class DocumentViewSet(PaginatedViewSet, ):
                 serialized_data=dcs.validated_data,
                 attachment=request.FILES.get('file')
             )
+            if not document:
+                return Response("Could not fetch resulting document",
+                                status=status.HTTP_417_EXPECTATION_FAILED)
             serializer = DocumentSerializer(document)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         except KairnialWSServiceError as e:

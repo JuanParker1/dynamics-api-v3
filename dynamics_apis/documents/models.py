@@ -186,7 +186,13 @@ class Document(PaginatedModel):
         :param user_id: ID of the user
         """
         kf = KairnialDocumentService(client_id=client_id, token=token, user_id=user_id, project_id=project_id)
-        return kf.get(id=id)
+        documents = kf.get(id=id)
+        print(documents)
+        if documents:
+            return documents[0]
+        else:
+            return None
+
 
     @classmethod
     def extract_attachment_data(cls, attachment: InMemoryUploadedFile):
@@ -238,7 +244,13 @@ class Document(PaginatedModel):
         serialized_data['size'] = file_size
         serialized_data['typeFichier'] = file_type
         fs = KairnialDocumentService(client_id=client_id, token=token, user_id=user_id, project_id=project_id)
-        return fs.create(document_create_serializer=serialized_data, content=file_content)
+        document_id, name, something = fs.create(document_create_serializer=serialized_data, content=file_content)
+        documents = fs.get(document_id)
+        if documents:
+            return documents[0]
+        else:
+            return None
+
 
     @classmethod
     def update(
@@ -277,7 +289,12 @@ class Document(PaginatedModel):
         serialized_data['typeFichier'] = file_type
         serialized_data['parentUUID'] = parent_id
         fs = KairnialDocumentService(client_id=client_id, token=token, user_id=user_id, project_id=project_id)
-        return fs.revise(document_revise_serializer=serialized_data, content=file_content)
+        document_id, name, something = fs.revise(document_revise_serializer=serialized_data, content=file_content)
+        documents = fs.get(document_id)
+        if documents:
+            return documents[0]
+        else:
+            return None
 
     @staticmethod
     def archive(

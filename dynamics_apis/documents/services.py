@@ -170,6 +170,7 @@ class KairnialDocumentService(KairnialWSService):
                 message=output.get('error'),
                 status=output.get('errorCode')
             )
+        return output
 
     def get(self, id: int):
         """
@@ -177,7 +178,7 @@ class KairnialDocumentService(KairnialWSService):
         :param id: ID of the document
         :return:
         """
-        return self.call(action='getFilesFromCat', parameters=[{'id': id}])
+        return self.call(action='getFilesFromCat', parameters=[{'getSingleID': id}])
 
     def create(self, document_create_serializer: dict, content):
         """
@@ -199,6 +200,7 @@ class KairnialDocumentService(KairnialWSService):
             uuid=us.validated_data.get('uuid'),
             json_data=document_create_serializer
         )
+        return output
 
     def revise(self, document_revise_serializer: dict, content):
         """

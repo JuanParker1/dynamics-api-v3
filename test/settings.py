@@ -201,7 +201,7 @@ def get_version():
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Kairnial API',
     'DESCRIPTION': """
-<h1>Kairnial API version 3 - Beta</h1>
+<h1>Kairnial bidirectional API Beta</h1>
 
 <p>This API is a REST frontend to the Kairnial Web Services.</p>
 <p>To use this API, you must obtain a client ID, a user API key and an API secret from our customer support.</p>
