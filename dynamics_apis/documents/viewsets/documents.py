@@ -123,8 +123,8 @@ class DocumentViewSet(PaginatedViewSet, ):
         methods=["GET"],
         tags=['dms/documents',]
     )
-    @action(methods=['GET'], detail=False, url_path='check_version', url_name='check_version')
-    def check_version(self, request, client_id, project_id, *args, **kwargs):
+    @action(methods=['GET'], detail=False, url_path='check_revisions', url_name='check_revisions')
+    def check_revisions(self, request, client_id, project_id, *args, **kwargs):
         """
         Create a new document
         :param request:

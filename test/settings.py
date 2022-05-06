@@ -11,17 +11,18 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 import os
-import string
 import random
+import string
 from pathlib import Path
-from django.utils.translation import gettext_lazy as _
 
+from django.utils.translation import gettext_lazy as _
 from dotenv import load_dotenv
 
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
@@ -30,6 +31,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 def generate_secret(nb: int = 128):
     return ''.join([random.choice(string.printable) for i in range(nb)])
+
 
 SECRET_KEY = generate_secret()
 
@@ -198,6 +200,25 @@ def get_version():
         return "dev"
 
 
+from dynamics_apis.settings import *
+
+if os.environ.get('KAIRNIAL_AUTH_PUBLIC_KEY'):
+    KAIRNIAL_AUTH_PUBLIC_KEY = os.environ.get('KAIRNIAL_AUTH_PUBLIC_KEY')
+else:
+    KAIRNIAL_AUTH_PUBLIC_KEY = load_key(
+        path=os.path.join(os.path.dirname(__file__),
+                          os.environ.get('KAIRNIAL_AUTH_PUBLIC_KEY_PATH', ''))
+    )
+
+KIARNIAL_AUTH_DOMAIN = os.environ.get('KAIRNIAL_AUTH_DOMAIN', '')
+# Kairnial auth server public key for token validation
+KAIRNIAL_AUTH_SERVER = 'https://' + KIARNIAL_AUTH_DOMAIN
+KAIRNIAL_CROSS_SERVER = os.environ.get('KAIRNIAL_CROSS_SERVER', '')
+KAIRNIAL_WS_SERVER = os.environ.get('KAIRNIAL_WS_SERVER', '')
+KAIRNIAL_FRONT_SERVER = os.environ.get('KAIRNIAL_FRONT_SERVER', '')
+KAIRNIAL_API_SERVER = os.environ.get('KAIRNIAL_API_SERVER', '')
+CLIENT_ID_VARIABLE = 'client_id'
+
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Kairnial API',
     'DESCRIPTION': """
@@ -232,10 +253,11 @@ Use <a href="#operations-projects-projects_list">project list</a> to select a pr
     "SCHEMA_PATH_PREFIX": "/{client_id}",
     "SCHEMA_PATH_PREFIX_TRIM": True,
 
-    "PREPROCESSING_HOOKS": ['dynamics_apis.authentication.openapi.preprocess_exclude_clientless_routes'],
+    "PREPROCESSING_HOOKS": [
+        'dynamics_apis.authentication.openapi.preprocess_exclude_clientless_routes'],
     "SERVERS": [
         {
-            'url': 'http://127.0.0.1:8000/{client_id}',
+            'url': f'{KAIRNIAL_API_SERVER}' + '/{client_id}',
             'description': 'Test server',
             'variables': {
                 'client_id': {
@@ -246,22 +268,3 @@ Use <a href="#operations-projects-projects_list">project list</a> to select a pr
         }
     ]
 }
-
-from dynamics_apis.settings import *
-
-if os.environ.get('KAIRNIAL_AUTH_PUBLIC_KEY'):
-    KAIRNIAL_AUTH_PUBLIC_KEY = os.environ.get('KAIRNIAL_AUTH_PUBLIC_KEY')
-else:
-    KAIRNIAL_AUTH_PUBLIC_KEY = load_key(
-        path=os.path.join(os.path.dirname(__file__), os.environ.get('KAIRNIAL_AUTH_PUBLIC_KEY_PATH', ''))
-    )
-
-KIARNIAL_AUTH_DOMAIN = os.environ.get('KAIRNIAL_AUTH_DOMAIN', '')
-# Kairnial auth server public key for token validation
-KAIRNIAL_AUTH_SERVER = 'https://' + KIARNIAL_AUTH_DOMAIN
-KAIRNIAL_CROSS_SERVER = os.environ.get('KAIRNIAL_CROSS_SERVER', '')
-KAIRNIAL_WS_SERVER = os.environ.get('KAIRNIAL_WS_SERVER', '')
-KAIRNIAL_FRONT_SERVER = os.environ.get('KAIRNIAL_FRONT_SERVER', '')
-CLIENT_ID_VARIABLE = 'client_id'
-
-
