@@ -147,7 +147,6 @@ class DocumentViewSet(PaginatedViewSet, ):
             except AssertionError:
                 pass
             return Response(errors, content_type="application/json", status=status.HTTP_400_BAD_REQUEST)
-        directory_name = dps.validated_data.get('path').split('/')[-1]
         folder_list = Folder.list(
             client_id=client_id,
             token=request.token,
@@ -157,20 +156,22 @@ class DocumentViewSet(PaginatedViewSet, ):
                 'exact_path': dps.validated_data.get('path'),
             }
         )
-        print(folder_list)
-        if folder_list:
-            dss.validated_data['folderRestricionId'] = folder_list[0].get('fcat_id')
-        revisions = Document.check_revision(
-            client_id=client_id,
-            token=request.token,
-            user_id=request.user_id,
-            project_id=project_id,
-            document_serialized_data=drs.validated_data,
-            supplementary_serialized_data=dss.validated_data
-        )
+        revisions = []
+        for folder in folder_list:
+            dss.validated_data['folderRestricionId'] = folder.get('fcat_id')
+            revision = Document.check_revision(
+                client_id=client_id,
+                token=request.token,
+                user_id=request.user_id,
+                project_id=project_id,
+                document_serialized_data=drs.validated_data,
+                supplementary_serialized_data=dss.validated_data
+            )
+            if revision:
+                revisions.append(revision)
         if not revisions:
             return Response(_("File not found"), status=status.HTTP_404_NOT_FOUND)
-        drs = DocumentRevisionTreeSerializer(revisions)
+        drs = DocumentRevisionTreeSerializer(revisions, many=True)
         return Response(drs.data, content_type="application/json")
 
     @extend_schema(

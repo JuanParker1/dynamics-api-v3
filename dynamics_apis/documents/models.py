@@ -95,6 +95,8 @@ class Folder(PaginatedModel):
         :return: FolderSerializer data
         """
         fs = KairnialFolderService(client_id=client_id, token=token, user_id=user_id, project_id=project_id)
+        if folders := fs.list(parent_id=serialized_data.get('parentId'), filters={'name': serialized_data.get('nom')}):
+            return folders[0]
         return fs.create(folder_create_serializer=serialized_data)
 
     @staticmethod
@@ -237,9 +239,13 @@ class Document(PaginatedModel):
         serialized_data['hash'] = file_hash
         serialized_data['size'] = file_size
         serialized_data['typeFichier'] = file_type
-        fs = KairnialDocumentService(client_id=client_id, token=token, user_id=user_id, project_id=project_id)
-        document_id, name, something = fs.create(document_create_serializer=serialized_data, content=file_content)
-        documents = fs.get(document_id)
+        fs = KairnialFolderService(client_id=client_id, token=token, user_id=user_id, project_id=project_id)
+        # Check if path already exists and prevent from creating the same path again as the webservice doesn‘t control that
+        if folders := fs.list(filters={'exact_path': serialized_data.get('path')}):
+            serialized_data['createFolders'] = False
+        ds = KairnialDocumentService(client_id=client_id, token=token, user_id=user_id, project_id=project_id)
+        document_id, name, something = ds.create(document_create_serializer=serialized_data, content=file_content)
+        documents = ds.get(document_id)
         if documents:
             return documents[0]
         else:

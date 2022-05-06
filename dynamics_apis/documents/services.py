@@ -92,7 +92,7 @@ class KairnialFolderService(KairnialWSService):
             format='int',
             use_cache=False
         )
-
+    
 
 class KairnialDocumentService(KairnialWSService):
     """
