@@ -51,7 +51,7 @@ def get_version(app):
                 f"api_version = [{git_tag.replace('.', ', ')}, {git_commits}, \"{suffix}\"]\n")
         fp.close()
     except Exception:
-        print(f'ERROR opening {app}/__version__.py', os.curdir)
+        print(f'ERROR opening {app}/version.py', os.curdir)
     return version
 
 

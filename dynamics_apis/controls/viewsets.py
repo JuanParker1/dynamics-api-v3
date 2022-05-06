@@ -56,8 +56,6 @@ class ControlTemplateViewSet(PaginatedViewSet):
                 page_limit=page_limit,
                 filters=cqs.validated_data
             )
-            print(f"template list has {len(template_list)} elements")
-            print(template_list)
 
             serializer = ControlTemplateSerializer(template_list, many=True)
             return PaginatedResponse(
@@ -94,7 +92,6 @@ class ControlTemplateViewSet(PaginatedViewSet):
                 project_id=project_id,
                 template_id=pk
             )
-            print(template_content)
 
             serializer = ControlTemplateContentSerializer(template_content)
             return Response(data=serializer.data, content_type='application/json')

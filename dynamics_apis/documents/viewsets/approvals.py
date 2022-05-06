@@ -129,9 +129,6 @@ class ApprovalViewSet(PaginatedViewSet):
                 page_offset=page_offset,
                 page_limit=page_limit
             )
-
-            print(approval_list[0].keys())
-
             serializer = ApprovalSerializer(approval_list, many=True)
             return PaginatedResponse(
                 data=serializer.data,

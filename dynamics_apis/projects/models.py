@@ -43,7 +43,6 @@ class Project(PaginatedModel):
         page_offset = project_list.get('LIMITSKIP')
         page_limit = project_list.get('LIMITTAKE')
         for project in project_list.get('items'):
-            print(project)
             km = Module.list(client_id=client_id, token=token, project_id=project.get('g_nom'))
             try:
                 info = json.loads(project.get('g_infos'))
@@ -54,10 +53,8 @@ class Project(PaginatedModel):
                 'project_code': project.get('g_nom'),
                 'modules': km
             }
-            print("metadata", metadata)
             project['meta_data'] = metadata
             output.append(project)
-        print(output)
         return total, output, page_offset, page_limit
 
 

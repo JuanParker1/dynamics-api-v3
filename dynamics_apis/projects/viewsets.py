@@ -84,7 +84,6 @@ class ProjectViewSet(PaginatedViewSet):
                 page_offset=page_offset,
                 page_limit=page_limit
             )
-            print(project_list)
             serializer = ProjectIntegrationSerializer(project_list, many=True)
             return PaginatedResponse(
                 total=total,
