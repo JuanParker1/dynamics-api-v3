@@ -115,7 +115,7 @@ class KairnialDocumentService(KairnialWSService):
             'LIMITTAKE': limit
         }
         if filters:
-            parameters_dict = [{key: value for key, value in filters.items() if value}]
+            parameters_dict.update({key: value for key, value in filters.items() if value})
         return self.call(action='getFilesFromCat', parameters=[parameters_dict])
 
     def _get_file_link(self, json_data):
