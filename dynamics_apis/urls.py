@@ -31,7 +31,7 @@ urlpatterns = [
     path('schema/', SpectacularAPIView.as_view(), name='schema'),
     # Optional UI:
     path('', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-    path('authentication/', APIKeyAuthenticationView.as_view()),
+    path('authentication/key/', APIKeyAuthenticationView.as_view()),
     path('<str:client_id>/authentication/', include(authenticate_urls)),
     path('<str:client_id>/projects/', include(project_urls)),
     path(project_path + 'dms/', include(document_urls)),
