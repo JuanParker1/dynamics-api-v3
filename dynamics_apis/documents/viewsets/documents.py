@@ -19,7 +19,8 @@ from dynamics_apis.common.viewsets import project_parameters, PaginatedResponse,
 from ..models import Document, Folder
 from ..serializers.documents import DocumentQuerySerializer, DocumentSerializer, \
     DocumentCreateSerializer, DocumentReviseSerializer, DocumentSearchRevisionSerializer, \
-    DocumentSearchRevisionSupplementaryArguments, DocumentRevisionSerializer
+    DocumentSearchRevisionSupplementaryArguments, DocumentRevisionSerializer, \
+    DocumentSearchPathSerializer, DocumentRevisionTreeSerializer
 
 
 class DocumentViewSet(PaginatedViewSet, ):
@@ -116,10 +117,11 @@ class DocumentViewSet(PaginatedViewSet, ):
         summary=_("Check if a document exists "),
         description=_("Returns existing document and revisions"),
         parameters=project_parameters + [
+            DocumentSearchPathSerializer,
             DocumentSearchRevisionSerializer,
             DocumentSearchRevisionSupplementaryArguments
         ],
-        responses={200: DocumentRevisionSerializer, 400: ErrorSerializer, 404: OpenApiTypes.STR},
+        responses={200: DocumentRevisionTreeSerializer, 400: ErrorSerializer, 404: OpenApiTypes.STR},
         methods=["GET"],
         tags=['dms/documents',]
     )
@@ -133,27 +135,29 @@ class DocumentViewSet(PaginatedViewSet, ):
         :return:
         """
         data = request.GET.copy()
+        dps = DocumentSearchPathSerializer(data=data)
         drs = DocumentSearchRevisionSerializer(data=data)
         dss = DocumentSearchRevisionSupplementaryArguments(data=data)
-        if not drs.is_valid() or not dss.is_valid():
+        if not dps.is_valid() or not drs.is_valid() or not dss.is_valid():
             errors = {}
             try:
+                errors.update(dps.errors)
                 errors.update(drs.errors)
                 errors.update(dss.errors)
             except AssertionError:
                 pass
             return Response(errors, content_type="application/json", status=status.HTTP_400_BAD_REQUEST)
-        directory_name = drs.validated_data.get('path').split('/')[-1]
+        directory_name = dps.validated_data.get('path').split('/')[-1]
         folder_list = Folder.list(
             client_id=client_id,
             token=request.token,
             user_id=request.user_id,
             project_id=project_id,
             filters={
-                'path': drs.validated_data.get('path'),
-                'name': directory_name
+                'exact_path': dps.validated_data.get('path'),
             }
         )
+        print(folder_list)
         if folder_list:
             dss.validated_data['folderRestricionId'] = folder_list[0].get('fcat_id')
         revisions = Document.check_revision(
@@ -166,7 +170,7 @@ class DocumentViewSet(PaginatedViewSet, ):
         )
         if not revisions:
             return Response(_("File not found"), status=status.HTTP_404_NOT_FOUND)
-        drs = DocumentRevisionSerializer(revisions)
+        drs = DocumentRevisionTreeSerializer(revisions)
         return Response(drs.data, content_type="application/json")
 
     @extend_schema(

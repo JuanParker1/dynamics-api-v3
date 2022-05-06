@@ -831,6 +831,18 @@ class RFieldSerializer(serializers.Serializer):
     )
 
 
+class DocumentSearchPathSerializer(serializers.Serializer):
+    """
+    Serializer for document path
+    """
+    folder_path = serializers.CharField(
+        label=_('Folder path'),
+        help_text=_('Folder path, can be created if not exists using create_folders parameter'),
+        required=False,
+        source='path'
+    )
+
+
 class DocumentSearchRevisionSerializer(serializers.Serializer):
     """
     Serializer to search for existing document when
@@ -858,16 +870,14 @@ class DocumentSearchRevisionSerializer(serializers.Serializer):
         label=_('Document numeric ID'),
         help_text=_('Numeric ID of the document'),
         source='item_id',
-        read_only=True,
-        default=0,
-        required=False
+        default=0
     )
-    folder_path = serializers.CharField(
-        label=_('Folder path'),
-        help_text=_('Folder path, can be created if not exists using create_folders parameter'),
-        required=False,
-        source='path'
-    )
+
+
+class DocumentExtensionSerializer(serializers.Serializer):
+    extension = serializers.CharField(source='ext')
+    path = serializers.CharField()
+    file_id = serializers.IntegerField()
 
 
 class DocumentRevisionSerializer(serializers.Serializer):
@@ -1008,16 +1018,16 @@ class DocumentRevisionSerializer(serializers.Serializer):
         source='entete_createdate',
         required=False
     )
-    tags = serializers.CharField(
+    tags = serializers.ListSerializer(
         label=_('Document tags'),
         help_text=_('Aggregated tags applied to document'),
+        child=serializers.CharField(),
         read_only=True,
         required=False
     )
-    system_tags = serializers.ListSerializer(
+    system_tags = serializers.CharField(
         label=_('Document system tags'),
         help_text=_('Aggregated system tags applied to document'),
-        child=serializers.CharField(),
         read_only=True,
         required=False
     )
@@ -1077,12 +1087,19 @@ class DocumentRevisionSerializer(serializers.Serializer):
         source='linkedContacts',
         required=False
     )
-    all_extensions = serializers.CharField(
-        label=_('Extensions'),
-        help_text=_('Concatenated list of extensions'),
-        read_only=True,
+    all_extensions = DocumentExtensionSerializer(
+        many=True,
         source='fileExtensionList',
-        required=False
+        read_only=True
+    )
+
+
+class DocumentRevisionTreeSerializer(DocumentRevisionSerializer):
+    revisions = DocumentRevisionSerializer(
+        label=_('document revisions'),
+        help_text=_('List of document revisions'),
+        read_only=True,
+        many=True
     )
 
 
@@ -1101,8 +1118,7 @@ class DocumentSearchRevisionSupplementaryArguments(serializers.Serializer):
         label=_('Is sending'),
         help_text=_('Check all files before sending'),
         source='isSending',
-        read_only=True,
-        required=False
+        default=True
     )
 
 

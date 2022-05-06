@@ -47,7 +47,7 @@ class Folder(PaginatedModel):
         if 'exact_path' in filters:
             output = []
             for folder in folder_list:
-                if folder.get('fcat_chemin').lower().startswith(filters['exact_path'].lower()):
+                if folder.get('fcat_chemin').lower() == filters['exact_path'].lower():
                     output.append(folder)
             folder_list = output
         if 'name' in filters:
@@ -336,8 +336,11 @@ class Document(PaginatedModel):
             document_search_revision_serializer=document_serialized_data,
             supplementary_info_serializer=supplementary_serialized_data
         )
-        if revisions and revisions.get(''):
-            return revisions.get('').get('')
+        if revisions:
+            if type(revisions) == dict and revisions.get(''):
+                return revisions.get('').get('')
+            if type(revisions) == list and revisions[0]:
+                return revisions[0].get('')
         else:
             return {}
 

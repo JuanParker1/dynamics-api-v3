@@ -242,9 +242,7 @@ class KairnialDocumentService(KairnialWSService):
         """
         Check if a document exists
         """
-        parameters = []
-        parameters.append([document_search_revision_serializer])
-        parameters.append(supplementary_info_serializer)
+        parameters = [[document_search_revision_serializer, ], supplementary_info_serializer]
         return self.call(action='getFilesForRevision', parameters=parameters)
 
 
