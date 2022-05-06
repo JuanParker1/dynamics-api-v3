@@ -1131,7 +1131,7 @@ class DocumentCreateSerializer(serializers.Serializer):
         label=_('Document description'),
         help_text=_('Description of the document'),
         source='desc',
-        required=True
+        required=False
     )
     external_name = serializers.CharField(
         label=_('Document name as uploaded'),

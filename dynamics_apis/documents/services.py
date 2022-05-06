@@ -31,12 +31,12 @@ class KairnialFolderService(KairnialWSService):
         :param parent_id: ID of the parent folder, optional
         :return:
         """
-        parameters = []
+        parameters_dict = {}
         if filters:
-            parameters = [{key: value} for key, value in filters.items()]
+            parameters_dict = {key: value for key, value in filters.items() if value}
         if parent_id:
-            parameters.append({'asyncFolderId': parent_id})
-        return self.call(action='getFlexDossiers', parameters=parameters)
+            parameters_dict['asyncFolderId'] = parent_id
+        return self.call(action='getFlexDossiers', parameters=[parameters_dict])
 
     def get(self, id: int):
         """
@@ -110,14 +110,13 @@ class KairnialDocumentService(KairnialWSService):
         :param limit: number of elements to fetch
         :return:
         """
-        parameters = []
+        parameters_dict = {
+            'LIMITSKIP': offset,
+            'LIMITTAKE': limit
+        }
         if filters:
-            parameters = [{key: value} for key, value in filters.items()]
-        parameters += [
-            {'LIMITSKIP': offset},
-            {'LIMITTAKE': limit}
-        ]
-        return self.call(action='getFilesFromCat', parameters=parameters)
+            parameters_dict = [{key: value for key, value in filters.items() if value}]
+        return self.call(action='getFilesFromCat', parameters=[parameters_dict])
 
     def _get_file_link(self, json_data):
         """
