@@ -115,6 +115,7 @@ def resolve_user(_, info, client_id, project_id):
         user_list = User.list(
             client_id=client_id,
             token=request.token,
+            user_id=request.user_id,
             project_id=project_id,
             filters=filters
         )
@@ -137,6 +138,7 @@ def resolve_users(_, info, client_id, project_id, **filters):
         user_list = User.list(
             client_id=client_id,
             token=request.token,
+            user_id=request.user_id,
             project_id=project_id,
             filters=usq.validated_data
         )
@@ -161,6 +163,7 @@ def resolve_groups(_, info, client_id, project_id, **filters):
         group_list = Group.list(
             client_id=client_id,
             token=request.token,
+            user_id=request.user_id,
             project_id=project_id,
             filters=gqs.validated_data
         )
@@ -183,6 +186,7 @@ def resolve_contacts(_, info, client_id, project_id, **filters):
         contacts_list = Contact.list(
             client_id=client_id,
             token=request.token,
+            user_id=request.user_id,
             project_id=project_id,
             filters=cqs.validated_data
         )
@@ -190,7 +194,7 @@ def resolve_contacts(_, info, client_id, project_id, **filters):
         return serializer.data
 
 
-def enhance_project_list(obj_list, client_id, token, selections):
+def enhance_project_list(obj_list, client_id, token, selections, user_id = None):
     """
     Inject client_id and token into lists to use in serializer relations
     """
@@ -207,6 +211,7 @@ def enhance_project_list(obj_list, client_id, token, selections):
     for i in range(len(obj_list)):
         obj_list[i]['client_id'] = client_id
         obj_list[i]['token'] = token
+        obj_list[i]['user_id'] = user_id
         for sel in ['contacts', 'groups', 'users']:
             selected = sel in selections
             obj_list[i][sel] = {
@@ -231,6 +236,7 @@ def resolve_projects(_, info, client_id: str, page_offset: int = 0, page_limit: 
         total, project_list, page_offset, page_limit = Project.paginated_list(
             client_id=client_id,
             token=request.token,
+            user_id=request.user_id,
             page_offset=page_offset,
             page_limit=page_limit,
             search=search
@@ -241,6 +247,7 @@ def resolve_projects(_, info, client_id: str, page_offset: int = 0, page_limit: 
             obj_list=project_list,
             client_id=client_id,
             token=request.token,
+            user_id=request.user_id,
             selections=selections)
         serializer = ProjectGraphQLSerializer(project_list, many=True)
         return serializer.data

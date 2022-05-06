@@ -22,6 +22,7 @@ class KairnialProject(KairnialCrossService):
     """
     service_domain = 'release'
     client_id = None
+    user_id = None
     token = None
     token_type = 'Bearer'
     logger = logging.getLogger('services')
@@ -49,6 +50,8 @@ class KairnialProject(KairnialCrossService):
             'Content-type': 'application/json',
             'Authorization': f'{self.token_type} {self.token}'
         }
+        if self.user_id:
+            headers['UserAppID'] = self.user_id
         cache_key = sha1(f'{url}||{json.dumps(headers)}||{data}'.encode('latin1')).hexdigest()
         if cache.get(cache_key):
             return cache.get(cache_key)

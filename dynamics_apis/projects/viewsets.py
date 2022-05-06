@@ -40,6 +40,7 @@ class ProjectViewSet(PaginatedViewSet):
             total, project_list, page_offset,page_limit = Project.paginated_list(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 search=request.GET.get('search'),
                 page_offset=page_offset,
                 page_limit=page_limit
@@ -80,6 +81,7 @@ class ProjectViewSet(PaginatedViewSet):
             total, project_list, page_offset, page_limit = Project.integration_list(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 search=request.GET.get('search'),
                 page_offset=page_offset,
                 page_limit=page_limit
@@ -99,15 +101,12 @@ class ProjectViewSet(PaginatedViewSet):
             })
             return Response(error.data, content_type='application/json', status=status.HTTP_400_BAD_REQUEST)
 
+
     @extend_schema(
         summary=_("Create a Kairnial project"),
         description=_(
             "Create a new project for the current connected user, give a template UUID to copy the configuration from an existing project"),
-        parameters=[
-            OpenApiParameter("client_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                             description=_("Client ID token"),
-                             default=os.environ.get('DEFAULT_KAIRNIAL_CLIENT_ID', '')),
-        ],
+        parameters=client_parameters,
         request=ProjectCreationSerializer,
         responses={201: OpenApiTypes.STR, 400: OpenApiTypes.STR, 406: OpenApiTypes.STR},
         methods=["POST"]
@@ -118,6 +117,7 @@ class ProjectViewSet(PaginatedViewSet):
             created = Project.create(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 serialized_project=pcs.validated_data
             )
             if created:
@@ -153,6 +153,7 @@ class ProjectViewSet(PaginatedViewSet):
             created = Project.update(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 pk=pk,
                 serialized_project=pus.validated_data
             )

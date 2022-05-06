@@ -22,6 +22,7 @@ class LazyContactsField(serializers.Field):
             contacts_list = Contact.list(
                 client_id=obj.get('client_id'),
                 token=obj.get('token'),
+                user_id=obj.get('user_id'),
                 project_id=obj.get('project_id'),
                 filters=obj.get('filters')
             )
@@ -39,6 +40,7 @@ class LazyGroupsField(serializers.Field):
             group_list = Group.list(
                 client_id=obj.get('client_id'),
                 token=obj.get('token'),
+                user_id=obj.get('user_id'),
                 project_id=obj.get('project_id'),
                 filters=obj.get('filters')
             )
@@ -56,6 +58,7 @@ class LazyUsersField(serializers.Field):
             user_list = User.list(
                 client_id=obj.get('client_id'),
                 token=obj.get('token'),
+                user_id=obj.get('user_id'),
                 project_id=obj.get('project_id'),
                 filters=obj.get('filters')
             )

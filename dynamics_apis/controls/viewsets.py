@@ -34,6 +34,7 @@ class ControlTemplateViewSet(PaginatedViewSet):
             ControlQuerySerializer,  # serializer fields are converted to parameters
         ],
         responses={200: ControlTemplateSerializer, 400: ErrorSerializer},
+        tags=['controls/templates', ],
         methods=["GET"]
     )
     def list(self, request: HttpRequest, client_id: str, project_id: str):
@@ -51,6 +52,7 @@ class ControlTemplateViewSet(PaginatedViewSet):
             total, template_list, page_offset, page_limit = ControlTemplate.paginated_list(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 project_id=project_id,
                 page_offset=page_offset,
                 page_limit=page_limit,
@@ -78,6 +80,7 @@ class ControlTemplateViewSet(PaginatedViewSet):
         description=_("List Kairnial control template elements for one template on this project"),
         parameters=project_parameters,
         responses={200: ControlTemplateElementSerializer, 400: ErrorSerializer},
+        tags=['controls/templates', ],
         methods=["GET"]
     )
     @action(methods=["GET"], detail=True, url_path="elements", url_name='template_elements')
@@ -89,6 +92,7 @@ class ControlTemplateViewSet(PaginatedViewSet):
             template_content = ControlTemplateContent.list(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 project_id=project_id,
                 template_id=pk
             )
@@ -119,6 +123,7 @@ class ControlInstanceViewSet(PaginatedViewSet):
             ControlQuerySerializer,  # serializer fields are converted to parameters
         ],
         responses={200: ControlInstanceSerializer, 400: ErrorSerializer},
+        tags=['controls/instances', ],
         methods=["GET"]
     )
     def list(self, request: HttpRequest, client_id: str, project_id: str):
@@ -137,6 +142,7 @@ class ControlInstanceViewSet(PaginatedViewSet):
             total, instance_list, page_offset, page_limit = ControlInstance.paginated_list(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 project_id=project_id,
                 page_offset=page_offset,
                 page_limit=page_limit,
