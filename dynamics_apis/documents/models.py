@@ -38,28 +38,24 @@ class Folder(PaginatedModel):
         """
         kf = KairnialFolderService(client_id=client_id, token=token, user_id=user_id, project_id=project_id)
         folder_list = kf.list(parent_id=parent_id, filters=filters).get('brut')
-        print("before filter", folder_list)
         if 'path' in filters:
             output = []
             for folder in folder_list:
                 if folder.get('fcat_chemin').lower().startswith(filters['path'].lower()):
                     output.append(folder)
             folder_list = output
-        print("after path filter", folder_list)
         if 'exact_path' in filters:
             output = []
             for folder in folder_list:
                 if folder.get('fcat_chemin').lower().startswith(filters['exact_path'].lower()):
                     output.append(folder)
             folder_list = output
-        print("after exact_path filter", folder_list)
         if 'name' in filters:
             output = []
             for folder in folder_list:
                 if folder.get('originalName').lower().startswith(filters['name'].lower()):
                     output.append(folder)
             folder_list = output
-        print("after name filter", folder_list)
         return folder_list
 
     @staticmethod
@@ -187,7 +183,6 @@ class Document(PaginatedModel):
         """
         kf = KairnialDocumentService(client_id=client_id, token=token, user_id=user_id, project_id=project_id)
         documents = kf.get(id=id)
-        print(documents)
         if documents:
             return documents[0]
         else:

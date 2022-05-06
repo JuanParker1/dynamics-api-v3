@@ -164,7 +164,6 @@ class DocumentViewSet(PaginatedViewSet, ):
             document_serialized_data=drs.validated_data,
             supplementary_serialized_data=dss.validated_data
         )
-        print(revisions)
         if not revisions:
             return Response(_("File not found"), status=status.HTTP_404_NOT_FOUND)
         drs = DocumentRevisionSerializer(revisions)
