@@ -107,11 +107,7 @@ class ProjectViewSet(PaginatedViewSet):
         summary=_("Create a Kairnial project"),
         description=_(
             "Create a new project for the current connected user, give a template UUID to copy the configuration from an existing project"),
-        parameters=[
-            OpenApiParameter("client_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                             description=_("Client ID token"),
-                             default=os.environ.get('DEFAULT_KAIRNIAL_CLIENT_ID', '')),
-        ],
+        parameters=client_parameters,
         request=ProjectCreationSerializer,
         responses={201: OpenApiTypes.STR, 400: OpenApiTypes.STR, 406: OpenApiTypes.STR},
         methods=["POST"]

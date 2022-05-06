@@ -14,6 +14,7 @@ import os
 import string
 import random
 from pathlib import Path
+from django.utils.translation import gettext_lazy as _
 
 from dotenv import load_dotenv
 
@@ -68,7 +69,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'dynamics_apis.common.middlewares.KairnialAuthMiddleware',
+    'dynamics_apis.authentication.middlewares.KairnialAuthMiddleware',
     'django.contrib.auth.middleware.RemoteUserMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -150,20 +151,6 @@ STATIC_ROOT = '/var/www/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-REST_FRAMEWORK = {
-    # YOUR SETTINGS
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': 100,
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
-    ),
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'dynamics_apis.authentication.authentication.KairnialTokenAuthentication',
-    ),
-
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
-}
-
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -189,6 +176,28 @@ LOGGING = {
     },
 }
 
+REST_FRAMEWORK = {
+    # YOUR SETTINGS
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 100,
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'dynamics_apis.authentication.authentication.KairnialTokenAuthentication',
+    ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+
+def get_version():
+    from dynamics_apis import version
+    try:
+        return version.api_version
+    except AttributeError:
+        return "dev"
+
+
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Kairnial API',
     'DESCRIPTION': """
@@ -199,29 +208,43 @@ SPECTACULAR_SETTINGS = {
 
 
 <h2>1. Obtain a authentication header</h2>
-To use this API, you must first <a href="#/authentication/authentication_key_create">obtain a token</a> using the authentication endpoint for this platform.
+To use this API, you must first <a href="#operations-authentication-authentication_key_create">obtain a token</a> using the authentication endpoint for this platform.
 
 
 One this token obtain, pass the token in the request header using the Authenticate header.
 e.g.: Authenticate: Bearer <Token>
 
 <h2>2. Select a project</h2>
-Use <a href="#/projects/projects_list">project list</a> to select a project.
+Use <a href="#operations-projects-projects_list">project list</a> to select a project.
 
 """,
-    'VERSION': '2.90.1',
+    'VERSION': get_version(),
     # OTHER SETTINGS
-    "APPEND_COMPONENTS": {
-        "securitySchemes": {
-            "ApiKeyAuth": {
-                "type": "apiKey",
-                "in": "header",
-                "name": "Authentication"
-            },
-        }
+    "COMPONENT_SPLIT_REQUEST": True,
+    "SWAGGER_UI_SETTINGS": {
+        "deepLinking": True,
+        "persistAuthorization": True,
+        "displayOperationId": True
     },
-    "SECURITY": [{"ApiKeyAuth": [], 'clientID': []}],
-    "COMPONENT_SPLIT_REQUEST": True
+    "FILTER": True,
+    "PERSIST_AUTHORIZATION": True,
+    "DEEP_LINKING": True,
+    "SCHEMA_PATH_PREFIX": "/{client_id}",
+    "SCHEMA_PATH_PREFIX_TRIM": True,
+
+    "PREPROCESSING_HOOKS": ['dynamics_apis.authentication.openapi.preprocess_exclude_clientless_routes'],
+    "SERVERS": [
+        {
+            'url': 'http://127.0.0.1:8000/{client_id}',
+            'description': 'Test server',
+            'variables': {
+                'client_id': {
+                    'default': os.environ.get('DEFAULT_KAIRNIAL_CLIENT_ID'),
+                    'description': _('Client ID provided by Kairnial customer service')
+                },
+            }
+        }
+    ]
 }
 
 from dynamics_apis.settings import *
@@ -239,3 +262,6 @@ KAIRNIAL_AUTH_SERVER = 'https://' + KIARNIAL_AUTH_DOMAIN
 KAIRNIAL_CROSS_SERVER = os.environ.get('KAIRNIAL_CROSS_SERVER', '')
 KAIRNIAL_WS_SERVER = os.environ.get('KAIRNIAL_WS_SERVER', '')
 KAIRNIAL_FRONT_SERVER = os.environ.get('KAIRNIAL_FRONT_SERVER', '')
+CLIENT_ID_VARIABLE = 'client_id'
+
+

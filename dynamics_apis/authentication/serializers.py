@@ -54,6 +54,25 @@ class APIKeyAuthenticationSerializer(serializers.Serializer):
         choices=settings.KIARNIAL_AUTHENTICATION_SCOPES,
         default=['login-token', 'project-list', 'direct-login'])
 
+class ClientlessAPIKeyAuthenticationSerializer(serializers.Serializer):
+    """
+    API Key / Secret authentication class
+    """
+    api_key = serializers.CharField(
+        label=_("User API key"),
+        help_text=_("User API Key obtained from Kairnial support"),
+        default=os.environ.get('DEFAULT_KAIRNIAL_API_KEY', ''))
+    api_secret = serializers.CharField(
+        label=_("User API secret"),
+        help_text=_("User API secret obtained from Kairnial support"),
+        default=os.environ.get('DEFAULT_KAIRNIAL_API_SECRET', ''))
+    scopes = serializers.MultipleChoiceField(
+        label=_("Apply to specific scopes"),
+        help_text=_(
+            "Select scopes in {}".format(' '.join(settings.KIARNIAL_AUTHENTICATION_SCOPES))),
+        choices=settings.KIARNIAL_AUTHENTICATION_SCOPES,
+        default=['login-token', 'project-list', 'direct-login'])
+
 
 class AuthResponseSerializer(serializers.Serializer):
     """
