@@ -2,6 +2,7 @@
 Services that get and push information to Kairnial WS servers
 """
 import json
+import logging
 import time
 import uuid
 
@@ -122,6 +123,7 @@ class KairnialDocumentService(KairnialWSService):
         """
         Get a file link for upload
         """
+        logger = logging.getLogger("services")
         file_uuid = str(uuid.uuid4())
         prepare_file_parameters = {
             'name': json_data.get('nom'),
@@ -139,7 +141,7 @@ class KairnialDocumentService(KairnialWSService):
         )
         us = FileUploadSerializer(data=response)
         if not us.is_valid():
-            print(us.errors)
+            logger.error(us.errors)
             raise KairnialWSServiceError(
                 message='Invalid response from file upload',
                 status=0

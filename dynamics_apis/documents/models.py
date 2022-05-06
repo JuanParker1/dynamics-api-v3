@@ -206,7 +206,6 @@ class Document(PaginatedModel):
         file_content = attachment.read()
         file_hash = hashlib.md5(file_content).hexdigest()
         file_size = attachment.size
-        print(name, extension, file_type, file_handler, file_hash, file_size)
         return name, extension, file_type, file_handler, file_hash, file_size, file_content
 
     @classmethod

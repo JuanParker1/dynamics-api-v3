@@ -100,7 +100,6 @@ class ControlInstance(PaginatedModel):
                 project_id=project_id
             )
             instances = kf.list(template_id=template_id, filters=filters, limit=page_limit, offset=page_offset)
-            print(instances)
         else:
             kf = KairnialControlInstanceService(
                 client_id=client_id,
@@ -111,7 +110,6 @@ class ControlInstance(PaginatedModel):
             instances = kf.list(
                 filters=filters, limit=page_limit, offset=page_offset
             )
-            print(instances)
         for i, instance in enumerate(instances.get('items')):
             if type(instance.get('content')) == list:
                 content = [
