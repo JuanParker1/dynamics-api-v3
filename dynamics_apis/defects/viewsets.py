@@ -5,7 +5,7 @@ Control viewsets
 from django.http import HttpRequest
 from django.utils.translation import gettext as _
 from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser
@@ -18,7 +18,7 @@ from dynamics_apis.common.viewsets import project_parameters, PaginatedResponse,
     pagination_parameters, PaginatedViewSet
 from dynamics_apis.defects.models import Defect
 from dynamics_apis.defects.serializers import DefectQuerySerializer, DefectSerializer, DefectCreateSerializer, \
-    DefectAreaSerializer, DefectBIMCategorySerializer, DefectBIMLevelSerializer
+    DefectAreaSerializer, DefectBIMCategorySerializer, DefectBIMLevelSerializer, DefectUpdateSerializer
 
 
 class DefectViewSet(PaginatedViewSet):
@@ -67,6 +67,33 @@ class DefectViewSet(PaginatedViewSet):
         )
 
     @extend_schema(
+        summary=_("Get Kairnial defect"),
+        description=_("Get a specific defect by ID"),
+        parameters=project_parameters + pagination_parameters + [
+            OpenApiParameter("id", OpenApiTypes.UUID, OpenApiParameter.PATH,
+                             description=_("Numeric ID of the defect")),
+        ],
+        responses={200: DefectSerializer, 400: ErrorSerializer},
+        tags=['dms/defects', ],
+        methods=["GET"]
+    )
+    @handle_ws_error
+    def retrieve(self, request: HttpRequest, pk, client_id: str, project_id: str):
+        """
+        Get Defeect by numeric ID
+        """
+        defect = Defect.get(
+            client_id=client_id,
+            token=request.token,
+            project_id=project_id,
+            pk=pk
+        )
+        if not defect:
+            return Response(_("Invalid defect"), status=status.HTTP_404_NOT_FOUND)
+        serializer = DefectSerializer(defect)
+        return Response(serializer.data, content_type="application/json")
+
+    @extend_schema(
         summary=_("Create Kairnial defect"),
         description=_("Create Kairnial defect"),
         parameters=project_parameters,
@@ -98,10 +125,29 @@ class DefectViewSet(PaginatedViewSet):
                             status=status.HTTP_406_NOT_ACCEPTABLE)
 
     @extend_schema(
+        summary=_("Update defect description"),
+        description=_("Update defect description"),
+        parameters=project_parameters,
+        request=DefectUpdateSerializer,
+        responses={200: DefectSerializer, 400: ErrorSerializer, 404: OpenApiTypes.STR},
+        tags=['dms/defects', ],
+        methods=["PATCH"]
+    )
+    @handle_ws_error
+    def patch(self, request: HttpRequest, client_id: str, project_id: str):
+        """
+        Patch defect
+        """
+        dus = DefectUpdateSerializer(data=request.data)
+        if not dus.is_valid():
+            return Response(dus.errors, content_type='application/json',
+                            status=status.HTTP_400_BAD_REQUEST)
+
+    @extend_schema(
         summary=_("List defect areas"),
         description=_("List areas attached to defects"),
         parameters=project_parameters,
-        responses={201: DefectAreaSerializer, 400: ErrorSerializer, 404: OpenApiTypes.STR},
+        responses={200: DefectAreaSerializer, 400: ErrorSerializer, 404: OpenApiTypes.STR},
         tags=['dms/defects', ],
         methods=["GET"]
     )
@@ -121,7 +167,7 @@ class DefectViewSet(PaginatedViewSet):
         summary=_("List defect BIM categories"),
         description=_("List BIM categories attached to defects"),
         parameters=project_parameters,
-        responses={201: DefectBIMCategorySerializer, 400: ErrorSerializer, 404: OpenApiTypes.STR},
+        responses={200: DefectBIMCategorySerializer, 400: ErrorSerializer, 404: OpenApiTypes.STR},
         tags=['dms/defects', ],
         methods=["GET"]
     )
@@ -141,7 +187,7 @@ class DefectViewSet(PaginatedViewSet):
         summary=_("List defect BIM levels"),
         description=_("List BIM levels attached to defects"),
         parameters=project_parameters,
-        responses={201: DefectBIMLevelSerializer, 400: ErrorSerializer, 404: OpenApiTypes.STR},
+        responses={200: DefectBIMLevelSerializer, 400: ErrorSerializer, 404: OpenApiTypes.STR},
         tags=['dms/defects', ],
         methods=["GET"]
     )

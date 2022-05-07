@@ -31,7 +31,23 @@ class Defect(PaginatedModel):
         :return:
         """
         kf = KairnialDefectService(client_id=client_id, token=token, project_id=project_id, user_id=user_id)
-        return kf.list(filters=filters, limit=page_limit, offset=page_offset)
+        defects = kf.list(filters=filters, limit=page_limit, offset=page_offset)
+        print(defects)
+        return defects
+
+    @staticmethod
+    def get(
+            client_id: str,
+            token: str,
+            project_id: str,
+            pk: int,
+            user_id: str = None
+    ):
+        """
+        Get a specific defect by numeric ID
+        """
+        kf = KairnialDefectService(client_id=client_id, token=token, project_id=project_id, user_id=user_id)
+        return kf.get(pk)
 
     @staticmethod
     def create(
@@ -59,9 +75,9 @@ class Defect(PaginatedModel):
 
     @staticmethod
     def areas(client_id: str,
-            token: str,
-            project_id: str,
-            user_id: str = None):
+              token: str,
+              project_id: str,
+              user_id: str = None):
         """
         List defect areas
         Create a Kairnial Defect
@@ -82,9 +98,9 @@ class Defect(PaginatedModel):
 
     @staticmethod
     def bim_categories(client_id: str,
-              token: str,
-              project_id: str,
-              user_id: str = None):
+                       token: str,
+                       project_id: str,
+                       user_id: str = None):
         """
         List defect BIM categories
         Create a Kairnial Defect
@@ -105,9 +121,9 @@ class Defect(PaginatedModel):
 
     @staticmethod
     def bim_levels(client_id: str,
-              token: str,
-              project_id: str,
-              user_id: str = None):
+                   token: str,
+                   project_id: str,
+                   user_id: str = None):
         """
         List defect BIM levels
         Create a Kairnial Defect
@@ -125,4 +141,3 @@ class Defect(PaginatedModel):
         levels = ds.bim_levels()
         print(levels)
         return levels
-

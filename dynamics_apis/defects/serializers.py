@@ -57,7 +57,7 @@ class DefectQuerySerializer(serializers.Serializer):
         label=_('Main area'),
         help_text=_('Filter on main area, use in conjunction with area_uuids'),
         source='mainPrimaryArea',
-        default=False
+        required=False
     )
     area_uuids = serializers.ListSerializer(
         label=_('List of areas'),
@@ -134,19 +134,19 @@ class DefectQuerySerializer(serializers.Serializer):
         label=_('Include created defects'),
         help_text=_('include created defects'),
         source='created',
-        default=True
+        required=False
     )
     include_updated = serializers.BooleanField(
         label=_('Include updated defects'),
         help_text=_('include updated defects'),
         source='modified',
-        default=True
+        required=False
     )
     updated_by_me = serializers.BooleanField(
         label=_('Updated by me'),
         help_text=_('Filter on defects I have updated'),
         source='modifiedbyme',
-        default=True
+        required=False
     )
 
 
@@ -444,7 +444,6 @@ class DefectCreateSerializer(serializers.Serializer):
     flags = serializers.CharField(
         label=_('Internal flags'),
         help_text=_('Undocumented defect flags'),
-        source=''
     )
     previous_description = serializers.CharField(
         label=_('Previous description'),
@@ -476,6 +475,25 @@ class DefectCreateSerializer(serializers.Serializer):
         help_text=_('How is that supposed to be structured ?'), # TODO: Identify field structure
         source='supplementaryValues'
     )
+
+class DefectUpdateSerializer(serializers.Serializer):
+    """
+    Serializer for defect patch
+    """
+    coordinates = serializers.CharField(  # TODO: Describe the field structure
+        label=_('Defect coordinates'),
+        help_text=_(''),
+        source='coord'
+    )
+    emitter = serializers.CharField(
+        label=_('Defect emitter'),
+        help_text=_('Emitter of the defect'),
+    )
+    description = serializers.CharField(
+        label=_('Defect description'),
+        help_text=_('Defect description text'),
+    )
+
 
 
 class DefectAreaSerializer(serializers.Serializer):
@@ -538,3 +556,4 @@ class DefectBIMLevelSerializer(serializers.Serializer):
         read_only=True,
         source='label'
     )
+

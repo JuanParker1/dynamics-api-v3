@@ -32,16 +32,15 @@ class KairnialDefectService(KairnialWSService):
         }
         if filters:
             parameters.update({key: value for key, value in filters.items() if value})
-        parameters += [offset, limit]
-        return self.call(action='getFlexAllReserves', parameters=parameters)
+        return self.call(action='getFlexAllReserves', parameters=[parameters])
 
-    def get(self, template_uuid: str):
+    def get(self, pin_id: int):
         """
         Get a defect detail
-        :param template_uuid: UUID of the control template
+        :param pin_id: numeric pin ID
         """
-        parameters = [{'template_uuid': template_uuid}]
-        return self.call(action='getTemplates', parameters=parameters)
+        parameters = [{'pinIds': [pin_id]}]
+        return self.call(action='getPinsByIds', parameters=parameters)
 
     def attachments(self, template_id: str):
         """

@@ -103,7 +103,7 @@ class GroupViewSet(ViewSet):
             serializer = GroupSerializer(group[0])
             return Response(serializer.data, content_type="application/json")
         except IndexError:
-            return Response(_("Invalid group"), status=status.HTTP_400_BAD_REQUEST)
+            return Response(_("Invalid group"), status=status.HTTP_404_NOT_FOUND)
 
     @extend_schema(
         summary=_("Create a Kairnial group"),

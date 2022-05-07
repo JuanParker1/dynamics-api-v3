@@ -32,10 +32,14 @@ class PaginatedModel:
                 page_limit=page_limit,
                 **kwargs
             )
-            total = response.get('total', 0)
-            paginated_list = response.get('items', [])
-            page_offset = response.get('LIMITSKIP', page_offset)
-            page_limit = response.get('LIMITTAKE', page_limit)
+            if response:
+                total = response.get('total', 0)
+                paginated_list = response.get('items', [])
+                page_offset = response.get('LIMITSKIP', page_offset)
+                page_limit = response.get('LIMITTAKE', page_limit)
+            else:
+                total = 0
+                paginated_list = []
             return total, paginated_list, page_offset, page_limit
         else:
             # Manual pagination when not supported by Kairnial WS
