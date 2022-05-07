@@ -270,8 +270,7 @@ class DefectSerializer(serializers.Serializer):
         label=_('Defect flags'),
         help_text=_("Cannot help here..."), # TODO: What is it for ?
         source='falgs'
-    )
-    # Weird stuff
+    ) # Weird stuff
     session = serializers.CharField(
         label=_('On site session'),
         help_text=_('Visit session information'),
@@ -301,4 +300,179 @@ class DefectSerializer(serializers.Serializer):
         help_text=_('Defect has been created on server'),
         source='fromServeur',
         read_only=True
+    )
+
+class DefectCreateSerializer(serializers.Serializer):
+    """
+    Serializer for defect input
+    """
+    id = serializers.UUIDField(
+        label=_('Defect universal ID'),
+        help_text=_('UUID of the defect'),
+        source='guid'
+    )
+    gpc = serializers.BooleanField(
+        label=_('Garantee of perfect completion'),
+        help_text=_('Does this defect concern GPC'),
+        source='gpa'
+    )
+    coordinates = serializers.CharField( # TODO: Describe the field structure
+        label=_('Defect coordinates'),
+        help_text=_(''),
+        source='coord'
+    )
+    coordinates_2 = serializers.CharField( # TODO: Describe the field structure
+        label=_('Other defect coordinates'),
+        help_text=_(''),
+        source='coord2'
+    )
+    coordinates_3D = serializers.CharField( # TODO: Describe the field structure
+        label=_('Defect 3D coordinates'),
+        help_text=_('Defect coordinates in a 3D model'),
+        source='coord3d'
+    )
+    campaign_id = serializers.IntegerField(
+        label=_('Campaign ID'),
+        help_text=_('Numeric ID of a campaign'),
+        source='campagne'
+    )
+    input_date = CastingDateTimeField(
+        label=_('Time of input'),
+        help_text=_('Datetime of defect input'),
+        source='datec'
+    )
+    building = serializers.CharField(
+        label=_('Building location'),
+        help_text=_('Text building of the defect'),
+        source='bat'
+    )
+    floor = serializers.CharField(
+        label=_('Floor location'),
+        help_text=_('Text floor of the defect'),
+        source='niveau'
+    )
+    location = serializers.CharField(
+        label=_('Location'),
+        help_text=_('Text location of the defect'),
+        source='lieu'
+    )
+    zone = serializers.CharField(
+        label=_('Zone'),
+        help_text=_('Text zone of the defect'),
+    )
+    layer_id = serializers.IntegerField(
+        label=_('Layer ID'),
+        help_text=_('Numeric ID of the layer of the defect'),
+        source='couche'
+    )
+    model_id = serializers.IntegerField(
+        label=_('Model ID'),
+        help_text=_('Numeric ID of the model of the defect'),
+    )
+    bim_model_id = serializers.CharField(
+        label=_('BIM Map ID'),
+        help_text=_('UUID of the BIM model of the defect'),
+        source='plan_uuid'
+    )
+    description = serializers.CharField(
+        label=_('Description'),
+        help_text=_('Text description of the defect'),
+        source='desc'
+    )
+    end_date = CastingDateTimeField(
+        label=_('End date'),
+        help_text=_('Datetime of end of defect'),
+        source='datef'
+    )
+    due_date = CastingDateTimeField(
+        label=_('Due date'),
+        help_text=_('Datetime of due completion of defect'),
+        source='datepf'
+    )
+    expected_date = CastingDateTimeField(
+        label=_('Due date'),
+        help_text=_('Datetime of due completion of defect'),
+        source='dateesp'
+    )
+    completion_date = CastingDateTimeField(
+        label=_('Completion date'),
+        help_text=_('Datetime of completion of defect'),
+        source='dater'
+    )
+    additional_date_1 = CastingDateTimeField(
+        label=_('Additional date 1'),
+        help_text=_('Datetime for additional date'),
+        source='date1'
+    )
+    additional_date_2 = CastingDateTimeField(
+        label=_('Additional date 2'),
+        help_text=_('Datetime for additional date'),
+        source='date2'
+    )
+    additional_date_3 = CastingDateTimeField(
+        label=_('Additional date 3'),
+        help_text=_('Datetime for additional date'),
+        source='date3'
+    )
+    status_id = serializers.IntegerField(
+        label=_('Status ID'),
+        help_text=_('Numeric ID of the status'),
+        source='actif'
+    )
+    photo = serializers.CharField(
+        label=_('Defect photo'),
+        help_text=_('Text info on the picture of the defect'),
+    )
+    photo_2 = serializers.CharField(
+        label=_('Defect photo'),
+        help_text=_('Text info on the picture of the defect'),
+        source='photo2'
+    )
+    photos = serializers.CharField(
+        label=_('Defect photos'),
+        help_text=_('Field containing information on defect photos'), # TODO: How is this field structured ?
+    )
+    location_detail_images = serializers.CharField(
+        label=_('Defect location images'),
+        help_text=_('Field containing information on defect location images'), # TODO: How is this field structured ?
+    )
+    emitter = serializers.CharField(
+        label=_('Emmiter'),
+        help_text=_('Name of the emitter'),
+        source='saisipar'
+    )
+    flags = serializers.CharField(
+        label=_('Internal flags'),
+        help_text=_('Undocumented defect flags'),
+        source=''
+    )
+    previous_description = serializers.CharField(
+        label=_('Previous description'),
+        help_text=_('Previous description of the defect'),
+        source='anctexte'
+    )
+    number = serializers.IntegerField(
+        label=_('Number'),
+        help_text=_('User defined defect number'),
+        source='idInt'
+    )
+    validation = serializers.CharField(
+        label=_('Validation text'),
+        help_text=_('Text of approval'),
+        source='pv'
+    )
+    localized_description = serializers.CharField(
+        label=_('Localized description'),
+        help_text=_('Text for a localized description'), # TODO: Localized or localisation ?
+        source='localizedDescription'
+    )
+    additional_info = serializers.CharField(
+        label=_('Additional info'),
+        help_text=_('Free text additional information'),
+        source='additionalInfos'
+    )
+    additional_values = serializers.CharField(
+        label=_('Additional values'),
+        help_text=_('How is that supposed to be structured ?'), # TODO: Identify field structure
+        source='supplementaryValues'
     )

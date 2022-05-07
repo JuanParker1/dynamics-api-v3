@@ -4,6 +4,7 @@ Control viewsets
 
 from django.http import HttpRequest
 from django.utils.translation import gettext as _
+from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.parsers import MultiPartParser
@@ -15,7 +16,7 @@ from dynamics_apis.common.services import KairnialWSServiceError
 from dynamics_apis.common.viewsets import project_parameters, PaginatedResponse, \
     pagination_parameters, PaginatedViewSet
 from dynamics_apis.defects.models import Defect
-from dynamics_apis.defects.serializers import DefectQuerySerializer, DefectSerializer
+from dynamics_apis.defects.serializers import DefectQuerySerializer, DefectSerializer, DefectCreateSerializer
 
 
 class DefectViewSet(PaginatedViewSet):
@@ -31,6 +32,7 @@ class DefectViewSet(PaginatedViewSet):
             DefectQuerySerializer,  # serializer fields are converted to parameters
         ],
         responses={200: DefectSerializer, 400: ErrorSerializer},
+        tags=['dms/defects', ],
         methods=["GET"]
     )
     def list(self, request: HttpRequest, client_id: str, project_id: str):
@@ -69,3 +71,34 @@ class DefectViewSet(PaginatedViewSet):
             })
             return Response(error.data, content_type='application/json',
                             status=status.HTTP_400_BAD_REQUEST)
+
+    @extend_schema(
+        summary=_("Create Kairnial folder"),
+        description=_("Create Kairnial"),
+        parameters=project_parameters,
+        request=DefectCreateSerializer,
+        responses={201: DefectSerializer, 400: ErrorSerializer, 404: OpenApiTypes.STR},
+        tags=['dms/defects', ],
+        methods=["POST"]
+    )
+    def create(self, request: HttpRequest, client_id: str, project_id: str):
+        """
+        Create folder
+        """
+        dcs = DefectCreateSerializer(data=request.data)
+        if not dcs.is_valid():
+            return Response(dcs.errors, content_type='application/json',
+                            status=status.HTTP_400_BAD_REQUEST)
+        defect = Defect.create(
+            client_id=client_id,
+            token=request.token,
+            user_id=request.user_id,
+            project_id=project_id,
+            serialized_data=dcs.validated_data
+        )
+        if defect:
+            serializer = DefectSerializer(defect)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(_("Defect could not be created"),
+                            status=status.HTTP_406_NOT_ACCEPTABLE)

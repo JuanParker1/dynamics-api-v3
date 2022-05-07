@@ -114,6 +114,7 @@ class ControlTemplateViewSet(PaginatedViewSet):
         description=_("List Kairnial control template attachments for one template on this project"),
         parameters=project_parameters,
         responses={200: ControlTemplateElementSerializer, 400: ErrorSerializer},
+        tags=['controls/templates', ],
         methods=["GET"]
     )
     @action(methods=["GET"], detail=True, url_path="attachments", url_name='template_attachments')

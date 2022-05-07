@@ -59,7 +59,6 @@ class KairnialFolderService(KairnialWSService):
         return self.call(
             action='addDossier',
             parameters=[folder_create_serializer],
-            use_cache=False
         )
 
     def update(self, id: int, folder_update_serializer: {}):
@@ -77,8 +76,7 @@ class KairnialFolderService(KairnialWSService):
         return self.call(
             action='updateDossier',
             parameters=[folder_update_serializer, ],
-            format='int',
-            use_cache=False
+            format='int'
         )
 
     def archive(self, id: str):
@@ -89,8 +87,7 @@ class KairnialFolderService(KairnialWSService):
         return self.call(
             action='archiveIt',
             parameters=[{'uuid': id}, ],
-            format='int',
-            use_cache=False
+            format='int'
         )
     
 
@@ -136,7 +133,6 @@ class KairnialDocumentService(KairnialWSService):
         response = self.call(
             action='prepareFileUpload',
             parameters=[prepare_file_parameters],
-            use_cache=False
         )
         us = FileUploadSerializer(data=response)
         if not us.is_valid():
@@ -234,8 +230,7 @@ class KairnialDocumentService(KairnialWSService):
         return self.call(
             action='archiveFile',
             parameters=[{'id': id}, ],
-            format='int',
-            use_cache=False
+            format='int'
         )
 
     def check_revision(self, document_search_revision_serializer, supplementary_info_serializer):
@@ -267,8 +262,7 @@ class KairnialApprovalTypeService(KairnialWSService):
         return self.call(
             action='archiveCircuitVisa',
             parameters=[{'id': id}, ],
-            format='int',
-            use_cache=False
+            format='int'
         )
 
 
