@@ -16,6 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from drf_spectacular.views import SpectacularSwaggerView, SpectacularAPIView, SpectacularRedocView
+from .authentication.views import APIKeyAuthenticationView
 from .users import urls as users_urls
 from .authentication import urls as authenticate_urls
 from .authorization import urls as authorization_urls
@@ -31,13 +32,13 @@ urlpatterns = [
     path('schema/', SpectacularAPIView.as_view(), name='schema'),
     # Optional UI:
     path('', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-    path('redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+    path('<str:client_id>/authentication/', include(authenticate_urls)),
     path('<str:client_id>/projects/', include(project_urls)),
     path(project_path + 'dms/', include(document_urls)),
     path(project_path + 'controls/', include(controls_urls)),
     path(project_path + 'defects/', include(defects_urls)),
     path(project_path + 'admin/', include(users_urls)),
     path(project_path + 'admin/', include(authorization_urls)),
-    path('authentication/', include(authenticate_urls)),
     path('graphql', include(graphql_urls)),
+    path('redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 ]

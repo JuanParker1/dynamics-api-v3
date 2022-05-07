@@ -30,6 +30,7 @@ class CastingDateField(serializers.DateTimeField):
     def to_representation(self, value):
         try:
             value = datetime.fromtimestamp(int(value)).date()
+            return value.strftime('%Y-%M-%D')
         except (TypeError, ValueError):
             pass
         return super().to_representation(value=value)

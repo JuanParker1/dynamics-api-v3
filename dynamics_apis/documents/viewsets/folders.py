@@ -32,6 +32,7 @@ class FolderViewSet(PaginatedViewSet):
             FolderQuerySerializer,  # serializer fields are converted to parameters
         ],
         responses={200: FolderSerializer, 400: ErrorSerializer},
+        tags=['dms/folders', ],
         methods=["GET"]
     )
     def list(self, request: HttpRequest, client_id: str, project_id: str):
@@ -50,6 +51,7 @@ class FolderViewSet(PaginatedViewSet):
             total, folder_list, page_offset, page_limit = Folder.paginated_list(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 project_id=project_id,
                 parent_id=parent_id,
                 page_offset=page_offset,
@@ -81,6 +83,7 @@ class FolderViewSet(PaginatedViewSet):
                              required=False, description=_("Folder numeric ID")),
         ],
         responses={200: FolderSerializer, 400: ErrorSerializer, 404: OpenApiTypes.STR},
+        tags=['dms/folders', ],
         methods=["GET"]
     )
     def retrieve(self, request: HttpRequest, client_id: str, project_id: str, pk: int):
@@ -94,6 +97,7 @@ class FolderViewSet(PaginatedViewSet):
         folder = Folder.get(
             client_id=client_id,
             token=request.token,
+            user_id=request.user_id,
             project_id=project_id,
             id=pk
         )
@@ -109,6 +113,7 @@ class FolderViewSet(PaginatedViewSet):
         parameters=project_parameters,
         request=FolderCreateSerializer,
         responses={201: FolderSerializer, 400: ErrorSerializer, 404: OpenApiTypes.STR},
+        tags=['dms/folders', ],
         methods=["POST"]
     )
     def create(self, request: HttpRequest, client_id: str, project_id: str):
@@ -122,6 +127,7 @@ class FolderViewSet(PaginatedViewSet):
         folder = Folder.create(
             client_id=client_id,
             token=request.token,
+            user_id=request.user_id,
             project_id=project_id,
             serialized_data=fcs.validated_data
         )
@@ -142,6 +148,7 @@ class FolderViewSet(PaginatedViewSet):
         ],
         request=FolderUpdateSerializer,
         responses={200: OpenApiTypes.STR, 400: ErrorSerializer, 404: OpenApiTypes.STR},
+        tags=['dms/folders', ],
         methods=["PUT"]
     )
     def update(self, request: HttpRequest, client_id: str, project_id: str, pk: int):
@@ -155,6 +162,7 @@ class FolderViewSet(PaginatedViewSet):
         updated = Folder.update(
             client_id=client_id,
             token=request.token,
+            user_id=request.user_id,
             project_id=project_id,
             id=pk,
             serialized_data=fus.validated_data
@@ -173,6 +181,7 @@ class FolderViewSet(PaginatedViewSet):
                              required=False, description=_("Folder universal ID")),
         ],
         responses={204: OpenApiTypes.STR, 400: ErrorSerializer, 404: OpenApiTypes.STR},
+        tags=['dms/folders', ],
         methods=["DELETE"]
     )
     def destroy(self, request: HttpRequest, client_id: str, project_id: str, pk: str):
@@ -186,6 +195,7 @@ class FolderViewSet(PaginatedViewSet):
         archived = Folder.archive(
             client_id=client_id,
             token=request.token,
+            user_id=request.user_id,
             project_id=project_id,
             id=pk
         )

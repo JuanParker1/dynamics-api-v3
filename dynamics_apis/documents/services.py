@@ -2,6 +2,7 @@
 Services that get and push information to Kairnial WS servers
 """
 import json
+import logging
 import time
 import uuid
 
@@ -30,12 +31,12 @@ class KairnialFolderService(KairnialWSService):
         :param parent_id: ID of the parent folder, optional
         :return:
         """
-        parameters = []
+        parameters_dict = {}
         if filters:
-            parameters = [{key: value} for key, value in filters.items()]
+            parameters_dict = {key: value for key, value in filters.items() if value}
         if parent_id:
-            parameters.append({'asyncFolderId': parent_id})
-        return self.call(action='getFlexDossiers', parameters=parameters)
+            parameters_dict['asyncFolderId'] = parent_id
+        return self.call(action='getFlexDossiers', parameters=[parameters_dict])
 
     def get(self, id: int):
         """
@@ -91,7 +92,7 @@ class KairnialFolderService(KairnialWSService):
             format='int',
             use_cache=False
         )
-
+    
 
 class KairnialDocumentService(KairnialWSService):
     """
@@ -109,19 +110,19 @@ class KairnialDocumentService(KairnialWSService):
         :param limit: number of elements to fetch
         :return:
         """
-        parameters = []
+        parameters_dict = {
+            'LIMITSKIP': offset,
+            'LIMITTAKE': limit
+        }
         if filters:
-            parameters = [{key: value} for key, value in filters.items()]
-        parameters += [
-            {'LIMITSKIP': offset},
-            {'LIMITTAKE': limit}
-        ]
-        return self.call(action='getFilesFromCat', parameters=parameters)
+            parameters_dict.update({key: value for key, value in filters.items() if value})
+        return self.call(action='getFilesFromCat', parameters=[parameters_dict])
 
     def _get_file_link(self, json_data):
         """
         Get a file link for upload
         """
+        logger = logging.getLogger("services")
         file_uuid = str(uuid.uuid4())
         prepare_file_parameters = {
             'name': json_data.get('nom'),
@@ -139,7 +140,7 @@ class KairnialDocumentService(KairnialWSService):
         )
         us = FileUploadSerializer(data=response)
         if not us.is_valid():
-            print(us.errors)
+            logger.error(us.errors)
             raise KairnialWSServiceError(
                 message='Invalid response from file upload',
                 status=0
@@ -170,6 +171,7 @@ class KairnialDocumentService(KairnialWSService):
                 message=output.get('error'),
                 status=output.get('errorCode')
             )
+        return output
 
     def get(self, id: int):
         """
@@ -177,7 +179,7 @@ class KairnialDocumentService(KairnialWSService):
         :param id: ID of the document
         :return:
         """
-        return self.call(action='getFilesFromCat', parameters=[{'id': id}])
+        return self.call(action='getFilesFromCat', parameters=[{'getSingleID': id}])
 
     def create(self, document_create_serializer: dict, content):
         """
@@ -199,6 +201,7 @@ class KairnialDocumentService(KairnialWSService):
             uuid=us.validated_data.get('uuid'),
             json_data=document_create_serializer
         )
+        return output
 
     def revise(self, document_revise_serializer: dict, content):
         """
@@ -234,6 +237,13 @@ class KairnialDocumentService(KairnialWSService):
             format='int',
             use_cache=False
         )
+
+    def check_revision(self, document_search_revision_serializer, supplementary_info_serializer):
+        """
+        Check if a document exists
+        """
+        parameters = [[document_search_revision_serializer, ], supplementary_info_serializer]
+        return self.call(action='getFilesForRevision', parameters=parameters)
 
 
 class KairnialApprovalTypeService(KairnialWSService):

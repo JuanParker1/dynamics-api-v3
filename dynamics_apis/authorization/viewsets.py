@@ -27,6 +27,7 @@ class ACLViewSet(ViewSet):
         description=_("List Kairnial platform new access rights"),
         parameters=project_parameters + [ACLQuerySerializer],
         responses={200: ACLSerializer, 400: ErrorSerializer},
+        tags=['admin/acls', ],
         methods=["GET"]
     )
     def list(self, request, client_id, project_id):
@@ -44,6 +45,7 @@ class ACLViewSet(ViewSet):
             acl_list = ACL.list(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 project_id=project_id,
                 **filters
             )
@@ -67,6 +69,7 @@ class ACLViewSet(ViewSet):
             ACLQuerySerializer
         ],
         responses={200: ACLSerializer, 400: ErrorSerializer},
+        tags=['admin/acls', ],
         methods=["GET"]
     )
     @action(methods=["GET"], detail=True, url_path="groups", url_name='acl_groups')
@@ -92,6 +95,7 @@ class ModuleViewSet(ViewSet):
         description=_("List Kairnial application modules"),
         parameters=project_parameters,
         responses={200: ModuleSerializer, 400: ErrorSerializer},
+        tags=['admin/modules', ],
         methods=["GET"]
     )
     def list(self, request, client_id, project_id):
@@ -105,6 +109,7 @@ class ModuleViewSet(ViewSet):
             module_list = Module.list(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 project_id=project_id
             )
             serializer = ModuleSerializer(module_list, many=True)
