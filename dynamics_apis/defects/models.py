@@ -56,3 +56,73 @@ class Defect(PaginatedModel):
             user_id=user_id,
             project_id=project_id)
         return ds.create(defect_create_serializer=serialized_data)
+
+    @staticmethod
+    def areas(client_id: str,
+            token: str,
+            project_id: str,
+            user_id: str = None):
+        """
+        List defect areas
+        Create a Kairnial Defect
+        :param client_id: ID of the client
+        :param token: Access token
+        :param project_id: RGOC Code of the project
+        :param user_id: ID of the user
+        :return: DefectAreaSerializer data
+        """
+        ds = KairnialDefectService(
+            client_id=client_id,
+            token=token,
+            user_id=user_id,
+            project_id=project_id)
+        areas = ds.areas()
+        print(areas)
+        return areas
+
+    @staticmethod
+    def bim_categories(client_id: str,
+              token: str,
+              project_id: str,
+              user_id: str = None):
+        """
+        List defect BIM categories
+        Create a Kairnial Defect
+        :param client_id: ID of the client
+        :param token: Access token
+        :param project_id: RGOC Code of the project
+        :param user_id: ID of the user
+        :return: DefectBIMCategorySerializer data
+        """
+        ds = KairnialDefectService(
+            client_id=client_id,
+            token=token,
+            user_id=user_id,
+            project_id=project_id)
+        categories = ds.bim_categories()
+        print(categories)
+        return categories
+
+    @staticmethod
+    def bim_levels(client_id: str,
+              token: str,
+              project_id: str,
+              user_id: str = None):
+        """
+        List defect BIM levels
+        Create a Kairnial Defect
+        :param client_id: ID of the client
+        :param token: Access token
+        :param project_id: RGOC Code of the project
+        :param user_id: ID of the user
+        :return: DefectBIMCategorySerializer data
+        """
+        ds = KairnialDefectService(
+            client_id=client_id,
+            token=token,
+            user_id=user_id,
+            project_id=project_id)
+        levels = ds.bim_levels()
+        print(levels)
+        return levels
+

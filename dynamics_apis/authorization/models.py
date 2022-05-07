@@ -20,6 +20,14 @@ class ACL:
             acl_list = [l for l in acl_list if search in f"{l['description']}|{l['acl_type']}"]
         return acl_list
 
+    @classmethod
+    def emittors(cls, client_id: str, token: str, project_id: str, user_id: str = None):
+        """
+        List allowed defect emittors
+        """
+        ka = KairnialACL(client_id=client_id, token=token, user_id=user_id, project_id=project_id)
+        return ka.list_emittors()
+
 class Module:
 
     @classmethod

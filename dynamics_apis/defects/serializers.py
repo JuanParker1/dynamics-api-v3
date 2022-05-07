@@ -456,9 +456,9 @@ class DefectCreateSerializer(serializers.Serializer):
         help_text=_('User defined defect number'),
         source='idInt'
     )
-    validation = serializers.CharField(
-        label=_('Validation text'),
-        help_text=_('Text of approval'),
+    session_id = serializers.CharField(
+        label=_('Defect input session ID'),
+        help_text=_('On site defect management session ID'),
         source='pv'
     )
     localized_description = serializers.CharField(
@@ -475,4 +475,66 @@ class DefectCreateSerializer(serializers.Serializer):
         label=_('Additional values'),
         help_text=_('How is that supposed to be structured ?'), # TODO: Identify field structure
         source='supplementaryValues'
+    )
+
+
+class DefectAreaSerializer(serializers.Serializer):
+    """
+    Serializer for an area
+    """
+    id = serializers.UUIDField(
+        label=_('Area ID'),
+        help_text=_('UUID of the area'),
+        source='uuid',
+        read_only=True
+    )
+    name = serializers.CharField(
+        label=_('Area name'),
+        help_text=_('Text name of the area'),
+        read_only=True
+    )
+    header = serializers.BooleanField(
+        label=_('Aggregated area'),
+        help_text=_('Is this area an aggregate'),
+        read_only=True
+    )
+    plan_id = serializers.UUIDField(
+        label=_('Plan ID'),
+        help_text=_('UUID of the plan'),
+        source='plan_uuid',
+        read_only=True
+    )
+    defects_count = serializers.ListSerializer(
+        label=_('Number of defects'),
+        help_text=_('List of numbers of defects'),
+        child=serializers.IntegerField(),
+        source='pins',
+        read_only = True
+    )
+
+class DefectBIMCategorySerializer(serializers.Serializer):
+    """
+    Serializer for a BIM category
+    """
+    id = serializers.UUIDField(
+        label=_('Category ID'),
+        help_text=_('UUID of the category'),
+        read_only=True
+    )
+    name = serializers.CharField(
+        label=_('Category name'),
+        help_text=_('Text name of the category'),
+        read_only=True,
+        source='label'
+    )
+
+class DefectBIMLevelSerializer(serializers.Serializer):
+    """
+    Serializer for a BIM category
+    """
+    name = serializers.CharField(
+        label=_('Level name'),
+        help_text=_('Text name of the level'),
+        read_only=True,
+        source='label'
     )

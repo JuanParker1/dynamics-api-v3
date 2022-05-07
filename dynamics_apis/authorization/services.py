@@ -21,6 +21,17 @@ class KairnialACL(KairnialWSService):
             parameters=[{}],
             use_cache=True)
 
+    def list_emittors(self) -> []:
+        """
+        List defect emittors
+        """
+        return self.call(
+            service='reserves',
+            action='getAllowedEmitters',
+            parameters=[{}],
+            use_cache=True
+        )
+
 
 class KairnialModule(KairnialWSService):
     """

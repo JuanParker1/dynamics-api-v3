@@ -62,3 +62,30 @@ class KairnialDefectService(KairnialWSService):
             parameters=[defect_create_serializer],
         )
 
+    def areas(self):
+        """
+        Get a list of areas
+        """
+        return self.call(
+            action='getAreas',
+            parameters=[]
+        )
+
+    def bim_categories(self):
+        """
+        List BIM categories on defects
+        """
+        return self.call(
+            action='getBimCategories',
+            parameters=[]
+        )
+
+    def bim_levels(self):
+        """
+        List BIM levels on defects
+        """
+        return self.call(
+            action='getBimLevels',
+            parameters=[]
+        )
+
