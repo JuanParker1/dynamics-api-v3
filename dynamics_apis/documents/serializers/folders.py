@@ -22,6 +22,11 @@ class FolderQuerySerializer(serializers.Serializer):
         required=False,
         default=False
     )
+    path = serializers.CharField(
+        label=_('Folder path'),
+        help_text=_('Filter on folders in a given path'),
+        required=False
+    )
     acl = serializers.BooleanField(
         label=_("filter on user authorizations"),
         help_text=_("Retrieve folders that have authorizations on this user"),
@@ -143,7 +148,7 @@ class FolderSerializer(serializers.Serializer):
         label=_('Folder name'),
         help_text=_('Name of folder'),
         read_only=True,
-        source='fcat_originalName'
+        source='originalName'
     )
     decorated_name = serializers.CharField(
         label=_('Decorated name'),

@@ -32,6 +32,7 @@ class ContactViewSet(ViewSet):
             ContactQuerySerializer,  # serializer fields are converted to parameters
         ],
         responses={200: ContactSerializer, 500: ErrorSerializer},
+        tags=['admin/contacts', ],
         methods=["GET"]
     )
     def list(self, request, client_id, project_id):
@@ -44,6 +45,7 @@ class ContactViewSet(ViewSet):
             contact_list = Contact.list(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 project_id=project_id,
                 filters=filters
             )
@@ -64,6 +66,7 @@ class ContactViewSet(ViewSet):
         parameters=project_parameters,
         request=ContactCreationSerializer,
         responses={201: OpenApiTypes.STR, 400: OpenApiTypes.STR, 406: OpenApiTypes.STR},
+        tags=['admin/contacts', ],
         methods=["POST"]
     )
     def create(self, request, client_id: str, project_id: str):
@@ -78,6 +81,7 @@ class ContactViewSet(ViewSet):
             created = Contact.create(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 project_id=project_id,
                 serialized_data=ccs.validated_data
             )
@@ -99,6 +103,7 @@ class ContactViewSet(ViewSet):
         ],
         request=ContactUpdateSerializer,
         responses={200: OpenApiTypes.STR, 400: OpenApiTypes.STR, 406: OpenApiTypes.STR},
+        tags=['admin/contacts', ],
         methods=["PUT"]
     )
     def update(self, request, client_id: str, project_id: str, pk: str):
@@ -114,6 +119,7 @@ class ContactViewSet(ViewSet):
             updated = Contact.update(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 project_id=project_id,
                 pk=pk,
                 serialized_data=cus.validated_data
@@ -135,6 +141,7 @@ class ContactViewSet(ViewSet):
                              description=_("Numerical ID of the contact")),
         ],
         responses={204: OpenApiTypes.STR, 400: OpenApiTypes.STR, 406: OpenApiTypes.STR},
+        tags=['admin/contacts', ],
         methods=["DELETE"]
     )
     def destroy(self, request, client_id: str, project_id: str, pk: int):
@@ -144,6 +151,7 @@ class ContactViewSet(ViewSet):
         deleted = Contact.delete(
             client_id=client_id,
             token=request.token,
+            user_id=request.user_id,
             project_id=project_id,
             pk=pk
         )

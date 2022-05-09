@@ -44,7 +44,7 @@ class ACLQuerySerializer(serializers.Serializer):
 
 class ModuleSerializer(serializers.Serializer):
     uuid = serializers.UUIDField(
-        label=_("ACL UUID"),
+        label=_("Module UUID"),
         read_only=True
     )
     route = serializers.CharField(

@@ -44,14 +44,13 @@ def get_version(app):
     try:
         fp = open(os.path.join(local_path, app, 'version.py'), 'w')
         if git_commits == -1:
-            fp.write(
-                f"api_version = [{branch}]\n")
+            fp.write(f"api_version = '{branch}'\n")
         else:
             fp.write(
-                f"api_version = [{git_tag.replace('.', ', ')}, {git_commits}, \"{suffix}\"]\n")
+                f"api_version = '{git_tag}.{git_commits}.{suffix}'\n")
         fp.close()
     except Exception:
-        print(f'ERROR opening {app}/__version__.py', os.curdir)
+        print(f'ERROR opening {app}/version.py', os.curdir)
     return version
 
 

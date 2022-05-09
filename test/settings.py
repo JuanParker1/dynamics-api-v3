@@ -11,16 +11,18 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 import os
-import string
 import random
+import string
 from pathlib import Path
 
+from django.utils.translation import gettext_lazy as _
 from dotenv import load_dotenv
 
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
@@ -29,6 +31,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 def generate_secret(nb: int = 128):
     return ''.join([random.choice(string.printable) for i in range(nb)])
+
 
 SECRET_KEY = generate_secret()
 
@@ -68,7 +71,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'dynamics_apis.common.middlewares.KairnialAuthMiddleware',
+    'dynamics_apis.authentication.middlewares.KairnialAuthMiddleware',
     'django.contrib.auth.middleware.RemoteUserMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -150,20 +153,6 @@ STATIC_ROOT = '/var/www/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-REST_FRAMEWORK = {
-    # YOUR SETTINGS
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-    'PAGE_SIZE': 100,
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
-    ),
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'dynamics_apis.authentication.authentication.KairnialTokenAuthentication',
-    ),
-
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
-}
-
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -189,40 +178,27 @@ LOGGING = {
     },
 }
 
-SPECTACULAR_SETTINGS = {
-    'TITLE': 'Kairnial API',
-    'DESCRIPTION': """
-<h1>Kairnial API version 3 - Beta</h1>
-
-<p>This API is a REST frontend to the Kairnial Web Services.</p>
-<p>To use this API, you must obtain a client ID, a user API key and an API secret from our customer support.</p>
-
-
-<h2>1. Obtain a authentication header</h2>
-To use this API, you must first <a href="#/authentication/authentication_key_create">obtain a token</a> using the authentication endpoint for this platform.
-
-
-One this token obtain, pass the token in the request header using the Authenticate header.
-e.g.: Authenticate: Bearer <Token>
-
-<h2>2. Select a project</h2>
-Use <a href="#/projects/projects_list">project list</a> to select a project.
-
-""",
-    'VERSION': '2.90.1',
-    # OTHER SETTINGS
-    "APPEND_COMPONENTS": {
-        "securitySchemes": {
-            "ApiKeyAuth": {
-                "type": "apiKey",
-                "in": "header",
-                "name": "Authentication"
-            },
-        }
-    },
-    "SECURITY": [{"ApiKeyAuth": [], 'clientID': []}],
-    "COMPONENT_SPLIT_REQUEST": True
+REST_FRAMEWORK = {
+    # YOUR SETTINGS
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 100,
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'dynamics_apis.authentication.authentication.KairnialTokenAuthentication',
+    ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
+
+
+def get_version():
+    from dynamics_apis import version
+    try:
+        return version.api_version
+    except AttributeError:
+        return "dev"
+
 
 from dynamics_apis.settings import *
 
@@ -230,7 +206,8 @@ if os.environ.get('KAIRNIAL_AUTH_PUBLIC_KEY'):
     KAIRNIAL_AUTH_PUBLIC_KEY = os.environ.get('KAIRNIAL_AUTH_PUBLIC_KEY')
 else:
     KAIRNIAL_AUTH_PUBLIC_KEY = load_key(
-        path=os.path.join(os.path.dirname(__file__), os.environ.get('KAIRNIAL_AUTH_PUBLIC_KEY_PATH', ''))
+        path=os.path.join(os.path.dirname(__file__),
+                          os.environ.get('KAIRNIAL_AUTH_PUBLIC_KEY_PATH', ''))
     )
 
 KIARNIAL_AUTH_DOMAIN = os.environ.get('KAIRNIAL_AUTH_DOMAIN', '')
@@ -239,3 +216,55 @@ KAIRNIAL_AUTH_SERVER = 'https://' + KIARNIAL_AUTH_DOMAIN
 KAIRNIAL_CROSS_SERVER = os.environ.get('KAIRNIAL_CROSS_SERVER', '')
 KAIRNIAL_WS_SERVER = os.environ.get('KAIRNIAL_WS_SERVER', '')
 KAIRNIAL_FRONT_SERVER = os.environ.get('KAIRNIAL_FRONT_SERVER', '')
+KAIRNIAL_API_SERVER = os.environ.get('KAIRNIAL_API_SERVER', '')
+CLIENT_ID_VARIABLE = 'client_id'
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Kairnial API',
+    'DESCRIPTION': """
+<h1>Kairnial bidirectional API Beta</h1>
+
+<p>This API is a REST frontend to the Kairnial Web Services.</p>
+<p>To use this API, you must obtain a client ID, a user API key and an API secret from our customer support.</p>
+
+
+<h2>1. Obtain a authentication header</h2>
+To use this API, you must first <a href="#operations-authentication-authentication_key_create">obtain a token</a> using the authentication endpoint for this platform.
+
+
+One this token obtain, pass the token in the request header using the Authenticate header.
+e.g.: Authenticate: Bearer <Token>
+
+<h2>2. Select a project</h2>
+Use <a href="#operations-projects-projects_list">project list</a> to select a project.
+
+""",
+    'VERSION': get_version(),
+    # OTHER SETTINGS
+    "COMPONENT_SPLIT_REQUEST": True,
+    "SWAGGER_UI_SETTINGS": {
+        "deepLinking": True,
+        "persistAuthorization": True,
+        "displayOperationId": True
+    },
+    "FILTER": True,
+    "PERSIST_AUTHORIZATION": True,
+    "DEEP_LINKING": True,
+    "SCHEMA_PATH_PREFIX": "/{client_id}",
+    "SCHEMA_PATH_PREFIX_TRIM": True,
+
+    "PREPROCESSING_HOOKS": [
+        'dynamics_apis.authentication.openapi.preprocess_exclude_clientless_routes'],
+    "SERVERS": [
+        {
+            'url': f'{KAIRNIAL_API_SERVER}' + '/{client_id}',
+            'description': 'Test server',
+            'variables': {
+                'client_id': {
+                    'default': os.environ.get('DEFAULT_KAIRNIAL_CLIENT_ID'),
+                    'description': _('Client ID provided by Kairnial customer service')
+                },
+            }
+        }
+    ]
+}

@@ -29,14 +29,13 @@ class KairnialControlTemplateService(KairnialWSService):
         :param limit: number of elements to fetch
         :return:
         """
-        parameters = []
+        parameters = {
+            'LIMITSKIP': offset,
+            'LIMITTAKE': limit
+        }
         if filters:
-            parameters = [{key: value} for key, value in filters.items()]
-        parameters += [
-            {'LIMITSKIP': offset},
-            {'LIMITTAKE': limit}
-        ]
-        return self.call(action='getTemplates', parameters=parameters)
+            parameters.update({key: value for key, value in filters.items() if value})
+        return self.call(action='getTemplates', parameters=[parameters])
 
     def get(self, template_uuid: str):
         """
@@ -62,14 +61,13 @@ class KairnialControlInstanceService(KairnialWSService):
         :param limit: number of elements to fetch
         :return:
         """
-        parameters = []
+        parameters = {
+            'LIMITSKIP': offset,
+            'LIMITTAKE': limit
+        }
         if filters:
-            parameters = [{key: value} for key, value in filters.items()]
-        parameters += [
-            {'LIMITSKIP': offset},
-            {'LIMITTAKE': limit}
-        ]
-        return self.call(action='getInstances', parameters=parameters)
+            parameters.update({key: value for key, value in filters.items() if value})
+        return self.call(action='getInstances', parameters=[parameters])
 
     def get(self, instance_uuid: str):
         """
@@ -94,15 +92,15 @@ class KairnialFormControlInstanceService(KairnialWSService):
         :param template_id: UUID of the template
         :return:
         """
-        parameters = []
+        parameters = {
+            'limitSkip': offset,
+            'limitTake': limit,
+            'templateArray': [template_id, ]
+        }
         if filters:
-            parameters = [{key: value} for key, value in filters.items()]
-        parameters += [
-            {'limitSkip': offset},
-            {'limitTake': limit}
-        ]
-        parameters += [{'templateArray': [template_id, ]}]
-        resp = self.call(action='getMultipleInstances', service='formControls', parameters=parameters)
+            parameters.update({key: value for key, value in filters.items() if value})
+        parameters += [{}]
+        resp = self.call(action='getMultipleInstances', service='formControls', parameters=[parameters])
         if 'error' in resp:
             return {'items': []}
         return resp
