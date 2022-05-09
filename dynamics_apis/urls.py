@@ -23,6 +23,7 @@ from .authorization import urls as authorization_urls
 from .projects import urls as project_urls
 from .documents import urls as document_urls
 from .controls import urls as controls_urls
+from .defects import urls as defects_urls
 from .graphql import urls as graphql_urls
 
 project_path = '<str:client_id>/<str:project_id>/'
@@ -35,6 +36,7 @@ urlpatterns = [
     path('<str:client_id>/projects/', include(project_urls)),
     path(project_path + 'dms/', include(document_urls)),
     path(project_path + 'controls/', include(controls_urls)),
+    path(project_path + 'defects/', include(defects_urls)),
     path(project_path + 'admin/', include(users_urls)),
     path(project_path + 'admin/', include(authorization_urls)),
     path('graphql', include(graphql_urls)),

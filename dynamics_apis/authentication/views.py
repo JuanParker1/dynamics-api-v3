@@ -12,6 +12,7 @@ from dynamics_apis.common.serializers import ErrorSerializer
 from .serializers import PasswordAuthenticationSerializer, APIKeyAuthenticationSerializer, \
     AuthResponseSerializer, ClientlessAPIKeyAuthenticationSerializer
 from .services import KairnialAuthentication, KairnialAuthenticationError
+from ..common.decorators import handle_ws_error
 
 
 class PasswordAuthenticationView(APIView):
@@ -28,6 +29,7 @@ class PasswordAuthenticationView(APIView):
         responses={200: AuthResponseSerializer, 400: ErrorSerializer},
         methods=["POST"]
     )
+    @handle_ws_error
     def post(self, request):
         serializer = PasswordAuthenticationSerializer(data=request.data)
         if serializer.is_valid():
@@ -60,6 +62,7 @@ class APIKeyAuthenticationView(APIView):
         request=APIKeyAuthenticationSerializer,
         methods=["POST"]
     )
+    @handle_ws_error
     def post(self, request):
         serializer = APIKeyAuthenticationSerializer(data=request.data)
         if serializer.is_valid():
@@ -94,6 +97,7 @@ class ClientlessAPIKeyAuthenticationView(APIView):
         request=ClientlessAPIKeyAuthenticationSerializer,
         methods=["POST"]
     )
+    @handle_ws_error
     def post(self, request, client_id):
         serializer = ClientlessAPIKeyAuthenticationSerializer(data=request.data)
         if serializer.is_valid():

@@ -26,6 +26,20 @@ class ACLSerializer(serializers.Serializer):
     )
 
 
+class TransmitterSerializer(serializers.Serializer):
+    """
+    Serializer for defect transmitters
+    """
+    id = serializers.IntegerField(
+        label=_('Transmitter ID'),
+        help_text=_('Numeric ID of the transmitter'),
+    )
+    label = serializers.CharField(
+        label=_('Transmitter label'),
+        help_text=_('Text label of the transmitter'),
+    )
+
+
 class ACLQuerySerializer(serializers.Serializer):
     """
     Serializer for ACL query parameters

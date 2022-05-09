@@ -23,7 +23,7 @@ class ControlTemplate(PaginatedModel):
             user_id: str = None
     ):
         """
-        List children folders from a parent
+        List control templates
         :param client_id: ID of the client
         :param token: Access token
         :param project_id: RGOC Code of the project
@@ -49,7 +49,7 @@ class ControlTemplateContent(PaginatedModel):
             user_id: str = None
     ):
         """
-        List children folders from a parent
+        List ccontents from a control template
         :param client_id: ID of the client
         :param token: Access token
         :param project_id: RGOC Code of the project
@@ -64,6 +64,25 @@ class ControlTemplateContent(PaginatedModel):
             except IndexError:
                 return None
         return None
+
+
+class ControlTemplateAttachment(PaginatedModel):
+    """
+    Class for control templates file attachments
+    """
+
+    @staticmethod
+    def list(
+            client_id: str,
+            token: str,
+            project_id: str,
+            template_id: str
+    ):
+        """
+        List file attachments for a template
+        """
+        kf = KairnialControlTemplateService(client_id=client_id, token=token, project_id=project_id)
+        return kf.attachments(template_id=template_id)
 
 
 class ControlInstance(PaginatedModel):
@@ -83,7 +102,7 @@ class ControlInstance(PaginatedModel):
             user_id: str = None
     ):
         """
-        List children folders from a parent
+        List control instances for a template
         :param client_id: ID of the client
         :param token: Access token
         :param project_id: RGOC Code of the project
@@ -127,7 +146,8 @@ class ControlInstance(PaginatedModel):
                         'position': key,
                         'date': value.get('date'),
                         'value': value.get('value', '')
-                    } for key, value in instance.get('content', {}).items() if key != 'additionalInfos' and key != 'settings'
+                    } for key, value in instance.get('content', {}).items() if
+                    key != 'additionalInfos' and key != 'settings'
                 ]
                 instances['items'][i]['additional_info'] = instances['items'][i]['content'].get('additionalInfos')
         return instances

@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     'dynamics_apis.projects',
     'dynamics_apis.documents',
     'dynamics_apis.controls',
+    'dynamics_apis.defects',
     'dynamics_apis.graphql',
 ]
 

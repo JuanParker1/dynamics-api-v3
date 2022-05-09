@@ -165,6 +165,27 @@ class ControlTemplateContentSerializer(serializers.Serializer):
     )
 
 
+class ControlTemplateAttachmentSerializer(serializers.Serializer):
+    """
+    Serializer for Control temlate attachment
+    """
+    # TODO: Define serializer fields
+    uuid = serializers.UUIDField(
+        label=_("Control template unique ID"),
+        help_text=_("UUID of the control template"),
+        source='notes_uuid',
+        allow_null=True,
+        read_only=True
+    )
+    id = CastingIntegerField(
+        label=_("Control template numeric ID"),
+        help_text=_("Numeric ID of the control template"),
+        source='notes_id',
+        allow_null=True,
+        read_only=True
+    )
+
+
 class ControlTemplateSerializer(serializers.Serializer):
     """
     Serializer for ControlTemplate

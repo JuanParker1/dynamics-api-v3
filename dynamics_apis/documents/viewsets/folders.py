@@ -16,6 +16,7 @@ from dynamics_apis.common.viewsets import project_parameters, PaginatedResponse,
 from ..models import Folder
 from ..serializers.folders import FolderQuerySerializer, FolderSerializer, FolderDetailSerializer, \
     FolderUpdateSerializer, FolderCreateSerializer
+from ...common.decorators import handle_ws_error
 
 
 class FolderViewSet(PaginatedViewSet):
@@ -35,6 +36,7 @@ class FolderViewSet(PaginatedViewSet):
         tags=['dms/folders', ],
         methods=["GET"]
     )
+    @handle_ws_error
     def list(self, request: HttpRequest, client_id: str, project_id: str):
         """
         List users on a projects
@@ -47,33 +49,24 @@ class FolderViewSet(PaginatedViewSet):
         fqs.is_valid()
         page_offset, page_limit = self.get_pagination(request=request)
         parent_id = request.GET.get('parent_id')
-        try:
-            total, folder_list, page_offset, page_limit = Folder.paginated_list(
-                client_id=client_id,
-                token=request.token,
-                user_id=request.user_id,
-                project_id=project_id,
-                parent_id=parent_id,
-                page_offset=page_offset,
-                page_limit=page_limit,
-                filters=fqs.validated_data
-            )
+        total, folder_list, page_offset, page_limit = Folder.paginated_list(
+            client_id=client_id,
+            token=request.token,
+            user_id=request.user_id,
+            project_id=project_id,
+            parent_id=parent_id,
+            page_offset=page_offset,
+            page_limit=page_limit,
+            filters=fqs.validated_data
+        )
 
-            serializer = FolderSerializer(folder_list, many=True)
-            return PaginatedResponse(
-                data=serializer.data,
-                total=total,
-                page_offset=page_offset,
-                page_limit=page_limit
-            )
-        except (KairnialWSServiceError, KeyError) as e:
-            error = ErrorSerializer({
-                'status': 400,
-                'code': getattr(e, 'status', 0),
-                'description': getattr(e, 'message', str(e))
-            })
-            return Response(error.data, content_type='application/json',
-                            status=status.HTTP_400_BAD_REQUEST)
+        serializer = FolderSerializer(folder_list, many=True)
+        return PaginatedResponse(
+            data=serializer.data,
+            total=total,
+            page_offset=page_offset,
+            page_limit=page_limit
+        )
 
     @extend_schema(
         summary=_("Retrieve Kairnial folder"),
@@ -86,6 +79,7 @@ class FolderViewSet(PaginatedViewSet):
         tags=['dms/folders', ],
         methods=["GET"]
     )
+    @handle_ws_error
     def retrieve(self, request: HttpRequest, client_id: str, project_id: str, pk: int):
         """
         Retrieve folder detail
@@ -116,6 +110,7 @@ class FolderViewSet(PaginatedViewSet):
         tags=['dms/folders', ],
         methods=["POST"]
     )
+    @handle_ws_error
     def create(self, request: HttpRequest, client_id: str, project_id: str):
         """
         Create folder
@@ -151,6 +146,7 @@ class FolderViewSet(PaginatedViewSet):
         tags=['dms/folders', ],
         methods=["PUT"]
     )
+    @handle_ws_error
     def update(self, request: HttpRequest, client_id: str, project_id: str, pk: int):
         """
         Update folder name and description
@@ -184,6 +180,7 @@ class FolderViewSet(PaginatedViewSet):
         tags=['dms/folders', ],
         methods=["DELETE"]
     )
+    @handle_ws_error
     def destroy(self, request: HttpRequest, client_id: str, project_id: str, pk: str):
         """
         Archive folder

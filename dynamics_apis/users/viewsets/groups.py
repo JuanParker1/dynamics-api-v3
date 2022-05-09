@@ -103,7 +103,7 @@ class GroupViewSet(ViewSet):
             serializer = GroupSerializer(group[0])
             return Response(serializer.data, content_type="application/json")
         except IndexError:
-            return Response(_("Invalid group"), status=status.HTTP_400_BAD_REQUEST)
+            return Response(_("Invalid group"), status=status.HTTP_404_NOT_FOUND)
 
     @extend_schema(
         summary=_("Create a Kairnial group"),
@@ -193,9 +193,9 @@ class GroupViewSet(ViewSet):
         request=GroupAddUserSerializer,
         responses={201: OpenApiTypes.STR, 400: OpenApiTypes.STR, 406: OpenApiTypes.STR},
         tags=['admin/groups', ],
-        methods=["POST"]
+        methods=["DELETE"]
     )
-    @action(['POST'], detail=True, url_path='users/remove', url_name="remove_users_from_group")
+    @action(['DELETE'], detail=True, url_path='users/remove', url_name="remove_users_from_group")
     def remove_users(self, request,  client_id: str, project_id: str, pk):
         """
         Remove a list of users to a group
@@ -325,9 +325,9 @@ class GroupViewSet(ViewSet):
         request=GroupAddAuthorizationSerializer,
         responses={201: OpenApiTypes.STR, 400: OpenApiTypes.STR, 406: OpenApiTypes.STR},
         tags=['admin/groups', ],
-        methods=["POST"]
+        methods=["DELETE"]
     )
-    @action(['POST'], detail=True, url_path='authorization/remove', url_name="remove_authorization_from_group")
+    @action(['DELETE'], detail=True, url_path='authorization/remove', url_name="remove_authorization_from_group")
     def remove_authorization(self, request, client_id: str, project_id: str, pk):
         """
         Remove a list of users to a group

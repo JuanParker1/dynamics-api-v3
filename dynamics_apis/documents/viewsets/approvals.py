@@ -17,6 +17,7 @@ from ..models import ApprovalType, Approval
 from ..serializers.approvals import ApprovalTypeSerializer, ApprovalSerializer, \
     ApprovalUpdateSerializer
 from ..serializers.documents import DocumentFilterSerializer
+from ...common.decorators import handle_ws_error
 
 
 class ApprovalTypeViewSet(PaginatedViewSet):
@@ -32,6 +33,7 @@ class ApprovalTypeViewSet(PaginatedViewSet):
         tags=['dms/approval types', ],
         methods=["GET"]
     )
+    @handle_ws_error
     def list(self, request: HttpRequest, client_id: str, project_id: str):
         """
         List approval types on a projects
@@ -41,8 +43,7 @@ class ApprovalTypeViewSet(PaginatedViewSet):
         :return:
         """
         page_offset, page_limit = self.get_pagination(request=request)
-        try:
-            total, approval_type_list, page_offset, page_limit = ApprovalType.paginated_list(
+        total, approval_type_list, page_offset, page_limit = ApprovalType.paginated_list(
                 client_id=client_id,
                 token=request.token,
                 user_id=request.user_id,
@@ -51,21 +52,13 @@ class ApprovalTypeViewSet(PaginatedViewSet):
                 page_limit=page_limit
             )
 
-            serializer = ApprovalTypeSerializer(approval_type_list, many=True)
-            return PaginatedResponse(
-                data=serializer.data,
-                total=total,
-                page_offset=page_offset,
-                page_limit=page_limit
-            )
-        except (KairnialWSServiceError, KeyError) as e:
-            error = ErrorSerializer({
-                'status': 400,
-                'code': getattr(e, 'status', 0),
-                'description': getattr(e, 'message', str(e))
-            })
-            return Response(error.data, content_type='application/json',
-                            status=status.HTTP_400_BAD_REQUEST)
+        serializer = ApprovalTypeSerializer(approval_type_list, many=True)
+        return PaginatedResponse(
+            data=serializer.data,
+            total=total,
+            page_offset=page_offset,
+            page_limit=page_limit
+        )
 
     @extend_schema(
         summary=_("Archive Kairnial approval type"),
@@ -78,6 +71,7 @@ class ApprovalTypeViewSet(PaginatedViewSet):
         tags=['dms/approval types', ],
         methods=["DELETE"]
     )
+    @handle_ws_error
     def destroy(self, request: HttpRequest, client_id: str, project_id: str, pk: int):
         """
         Archive document
@@ -116,6 +110,7 @@ class ApprovalViewSet(PaginatedViewSet):
         tags=['dms/approvals', ],
         methods=["GET"]
     )
+    @handle_ws_error
     def list(self, request: HttpRequest, client_id: str, project_id: str):
         """
         List approvals on a project
@@ -126,30 +121,21 @@ class ApprovalViewSet(PaginatedViewSet):
         :return:
         """
         page_offset, page_limit = self.get_pagination(request=request)
-        try:
-            total, approval_list, page_offset, page_limit = Approval.paginated_list(
-                client_id=client_id,
-                token=request.token,
-                user_id=request.user_id,
-                project_id=project_id,
-                page_offset=page_offset,
-                page_limit=page_limit
-            )
-            serializer = ApprovalSerializer(approval_list, many=True)
-            return PaginatedResponse(
-                data=serializer.data,
-                total=total,
-                page_offset=page_offset,
-                page_limit=page_limit
-            )
-        except (KairnialWSServiceError, KeyError) as e:
-            error = ErrorSerializer({
-                'status': 400,
-                'code': getattr(e, 'status', 0),
-                'description': getattr(e, 'message', str(e))
-            })
-            return Response(error.data, content_type='application/json',
-                            status=status.HTTP_400_BAD_REQUEST)
+        total, approval_list, page_offset, page_limit = Approval.paginated_list(
+            client_id=client_id,
+            token=request.token,
+            user_id=request.user_id,
+            project_id=project_id,
+            page_offset=page_offset,
+            page_limit=page_limit
+        )
+        serializer = ApprovalSerializer(approval_list, many=True)
+        return PaginatedResponse(
+            data=serializer.data,
+            total=total,
+            page_offset=page_offset,
+            page_limit=page_limit
+        )
 
     @extend_schema(
         summary=_("Retrieve approval - NOT IMPLEMENTED"),
@@ -185,6 +171,7 @@ class ApprovalViewSet(PaginatedViewSet):
         tags=['dms/approvals', ],
         methods=["PUT"]
     )
+    @handle_ws_error
     def update(self, request: HttpRequest, client_id: str, project_id: str, pk: int):
         """
         Approval update view

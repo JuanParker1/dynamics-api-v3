@@ -21,6 +21,7 @@ from ..serializers.documents import DocumentQuerySerializer, DocumentSerializer,
     DocumentCreateSerializer, DocumentReviseSerializer, DocumentSearchRevisionSerializer, \
     DocumentSearchRevisionSupplementaryArguments, DocumentRevisionSerializer, \
     DocumentSearchPathSerializer, DocumentRevisionTreeSerializer
+from ...common.decorators import handle_ws_error
 
 
 class DocumentViewSet(PaginatedViewSet, ):
@@ -41,6 +42,7 @@ class DocumentViewSet(PaginatedViewSet, ):
         tags=['dms/documents', ],
         methods=["GET"]
     )
+    @handle_ws_error
     def list(self, request: HttpRequest, client_id: str, project_id: str):
         """
         List documents on a projects
@@ -53,33 +55,24 @@ class DocumentViewSet(PaginatedViewSet, ):
         dqs.is_valid()
         page_offset, page_limit = self.get_pagination(request=request)
         parent_id = request.GET.get('parent_id')
-        try:
-            total, document_list, page_offset, page_limit = Document.paginated_list(
-                client_id=client_id,
-                token=request.token,
-                user_id=request.user_id,
-                project_id=project_id,
-                parent_id=parent_id,
-                page_offset=page_offset,
-                page_limit=page_limit,
-                filters=dqs.validated_data
-            )
+        total, document_list, page_offset, page_limit = Document.paginated_list(
+            client_id=client_id,
+            token=request.token,
+            user_id=request.user_id,
+            project_id=project_id,
+            parent_id=parent_id,
+            page_offset=page_offset,
+            page_limit=page_limit,
+            filters=dqs.validated_data
+        )
 
-            serializer = DocumentSerializer(document_list, many=True)
-            return PaginatedResponse(
-                data=serializer.data,
-                total=total,
-                page_offset=page_offset,
-                page_limit=page_limit
-            )
-        except (KairnialWSServiceError, KeyError) as e:
-            error = ErrorSerializer({
-                'status': 400,
-                'code': getattr(e, 'status', 0),
-                'description': getattr(e, 'message', str(e))
-            })
-            return Response(error.data, content_type='application/json',
-                            status=status.HTTP_400_BAD_REQUEST)
+        serializer = DocumentSerializer(document_list, many=True)
+        return PaginatedResponse(
+            data=serializer.data,
+            total=total,
+            page_offset=page_offset,
+            page_limit=page_limit
+        )
 
     @extend_schema(
         summary=_("Retrieve Kairnial document"),
@@ -92,6 +85,7 @@ class DocumentViewSet(PaginatedViewSet, ):
         tags=['dms/documents', ],
         methods=["GET"]
     )
+    @handle_ws_error
     def retrieve(self, request: HttpRequest, client_id: str, project_id: str, pk: int):
         """
         Retrieve folder detail
@@ -126,6 +120,7 @@ class DocumentViewSet(PaginatedViewSet, ):
         tags=['dms/documents',]
     )
     @action(methods=['GET'], detail=False, url_path='check_revisions', url_name='check_revisions')
+    @handle_ws_error
     def check_revisions(self, request, client_id, project_id, *args, **kwargs):
         """
         Create a new document
@@ -186,6 +181,7 @@ class DocumentViewSet(PaginatedViewSet, ):
         tags=['dms/documents', ],
         methods=["POST"]
     )
+    @handle_ws_error
     def create(self, request: HttpRequest, client_id: str, project_id: str):
         """
         Create a new document
@@ -229,6 +225,7 @@ class DocumentViewSet(PaginatedViewSet, ):
         tags=['dms/documents', ],
         methods=["PUT"]
     )
+    @handle_ws_error
     def update(self, request: HttpRequest, client_id: str, project_id: str, pk: str):
         """
         Update document information
@@ -244,23 +241,20 @@ class DocumentViewSet(PaginatedViewSet, ):
         if not dcs.is_valid():
             return Response(dcs.errors, content_type='application/json',
                             status=status.HTTP_400_BAD_REQUEST)
-        try:
-            document = Document.update(
-                parent_id=pk,
-                client_id=client_id,
-                token=request.token,
-                user_id=request.user_id,
-                project_id=project_id,
-                serialized_data=dcs.validated_data,
-                attachment=request.FILES.get('file')
-            )
-            if not document:
-                return Response("Could not fetch resulting document",
-                                status=status.HTTP_417_EXPECTATION_FAILED)
-            serializer = DocumentSerializer(document)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        except KairnialWSServiceError as e:
-            return Response(e.message, status=status.HTTP_400_BAD_REQUEST)
+        document = Document.update(
+            parent_id=pk,
+            client_id=client_id,
+            token=request.token,
+            user_id=request.user_id,
+            project_id=project_id,
+            serialized_data=dcs.validated_data,
+            attachment=request.FILES.get('file')
+        )
+        if not document:
+            return Response("Could not fetch resulting document",
+                            status=status.HTTP_417_EXPECTATION_FAILED)
+        serializer = DocumentSerializer(document)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @extend_schema(
         summary=_("Archive Kairnial document"),
@@ -273,6 +267,7 @@ class DocumentViewSet(PaginatedViewSet, ):
         tags=['dms/documents', ],
         methods=["DELETE"]
     )
+    @handle_ws_error
     def destroy(self, request: HttpRequest, client_id: str, project_id: str, pk: int):
         """
         Archive document
