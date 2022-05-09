@@ -23,6 +23,7 @@ class KairnialAuthMiddleware(object):
         # GET TOKEN
         try:
             request.token = request.META.get('HTTP_AUTHENTICATION').split()[1]
+            request.user_id = request.META.get('HTTP_USER_APP_ID')
         except (AttributeError, IndexError):
             pass
         response = self.get_response(request)

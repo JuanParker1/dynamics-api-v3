@@ -34,8 +34,10 @@ class KairnialTokenAuthentication(JWTAuthentication):
         try:
             token = request.META.get('HTTP_AUTHENTICATION').split()[1]
             if token is None:
+                logger.error('Authentication header not found')
                 return None
         except (AttributeError, IndexError):
+            logger.error('Malformed authentication header')
             return None
         try:
             payload = jwt.decode(

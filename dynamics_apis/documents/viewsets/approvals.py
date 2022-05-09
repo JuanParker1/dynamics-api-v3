@@ -29,6 +29,7 @@ class ApprovalTypeViewSet(PaginatedViewSet):
         description=_("List Kairnial approval types on this project"),
         parameters=project_parameters + pagination_parameters,
         responses={200: ApprovalTypeSerializer, 400: ErrorSerializer},
+        tags=['dms/approval types', ],
         methods=["GET"]
     )
     def list(self, request: TokenRequest, client_id: str, project_id: str):
@@ -44,6 +45,7 @@ class ApprovalTypeViewSet(PaginatedViewSet):
             total, approval_type_list, page_offset, page_limit = ApprovalType.paginated_list(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 project_id=project_id,
                 page_offset=page_offset,
                 page_limit=page_limit
@@ -73,6 +75,7 @@ class ApprovalTypeViewSet(PaginatedViewSet):
                              description=_("Approval type numeric ID")),
         ],
         responses={204: OpenApiTypes.STR, 400: ErrorSerializer, 404: OpenApiTypes.STR},
+        tags=['dms/approval types', ],
         methods=["DELETE"]
     )
     def destroy(self, request: TokenRequest, client_id: str, project_id: str, pk: int):
@@ -86,6 +89,7 @@ class ApprovalTypeViewSet(PaginatedViewSet):
         archived = ApprovalType.archive(
             client_id=client_id,
             token=request.token,
+            user_id=request.user_id,
             project_id=project_id,
             id=pk
         )
@@ -108,6 +112,7 @@ class ApprovalViewSet(PaginatedViewSet):
             DocumentFilterSerializer
         ],
         responses={200: ApprovalSerializer, 400: ErrorSerializer},
+        tags=['dms/approvals', ],
         methods=["GET"]
     )
     def list(self, request: TokenRequest, client_id: str, project_id: str):
@@ -123,13 +128,11 @@ class ApprovalViewSet(PaginatedViewSet):
             total, approval_list, page_offset, page_limit = Approval.paginated_list(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 project_id=project_id,
                 page_offset=page_offset,
                 page_limit=page_limit
             )
-
-            print(approval_list[0].keys())
-
             serializer = ApprovalSerializer(approval_list, many=True)
             return PaginatedResponse(
                 data=serializer.data,
@@ -146,6 +149,19 @@ class ApprovalViewSet(PaginatedViewSet):
             return Response(error.data, content_type=JSON_CONTENT_TYPE,
                             status=status.HTTP_400_BAD_REQUEST)
 
+
+    @extend_schema(
+        summary=_("Retrieve approval - NOT IMPLEMENTED"),
+        exclude=True,
+        description=_("Retrieve approval by ID"),
+        parameters=project_parameters + pagination_parameters + [
+            ApprovalUpdateSerializer,
+        ],
+        responses={200: OpenApiTypes.INT, 400: ErrorSerializer},
+        tags=['dms/approvals', ],
+        methods=["GET"],
+
+    )
     @staticmethod
     def retrieve(**_):
         """
@@ -162,6 +178,7 @@ class ApprovalViewSet(PaginatedViewSet):
             ApprovalUpdateSerializer,
         ],
         responses={200: OpenApiTypes.INT, 400: ErrorSerializer},
+        tags=['dms/approvals', ],
         methods=["PUT"]
     )
     def update(self, request: TokenRequest, client_id: str, project_id: str, pk: int):
@@ -175,6 +192,7 @@ class ApprovalViewSet(PaginatedViewSet):
             client_id=client_id,
             token=request.token,
             project_id=project_id,
+            user_id=request.user_id,
             document_id=aus.validated_data.get('document_id'),
             workflow_id=aus.validated_data.get('workflow_id'),
             approval_id=pk,

@@ -7,6 +7,7 @@ from django.utils.translation import gettext as _
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import status
+from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from dynamics_apis.common.serializers import ErrorSerializer
@@ -15,7 +16,8 @@ from dynamics_apis.common.viewsets import client_parameters, pagination_paramete
     PaginatedViewSet, PaginatedResponse, \
     JSON_CONTENT_TYPE
 from .models import Project
-from .serializers import ProjectSerializer, ProjectCreationSerializer, ProjectUpdateSerializer
+from .serializers import ProjectSerializer, ProjectCreationSerializer, ProjectUpdateSerializer, \
+    ProjectIntegrationSerializer
 
 
 class ProjectViewSet(PaginatedViewSet):
@@ -40,6 +42,7 @@ class ProjectViewSet(PaginatedViewSet):
             total, project_list, page_offset, page_limit = Project.paginated_list(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 search=request.GET.get('search'),
                 page_offset=page_offset,
                 page_limit=page_limit
@@ -60,15 +63,54 @@ class ProjectViewSet(PaginatedViewSet):
             return Response(error.data, content_type=JSON_CONTENT_TYPE, status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
+        summary=_("Project discovery for Thinkproject integration"),
+        description=_("Get a list of projects associated to current connected user"),
+        request=ProjectSerializer,
+        parameters=client_parameters + pagination_parameters + [
+            OpenApiParameter("search", OpenApiTypes.STR, OpenApiParameter.QUERY,
+                             description=_("Search project name containing")),
+        ],
+        responses={200: ProjectIntegrationSerializer, 400: KairnialWSServiceError},
+        methods=["GET"]
+    )
+    @action(methods=['GET', ], detail=False, url_path='discovery', url_name='discovery')
+    def discover(self, request, client_id):
+        """
+        Integrate into CIC project
+        """
+        page_offset, page_limit = self.get_pagination(request=request)
+        try:
+            total, project_list, page_offset, page_limit = Project.integration_list(
+                client_id=client_id,
+                token=request.token,
+                user_id=request.user_id,
+                search=request.GET.get('search'),
+                page_offset=page_offset,
+                page_limit=page_limit
+            )
+            serializer = ProjectIntegrationSerializer(project_list, many=True)
+            return PaginatedResponse(
+                total=total,
+                data=serializer.data,
+                page_offset=page_offset,
+                page_limit=page_limit
+            )
+        except KairnialWSServiceError as e:
+            error = ErrorSerializer({
+                'status': 400,
+                'error': e.status,
+                'description': e.message
+            })
+            return Response(error.data, content_type='application/json', status=status.HTTP_400_BAD_REQUEST)
+
+
+    @extend_schema(
         summary=_("Create a Kairnial project"),
         description=_(
-            "Create a new project for the current connected user,"
-            " give a template UUID to copy the configuration from an existing project"),
-        parameters=[
-            OpenApiParameter("client_id", OpenApiTypes.STR, OpenApiParameter.PATH,
-                             description=_("Client ID token"),
-                             default=os.environ.get('DEFAULT_KAIRNIAL_CLIENT_ID', '')),
-        ],
+            "Create a new project for the current connected user, "
+            "give a template UUID to copy the configuration "
+            "from an existing project"),
+        parameters=client_parameters,
         request=ProjectCreationSerializer,
         responses={201: OpenApiTypes.STR, 400: OpenApiTypes.STR, 406: OpenApiTypes.STR},
         methods=["POST"]
@@ -79,6 +121,7 @@ class ProjectViewSet(PaginatedViewSet):
             created = Project.create(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 serialized_project=pcs.validated_data
             )
             if created:
@@ -114,6 +157,7 @@ class ProjectViewSet(PaginatedViewSet):
             created = Project.update(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 pk=pk,
                 serialized_project=pus.validated_data
             )

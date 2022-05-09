@@ -2,9 +2,12 @@
 Project information serializers
 """
 import json
+import uuid
 
 from django.utils.translation import gettext as _
 from rest_framework import serializers
+
+from dynamics_apis.common.serializers import CastingDateField
 
 
 class ProjectInfoSerializer(serializers.Serializer):
@@ -87,6 +90,11 @@ class ProjectSerializer(serializers.Serializer):
         label=_("Name of the project"),
         help_text=_("Name of the project"),
         source='g_desc', read_only=True)
+    url = serializers.URLField(
+        label=_('Project URL'),
+        help_text=_('Frontend direct URL to the project'),
+        source='frontendURL'
+    )
     services_backend = serializers.CharField(
         label=_("Backend serving the project"),
         help_text=_(
@@ -122,13 +130,12 @@ class ProjectSerializer(serializers.Serializer):
     last_activity = serializers.DateTimeField(
         label=_("Date of last activity"),
         help_text=_("Date of last activity on the project"),
-        source='g_createdate', read_only=True,
-        format='%Y-%M-%D')
+        source='lastactivity', read_only=True, format='%Y-%M-%DT%h:%m:%s')
     creation_date = serializers.DateTimeField(
         label=_("Date of creation"),
         help_text=_("Date of project creation"),
-        source='lastactivity',
-        read_only=True, format='%Y-%M-%D:%h:%m:%s')
+        source='g_createdate', format='%Y-%M-%D',
+        read_only=True)
     project_type = serializers.CharField(
         label=_("Type of project"),
         help_text=_("Type of project from a Kairnial perspective"),
@@ -220,4 +227,96 @@ class ProjectUpdateSerializer(serializers.Serializer):
         label=_('Project type'),
         help_text=_('Type of the project'),
         required=False
+    )
+
+
+class ProjectIntegrationModuleSerializer(serializers.Serializer):
+    module_id = serializers.CharField(
+        label=_('Module ID'),
+        help_text=_('Text identifier of a module (e.g. rfiles)'),
+        source='route',
+        read_only=True
+    )
+    module_name = serializers.CharField(
+        label=_('Module name'),
+        help_text=_('Name of the module'),
+        source='title',
+        read_only=True
+    )
+    module_url = serializers.URLField(
+        label=_('Module URL'),
+        help_text=_('Module Path'),
+        read_only=True,
+        source='url'
+    )
+    module_icon = serializers.CharField(
+        label=_('Module icon'),
+        help_text=_('URL to the icon of the module'),
+        read_only=True,
+        source='icon'
+    )
+
+
+class ProjectIntegrationMetadataSerializer(serializers.Serializer):
+    project_code = serializers.CharField(
+        label=_('Project code'),
+        help_text=_('RGOC value'),
+        read_only=True
+    )
+    modules = ProjectIntegrationModuleSerializer(label=_('List of project modules'), many=True)
+
+
+class ProjectIntegrationSerializer(serializers.Serializer):
+    """
+    Serializer for CIC/Atrium integration
+    """
+    project_id = serializers.UUIDField(
+        label=_("Project identifier"),
+        help_text=_("Project UUID identifier in the product"),
+        required=True,
+        source='uuid'
+    )
+    project_name = serializers.CharField(
+        label=_('Project name'),
+        help_text=_("String representing the project name"),
+        required=True,
+        source='g_desc'
+    )
+    start_date = CastingDateField(
+        label=_('Project start date'),
+        help_text=_("ISO start date of the project"),
+        required=True,
+        source='g_createdate'
+    )
+    end_date = CastingDateField(
+        label=_('Project end date'),
+        help_text=_("ISO start date of the project"),
+        source='g_enddate',
+        allow_null=True
+    )
+    source_system = serializers.CharField(
+        label=_('Source system'),
+        help_text=_('Immutable string'),
+        default='Kairnial'
+    )
+    source_system_id = serializers.UUIDField(
+        label=_('Source system ID'),
+        help_text=_('ID of the product'),
+        default=uuid.uuid4(),
+    )
+    project_url = serializers.URLField(
+        label=_('Project URL'),
+        help_text=_('Frontend direct URL to the project'),
+        source='frontendURL'
+    )
+    cover_image_url = serializers.URLField(
+        label=_('Project image URL'),
+        help_text=_('URL to a PNG image with ratio of 2:1 and at least 600px by 300px '),
+        allow_null=True,
+        allow_blank=True
+
+    )
+    meta_data = ProjectIntegrationMetadataSerializer(
+        label=_('Project metadata'),
+        help_text=_('Additional info to integration Atrium')
     )

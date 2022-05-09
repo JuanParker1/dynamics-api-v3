@@ -33,6 +33,7 @@ default_project_example = OpenApiExample(
 
 client_parameters = [
     OpenApiParameter("client_id", OpenApiTypes.STR, OpenApiParameter.PATH,
+                     exclude=True,
                      description=_("Client ID obtain from Kairnial support"),
                      examples=[default_client_example]),
 ]

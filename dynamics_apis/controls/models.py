@@ -19,7 +19,8 @@ class ControlTemplate(PaginatedModel):
             project_id: str,
             page_offset: int,
             page_limit: int,
-            filters: dict = None
+            filters: dict = None,
+            user_id: str = None
     ):
         """
         List children folders from a parent
@@ -29,9 +30,11 @@ class ControlTemplate(PaginatedModel):
         :param filters: serialized values from a ControlTemplateQuerySerializer
         :param page_offset: # of first record
         :param page_limit: max nb of records per request
+        :param user_id: Optional User ID
+
         :return:
         """
-        kf = KairnialControlTemplateService(client_id=client_id, token=token, project_id=project_id)
+        kf = KairnialControlTemplateService(client_id=client_id, token=token, user_id=user_id, project_id=project_id)
         return kf.list(filters=filters, limit=page_limit, offset=page_offset)
 
 
@@ -45,7 +48,8 @@ class ControlTemplateContent(PaginatedModel):
             client_id: str,
             token: str,
             project_id: str,
-            template_id: str
+            template_id: str,
+            user_id: str = None
     ):
         """
         List children folders from a parent
@@ -53,10 +57,11 @@ class ControlTemplateContent(PaginatedModel):
         :param token: Access token
         :param project_id: RGOC Code of the project
         :param template_id: UUID of the template to fetch
+        :param user_id: Optional User ID
         :return:
         """
-        kf = KairnialControlTemplateService(client_id=client_id, token=token, project_id=project_id)
-        if template := kf.list(filters={'template_uuid': template_id}):
+        kf = KairnialControlTemplateService(client_id=client_id, token=token, user_id=user_id, project_id=project_id)
+        if template:=kf.list(filters={'template_uuid': template_id}):
             try:
                 return template.get('items')[0].get('content')
             except IndexError:
@@ -77,7 +82,8 @@ class ControlInstance(PaginatedModel):
             page_offset: int,
             page_limit: int,
             filters: dict = None,
-            template_id: str = None
+            template_id: str = None,
+            user_id: str = None
     ):
         """
         List children folders from a parent
@@ -88,19 +94,28 @@ class ControlInstance(PaginatedModel):
         :param template_id: UUID of the template
         :param page_offset: # of first record
         :param page_limit: max nb of records per request
+        :param user_id: Optional User ID
         :return:
         """
 
         if template_id:
-            kf = KairnialFormControlInstanceService(client_id=client_id, token=token, project_id=project_id)
+            kf = KairnialFormControlInstanceService(
+                client_id=client_id,
+                token=token,
+                user_id=user_id,
+                project_id=project_id
+            )
             instances = kf.list(template_id=template_id, filters=filters, limit=page_limit, offset=page_offset)
-            print(instances)
         else:
-            kf = KairnialControlInstanceService(client_id=client_id, token=token, project_id=project_id)
+            kf = KairnialControlInstanceService(
+                client_id=client_id,
+                token=token,
+                user_id=user_id,
+                project_id=project_id
+            )
             instances = kf.list(
                 filters=filters, limit=page_limit, offset=page_offset
             )
-            print(instances)
         for i, instance in enumerate(instances.get('items')):
             if type(instance.get('content')) == list:
                 content = [

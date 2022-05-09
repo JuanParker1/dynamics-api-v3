@@ -32,12 +32,12 @@ class KairnialFolderService(KairnialWSService):
         :param filters: key: value filters
         :return:
         """
-        parameters = []
+        parameters_dict = {}
         if filters:
-            parameters = [{key: value} for key, value in filters.items()]
+            parameters_dict = {key: value for key, value in filters.items() if value}
         if parent_id:
-            parameters.append({'asyncFolderId': parent_id})
-        return self.call(action='getFlexDossiers', parameters=parameters, use_cache=True)
+            parameters_dict['asyncFolderId'] = parent_id
+        return self.call(action='getFlexDossiers', parameters=[parameters_dict])
 
     def get(self, id: int):
         """
@@ -108,16 +108,15 @@ class KairnialDocumentService(KairnialWSService):
         :param limit: number of elements to fetch
         :return:
         """
-        parameters = []
+        parameters_dict = {
+            'LIMITSKIP': offset,
+            'LIMITTAKE': limit
+        }
         if parent_id:
-            parameters.append({'fcat_id': parent_id})
+            parameters_dict['fcat_id'] = parent_id
         if filters:
-            parameters = [{key: value} for key, value in filters.items()]
-        parameters += [
-            {'LIMITSKIP': offset},
-            {'LIMITTAKE': limit}
-        ]
-        return self.call(action='getFilesFromCat', parameters=parameters, use_cache=True)
+            parameters_dict.update({key: value for key, value in filters.items() if value})
+        return self.call(action='getFilesFromCat', parameters=[parameters_dict])
 
     def _get_file_link(self, json_data):
         """
@@ -140,7 +139,7 @@ class KairnialDocumentService(KairnialWSService):
         )
         us = FileUploadSerializer(data=response)
         if not us.is_valid():
-            logger.debug(us.errors)
+            logger.error(us.errors)
             raise KairnialWSServiceError(
                 message='Invalid response from file upload',
                 status=0
@@ -170,6 +169,7 @@ class KairnialDocumentService(KairnialWSService):
                 message=output.get('error'),
                 status=output.get('errorCode')
             )
+        return output
 
     def get(self, id: int):
         """
@@ -177,7 +177,7 @@ class KairnialDocumentService(KairnialWSService):
         :param id: ID of the document
         :return:
         """
-        return self.call(action='getFilesFromCat', parameters=[{'id': id}], use_cache=True)
+        return self.call(action='getFilesFromCat', parameters=[{'getSingleID': id}], use_cache=True)
 
     def create(self, document_create_serializer: dict, content):
         """
@@ -234,6 +234,13 @@ class KairnialDocumentService(KairnialWSService):
             parameters=[{'id': id}, ],
             out_format='int'
         )
+
+    def check_revision(self, document_search_revision_serializer, supplementary_info_serializer):
+        """
+        Check if a document exists
+        """
+        parameters = [[document_search_revision_serializer, ], supplementary_info_serializer]
+        return self.call(action='getFilesForRevision', parameters=parameters)
 
 
 class KairnialApprovalTypeService(KairnialWSService):

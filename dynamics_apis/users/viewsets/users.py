@@ -32,6 +32,7 @@ class UserViewSet(ViewSet):
             UserQuerySerializer,  # serializer fields are converted to parameters
         ],
         responses={200: UserUUIDSerializer, 500: ErrorSerializer},
+        tags=['admin/users', ],
         methods=["GET"]
     )
     def list(self, request, client_id, project_id):
@@ -67,6 +68,7 @@ class UserViewSet(ViewSet):
         description=_("Count the number of active users on the project"),
         parameters=project_parameters,
         responses={200: ProjectMemberCountSerializer, 500: ErrorSerializer},
+        tags=['admin/users', ],
         methods=["GET"]
     )
     @action(["GET"], detail=False, description=_("Count users for this project"), url_path='count', name="count_users")
@@ -82,6 +84,7 @@ class UserViewSet(ViewSet):
             user_count = User.count(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 project_id=project_id
             )
             serializer = ProjectMemberCountSerializer(user_count)
@@ -103,6 +106,7 @@ class UserViewSet(ViewSet):
                              description=_("User Unique ID")),
         ],
         responses={200: UserUUIDSerializer, 400: ErrorSerializer},
+        tags=['admin/users', ],
         methods=["GET"]
     )
     def retrieve(self, request, client_id: str, project_id: str, pk: str):
@@ -118,6 +122,7 @@ class UserViewSet(ViewSet):
             user = User.get(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 project_id=project_id,
                 pk=pk
             )
@@ -131,6 +136,7 @@ class UserViewSet(ViewSet):
         description=_("Get information on the current connected user"),
         parameters=project_parameters,
         responses={200: ProjectMemberSerializer, 400: ErrorSerializer},
+        tags=['admin/users', ],
         methods=["GET"]
     )
     @action(['GET'], detail=False, url_path='me', url_name="me")
@@ -142,6 +148,7 @@ class UserViewSet(ViewSet):
             user_list = User.list(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 project_id=project_id
             )
             for user in user_list:
@@ -172,6 +179,7 @@ class UserViewSet(ViewSet):
                              description=_("User Numeric ID")),
         ],
         responses={200: UserGroupSerializer, 400: ErrorSerializer},
+        tags=['admin/users', ],
         methods=["GET"]
     )
     @action(["GET"], detail=True, description=_("List groups for this user"), url_path='groups', name="groups")
@@ -188,6 +196,7 @@ class UserViewSet(ViewSet):
             user_groups = User.groups(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 project_id=project_id,
                 pk=pk
             )
@@ -208,6 +217,7 @@ class UserViewSet(ViewSet):
         request=UserMultiInviteSerializer,
         parameters=project_parameters,
         responses={200: [UserInviteResponseSerializer], 400: ErrorSerializer},
+        tags=['admin/users', ],
         methods=["POST"]
     )
     def create(self, request, client_id, project_id):
@@ -226,6 +236,7 @@ class UserViewSet(ViewSet):
             invites = User.invite(
                 client_id=client_id,
                 token=request.token,
+                user_id=request.user_id,
                 project_id=project_id,
                 users=user_list.validated_data.get('users')
             )
@@ -248,6 +259,7 @@ class UserViewSet(ViewSet):
                              description=_("User Unique ID")),
         ],
         responses={204: OpenApiTypes.STR, 400: ErrorSerializer},
+        tags=['admin/users', ],
         methods=["DELETE"]
     )
     def destroy(self, request, client_id: str, project_id: str, pk: str):
@@ -262,6 +274,7 @@ class UserViewSet(ViewSet):
         User.archive(
             client_id=client_id,
             token=request.token,
+            user_id=request.user_id,
             project_id=project_id,
             pk=pk
         )

@@ -4,6 +4,8 @@ Serializers for documents
 from django.utils.translation import gettext as _
 from rest_framework import serializers
 
+from dynamics_apis.common.serializers import CastingDateField
+
 
 class CustomFieldSerializer(serializers.Serializer):
     id = serializers.UUIDField(
@@ -460,7 +462,7 @@ class DocumentSerializer(serializers.Serializer):
         source='tags',
         required=False
     )
-    archive = serializers.BooleanField(
+    archived = serializers.BooleanField(
         label=_('Archived document'),
         help_text=_('Document has been archived'),
         read_only=True,
@@ -829,6 +831,297 @@ class RFieldSerializer(serializers.Serializer):
     )
 
 
+class DocumentSearchPathSerializer(serializers.Serializer):
+    """
+    Serializer for document path
+    """
+    folder_path = serializers.CharField(
+        label=_('Folder path'),
+        help_text=_('Folder path, can be created if not exists using create_folders parameter'),
+        required=False,
+        source='path'
+    )
+
+
+class DocumentSearchRevisionSerializer(serializers.Serializer):
+    """
+    Serializer to search for existing document when
+    """
+    name = serializers.CharField(
+        label=_('Document name'),
+        help_text=_('Name of the document'),
+        source='entete_nom',
+        required=True,
+    )
+    naming_convention = serializers.IntegerField(
+        label=_('Naming convention ID'),
+        help_text=_('Numeric ID of the naming convention'),
+        required=False,
+        default=0,
+        source='entete_nomenclature'
+    )
+    parent = serializers.UUIDField(
+        label=_('Main document ID'),
+        help_text=_('UUID of the parent document'),
+        required=False,
+        source='parent_uuid'
+    )
+    id = serializers.IntegerField(
+        label=_('Document numeric ID'),
+        help_text=_('Numeric ID of the document'),
+        source='item_id',
+        default=0
+    )
+
+
+class DocumentExtensionSerializer(serializers.Serializer):
+    extension = serializers.CharField(source='ext')
+    path = serializers.CharField()
+    file_id = serializers.IntegerField()
+
+
+class DocumentRevisionSerializer(serializers.Serializer):
+    """
+    Serialize result of GetFileRevision
+    """
+    group_id = serializers.UUIDField(
+        label=_('Group ID'),
+        help_text=_('UUID of the parent group'),
+        source='groupe_uuid',
+        read_only=True,
+        required=False
+    )
+    id = serializers.IntegerField(
+        label=_('Document ID'),
+        help_text=_('Document numeric ID'),
+        read_only=True,
+        source='item_id'
+    )
+    folder_id = serializers.IntegerField(
+        label=_('Folder ID'),
+        help_text=_('Folder numeric ID'),
+        read_only=True,
+        source='cat_id'
+    )
+    name = serializers.CharField(
+        label=_('Document name'),
+        help_text=_('Name of the document'),
+        read_only=True,
+        source='entete_nom'
+    )
+    extension = serializers.CharField(
+        label=_('File extension'),
+        help_text=_('Extension of the file'),
+        read_only=True,
+        source='entete_ext'
+    )
+    link_extension = serializers.CharField(
+        label=_('File extension for link'),
+        help_text=_('Extension of the file used in link'),
+        read_only=True,
+        source='entete_extForLink'
+    )
+    external_name = serializers.CharField(
+        label=_('Document name as uploaded'),
+        help_text=_('Name of the document when uploaded'),
+        source='entete_oldName',
+        read_only=True
+    )
+    type = serializers.CharField(
+        label=_('File type'),
+        help_text=_('MIME type of the file'),
+        source='files_type',
+        read_only=True
+    )
+    description = serializers.CharField(
+        label=_('Document description'),
+        help_text=_('Description of the document'),
+        read_only=True,
+        source='files_desc'
+    )
+    file_date = CastingDateField(
+        label=_('Date of file'),
+        help_text=_('Date of the upload'),
+        read_only=True,
+        source='files_date'
+    )
+    file_size = serializers.IntegerField(
+        label=_('File size'),
+        help_text=_('Size of the uploaded file'),
+        read_only=True,
+        source='files_size'
+    )
+    workflow = serializers.CharField(
+        label=_('Workflow'),
+        help_text=_('Workflow of the document'),
+        read_only=True,
+        source='circuit'
+    )
+    created_by_id = serializers.IntegerField(
+        label=_('creator numeric ID'),
+        help_text=_('Numeric ID of the creator'),
+        read_only=True,
+        source='entete_createby'
+    )
+    created_by_link_id = serializers.IntegerField(
+        label=_('creator numeric ID'),
+        help_text=_('Numeric ID of the creator'),
+        read_only=True,
+        source='entete_createbyForLink'
+    )
+    archive = serializers.BooleanField(
+        label=_('Archived document'),
+        help_text=_('Document has been archived'),
+        read_only=True,
+        source='entete_archive'
+    )
+    revision_count = serializers.IntegerField(
+        label=_('Nb of revisions'),
+        help_text=_('Number of revisions, 1 means there is only one version'),
+        read_only=True,
+        source='files_nbrev'
+    )
+    last_revision = serializers.CharField(
+        label=_('Last revision number'),
+        help_text=_('Number of the last revision'),
+        read_only=True,
+        source=_('files_lastRev')
+    )
+    version = serializers.IntegerField(
+        label=_('Version number'),
+        help_text=_('Automatic or manual version number'),
+        read_only=True,
+        source='entete_version'
+    )
+    converted = serializers.BooleanField(
+        label=_('Converted file'),
+        help_text=_('File has been converted'),
+        read_only=True,
+        source='files_converted'
+    )
+    file_id = serializers.IntegerField(
+        label=_('File ID'),
+        help_text=_('Numeric ID of the file'),
+        read_only=True,
+        source='files_id'
+    )
+    parent_id = serializers.IntegerField(
+        label=_('Parent ID'),
+        help_text=_('Numeric ID of the parent file'),
+        read_only=True,
+        source='entete_parentId'
+    )
+    created_at = serializers.CharField(
+        label=_('Date of document'),
+        help_text=_('Date of the document creation'),
+        read_only=True,
+        source='entete_createdate',
+        required=False
+    )
+    tags = serializers.ListSerializer(
+        label=_('Document tags'),
+        help_text=_('Aggregated tags applied to document'),
+        child=serializers.CharField(),
+        read_only=True,
+        required=False
+    )
+    system_tags = serializers.CharField(
+        label=_('Document system tags'),
+        help_text=_('Aggregated system tags applied to document'),
+        read_only=True,
+        required=False
+    )
+    naming_convention = serializers.IntegerField(
+        label=_('Naming convention ID'),
+        help_text=_('Numeric ID of the naming convention'),
+        required=False,
+        default=0,
+        source='entete_nomenclature'
+    )
+    approved_by = serializers.IntegerField(
+        label=_('Validator ID'),
+        help_text=_('Numeric ID of the validator'),
+        read_only=True,
+        source='files_validation_by',
+        required=False
+    )
+    approved_date = serializers.DateField(
+        label=_('Document approval date'),
+        help_text=_('Date of the document approval'),
+        read_only=True,
+        source='files_validation_date',
+        required=False
+    )
+    folder_path = serializers.CharField(
+        label=_('Folder path'),
+        help_text=_('Path of the folder'),
+        read_only=True,
+        source='fcat_chemin',
+        required=False
+    )
+    sent_date = serializers.DateField(
+        label=_('Document send date'),
+        help_text=_('Date of the document deposit'),
+        read_only=True,
+        source='files_sendDate',
+        required=False
+    )
+    stamp_info = serializers.CharField(
+        label=_('Stamp path'),
+        help_text=_('Path of the stamped file'),
+        read_only=True,
+        source='files_pathSecondary',
+        required=False
+    )
+    forecast_info = serializers.JSONField(
+        label=_('Forecast information'),
+        help_text=_('Forecast JSON data'),
+        read_only=True,
+        source='previsionalData',
+        required=False
+    )
+    contacts = serializers.CharField(
+        label=_('Contacts'),
+        help_text=_('Concatenated list of contact IDs'),
+        read_only=True,
+        source='linkedContacts',
+        required=False
+    )
+    all_extensions = DocumentExtensionSerializer(
+        many=True,
+        source='fileExtensionList',
+        read_only=True
+    )
+
+
+class DocumentRevisionTreeSerializer(DocumentRevisionSerializer):
+    revisions = DocumentRevisionSerializer(
+        label=_('document revisions'),
+        help_text=_('List of document revisions'),
+        read_only=True,
+        many=True
+    )
+
+
+class DocumentSearchRevisionSupplementaryArguments(serializers.Serializer):
+    """
+    Serializer for revision search additional arguments (folder id)
+    """
+    folder_id = serializers.IntegerField(
+        label=_('Folder ID'),
+        help_text=_('Restrict search on folder ID'),
+        source='folderRestricionId',
+        read_only=True,
+        required=False
+    )
+    is_sending = serializers.BooleanField(
+        label=_('Is sending'),
+        help_text=_('Check all files before sending'),
+        source='isSending',
+        default=True
+    )
+
+
 class DocumentCreateSerializer(serializers.Serializer):
     """
     Serializer for document creation
@@ -854,7 +1147,7 @@ class DocumentCreateSerializer(serializers.Serializer):
         label=_('Document description'),
         help_text=_('Description of the document'),
         source='desc',
-        required=True
+        required=False
     )
     external_name = serializers.CharField(
         label=_('Document name as uploaded'),
