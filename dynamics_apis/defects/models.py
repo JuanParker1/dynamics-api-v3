@@ -1,7 +1,7 @@
 """
 Kairnial defect models
 """
-
+from dynamics_apis.authorization.models import ACL
 from dynamics_apis.common.models import PaginatedModel
 from dynamics_apis.defects.services import KairnialDefectService
 
@@ -28,11 +28,20 @@ class Defect(PaginatedModel):
         :param project_id: RGOC Code of the project
         :param filters: serialized values from a DefectQuerySerializer
         :param user_id: ID of the user
+        :param page_offset: start pagination at given offset
+        :param page_limit: number of records
         :return:
         """
-        kf = KairnialDefectService(client_id=client_id, token=token, project_id=project_id, user_id=user_id)
+        transmitter = [e.get('label') for e in ACL.transmitters(
+            client_id=client_id,
+            token=token,
+            project_id=project_id,
+            user_id=user_id)]
+        if 'emetteurs' not in filters:
+            filters['emetteurs'] = transmitter
+        kf = KairnialDefectService(client_id=client_id, token=token, project_id=project_id,
+                                   user_id=user_id)
         defects = kf.list(filters=filters, limit=page_limit, offset=page_offset)
-        print(defects)
         return defects
 
     @staticmethod
@@ -46,8 +55,21 @@ class Defect(PaginatedModel):
         """
         Get a specific defect by numeric ID
         """
-        kf = KairnialDefectService(client_id=client_id, token=token, project_id=project_id, user_id=user_id)
-        return kf.get(pk)
+        kf = KairnialDefectService(client_id=client_id, token=token, project_id=project_id,
+                                   user_id=user_id)
+        results = kf.get(pk)
+        print(results)
+        try:
+            total = int(results.get('total'))
+        except ValueError:
+            total = 0
+        if total:
+            try:
+                return results.get('pins')[0]
+            except IndexError:
+                return None
+        else:
+            return None
 
     @staticmethod
     def create(
@@ -93,7 +115,6 @@ class Defect(PaginatedModel):
             user_id=user_id,
             project_id=project_id)
         areas = ds.areas()
-        print(areas)
         return areas
 
     @staticmethod
@@ -116,7 +137,6 @@ class Defect(PaginatedModel):
             user_id=user_id,
             project_id=project_id)
         categories = ds.bim_categories()
-        print(categories)
         return categories
 
     @staticmethod
@@ -139,5 +159,4 @@ class Defect(PaginatedModel):
             user_id=user_id,
             project_id=project_id)
         levels = ds.bim_levels()
-        print(levels)
         return levels

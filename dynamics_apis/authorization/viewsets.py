@@ -12,7 +12,8 @@ from rest_framework.viewsets import ViewSet
 from dynamics_apis.common.serializers import ErrorSerializer
 from dynamics_apis.common.viewsets import project_parameters
 from .models import ACL, Module
-from .serializers import ACLSerializer, ACLQuerySerializer, ModuleSerializer, EmittorSerializer
+from .serializers import ACLSerializer, ACLQuerySerializer, \
+    ModuleSerializer, TransmitterSerializer
 from ..common.decorators import handle_ws_error
 
 
@@ -77,30 +78,30 @@ class ACLViewSet(ViewSet):
         pass
 
     @extend_schema(
-        summary=_("List defect emittors"),
-        description=_("List Kairnial emittors allowed for the current user"),
+        summary=_("List defect transmitters"),
+        description=_("List Kairnial transmitters allowed for the current user"),
         parameters=project_parameters,
-        responses={200: EmittorSerializer, 400: ErrorSerializer},
+        responses={200: TransmitterSerializer, 400: ErrorSerializer},
         tags=['admin/acls', ],
         methods=["GET"]
     )
-    @action(methods=["GET"], detail=False, url_path="emittors", url_name='acl_emittors')
+    @action(methods=["GET"], detail=False, url_path="transmitters", url_name='acl_transmitters')
     @handle_ws_error
-    def list_emittors(self, request, client_id: str, project_id: str):
+    def list_transmitters(self, request, client_id: str, project_id: str):
         """
-        List defect emittors
+        List defect transmitters
         :param request:
         :param client_id: ID of the client
         :param project_id: RGOC ID of the project
         :return:
         """
-        emittor_list = ACL.emittors(
+        transmitter_list = ACL.transmitters(
             client_id=client_id,
             token=request.token,
             user_id=request.user_id,
             project_id=project_id
         )
-        serializer = EmittorSerializer(emittor_list, many=True)
+        serializer = TransmitterSerializer(transmitter_list, many=True)
         return Response(serializer.data, content_type="application/json")
 
 

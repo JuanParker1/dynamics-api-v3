@@ -25,22 +25,45 @@ class KairnialDefectService(KairnialWSService):
         :return:
         """
         parameters = {
+            'LIMITSKIP': offset,
+            'LIMITTAKE': limit,
             'limited': {
                 'lastId': offset,
                 'nbItems': limit
-            }
+            },
+            'flag': 3, # Because...
+            'giveMeC': 'true', # Pagination
+            'mainPrimaryArea': True, # show areas on plan
+            'backDays': -1, # filter on date, includes all
+            'comment': False # get comments
         }
         if filters:
             parameters.update({key: value for key, value in filters.items() if value})
-        return self.call(action='getFlexAllReserves', parameters=[parameters])
+        return self.call(action='getFlexAllReserves', parameters=[parameters],
+                         use_cache=True)
 
     def get(self, pin_id: int):
         """
         Get a defect detail
         :param pin_id: numeric pin ID
         """
-        parameters = [{'pinIds': [pin_id]}]
-        return self.call(action='getPinsByIds', parameters=parameters)
+        limit = 100
+        offset = 0
+        parameters = {
+            'LIMITSKIP': offset,
+            'LIMITTAKE': limit,
+            'limited': {
+                'lastId': offset,
+                'nbItems': limit
+            },
+            'flag': 3,  # Because...
+            'giveMeC': 'true',  # Pagination
+            'mainPrimaryArea': True,  # show areas on plan
+            'backDays': -1,  # filter on date, includes all
+            'comment': False,  # get comments
+            'uuidFilter': [pin_id, ]
+        }
+        return self.call(action='getFlexAllReserves', parameters=[parameters])
 
     def attachments(self, template_id: str):
         """
@@ -56,10 +79,12 @@ class KairnialDefectService(KairnialWSService):
         Defect creation service
         :param defect_create_serializer: serialized data from DefectCreateSerializer
         """
-        return self.call(
-            action='addReserve',
-            parameters=[defect_create_serializer],
-        )
+        return None
+        # TODO: Check data before pushing to the backend because there is no verification whatsoever
+        # return self.call(
+        #    action='addReserve',
+        #    parameters=[defect_create_serializer],
+        # )
 
     def areas(self):
         """

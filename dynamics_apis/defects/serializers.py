@@ -100,8 +100,8 @@ class DefectQuerySerializer(serializers.Serializer):
         required=False
     )
     positions = serializers.ListSerializer(
-        label=_('List of company IDs'),
-        help_text=_('List of company numeric IDs'),
+        label=_('List of positions'),
+        help_text=_('List of positions'),
         child=serializers.CharField(),
         source='entreprises',
         required=False
@@ -157,12 +157,12 @@ class DefectSerializer(serializers.Serializer):
     uuid = serializers.UUIDField(
         label=_('Defect ID'),
         help_text=_('UUID of a defect'),
+        source='guid',
         read_only=True
     )
     id = serializers.IntegerField(
         label=_('Defect Numeric ID'),
         help_text=_('Numeric ID of the defect'),
-        source='note',
         read_only=True
     )
     number = serializers.IntegerField(
@@ -197,7 +197,8 @@ class DefectSerializer(serializers.Serializer):
     )
     photo = serializers.CharField(
         label=_("Attachments"),
-        help_text=_('if no attachment is associated, value is noPhoto, otherwise it contains the number of attachments'),
+        help_text=_(
+            'if no attachment is associated, value is noPhoto, otherwise it contains the number of attachments'),
         read_only=True,
         default='noPhoto'
     )
@@ -264,13 +265,9 @@ class DefectSerializer(serializers.Serializer):
     company = serializers.CharField(
         label=_('Assigned company'),
         help_text=_('Name of the assigned company'),
-        source="entreprise"
+        source="entreprise",
+        read_only=True
     )
-    flags = serializers.CharField(
-        label=_('Defect flags'),
-        help_text=_("Cannot help here..."), # TODO: What is it for ?
-        source='falgs'
-    ) # Weird stuff
     session = serializers.CharField(
         label=_('On site session'),
         help_text=_('Visit session information'),
@@ -302,6 +299,7 @@ class DefectSerializer(serializers.Serializer):
         read_only=True
     )
 
+
 class DefectCreateSerializer(serializers.Serializer):
     """
     Serializer for defect input
@@ -309,32 +307,43 @@ class DefectCreateSerializer(serializers.Serializer):
     id = serializers.UUIDField(
         label=_('Defect universal ID'),
         help_text=_('UUID of the defect'),
-        source='guid'
+        source='guid',
+        required=False
     )
     gpc = serializers.BooleanField(
         label=_('Garantee of perfect completion'),
         help_text=_('Does this defect concern GPC'),
-        source='gpa'
+        source='gpa',
+        default=False
     )
-    coordinates = serializers.CharField( # TODO: Describe the field structure
+    coordinates = serializers.CharField(  # TODO: Describe the field structure
         label=_('Defect coordinates'),
-        help_text=_(''),
-        source='coord'
+        help_text=_('x:y style coordinates'),
+        source='coord',
+        required = True
     )
-    coordinates_2 = serializers.CharField( # TODO: Describe the field structure
+    coordinates_2 = serializers.CharField(  # TODO: Describe the field structure
         label=_('Other defect coordinates'),
-        help_text=_(''),
-        source='coord2'
+        help_text=_('optional x:y style coordinates'),
+        source='coord2',
+        default='0:0'
     )
-    coordinates_3D = serializers.CharField( # TODO: Describe the field structure
+    coordinates_3D = serializers.CharField(  # TODO: Describe the field structure
         label=_('Defect 3D coordinates'),
-        help_text=_('Defect coordinates in a 3D model'),
-        source='coord3d'
+        help_text=_('x:y:z Defect coordinates in a 3D model'),
+        source='coord3d',
+        required=False
     )
     campaign_id = serializers.IntegerField(
         label=_('Campaign ID'),
         help_text=_('Numeric ID of a campaign'),
         source='campagne'
+    )
+    company = serializers.CharField(
+        label=_('Assigned company'),
+        help_text=_('Name of the assigned company'),
+        source="entreprise",
+        required=True
     )
     input_date = CastingDateTimeField(
         label=_('Time of input'),
@@ -358,26 +367,30 @@ class DefectCreateSerializer(serializers.Serializer):
     )
     zone = serializers.CharField(
         label=_('Zone'),
-        help_text=_('Text zone of the defect'),
+        help_text=_('Text zone of the defect')
     )
     layer_id = serializers.IntegerField(
         label=_('Layer ID'),
         help_text=_('Numeric ID of the layer of the defect'),
-        source='couche'
+        source='couche',
+        required=False
     )
     model_id = serializers.IntegerField(
         label=_('Model ID'),
         help_text=_('Numeric ID of the model of the defect'),
+        required=False
     )
     bim_model_id = serializers.CharField(
         label=_('BIM Map ID'),
         help_text=_('UUID of the BIM model of the defect'),
-        source='plan_uuid'
+        source='plan_uuid',
+        required=False
     )
     description = serializers.CharField(
         label=_('Description'),
         help_text=_('Text description of the defect'),
-        source='desc'
+        source='desc',
+        required=False
     )
     end_date = CastingDateTimeField(
         label=_('End date'),
@@ -397,63 +410,75 @@ class DefectCreateSerializer(serializers.Serializer):
     completion_date = CastingDateTimeField(
         label=_('Completion date'),
         help_text=_('Datetime of completion of defect'),
-        source='dater'
+        source='dater',
+        required=False
     )
     additional_date_1 = CastingDateTimeField(
         label=_('Additional date 1'),
         help_text=_('Datetime for additional date'),
-        source='date1'
+        source='date1',
+        required=False
     )
     additional_date_2 = CastingDateTimeField(
         label=_('Additional date 2'),
         help_text=_('Datetime for additional date'),
-        source='date2'
+        source='date2',
+        required=False
     )
     additional_date_3 = CastingDateTimeField(
         label=_('Additional date 3'),
         help_text=_('Datetime for additional date'),
-        source='date3'
+        source='date3',
+        required=False
     )
     status_id = serializers.IntegerField(
         label=_('Status ID'),
         help_text=_('Numeric ID of the status'),
-        source='actif'
+        source='actif',
+        default=1
     )
     photo = serializers.CharField(
         label=_('Defect photo'),
         help_text=_('Text info on the picture of the defect'),
+        default=''
     )
     photo_2 = serializers.CharField(
         label=_('Defect photo'),
         help_text=_('Text info on the picture of the defect'),
-        source='photo2'
+        source='photo2',
+        required=False
     )
     photos = serializers.CharField(
         label=_('Defect photos'),
-        help_text=_('Field containing information on defect photos'), # TODO: How is this field structured ?
+        help_text=_('Field containing information on defect photos'),
+        required=False
     )
     location_detail_images = serializers.CharField(
         label=_('Defect location images'),
-        help_text=_('Field containing information on defect location images'), # TODO: How is this field structured ?
+        help_text=_('Field containing information on defect location images'),
+        required=False
     )
-    emitter = serializers.CharField(
-        label=_('Emmiter'),
-        help_text=_('Name of the emitter'),
+    transmitter = serializers.CharField(
+        label=_('Transmitter'),
+        help_text=_('Name of the transmitter'),
         source='saisipar'
     )
     flags = serializers.CharField(
         label=_('Internal flags'),
         help_text=_('Undocumented defect flags'),
+        default=0
     )
     previous_description = serializers.CharField(
         label=_('Previous description'),
         help_text=_('Previous description of the defect'),
-        source='anctexte'
+        source='anctexte',
+        required=False
     )
     number = serializers.IntegerField(
         label=_('Number'),
         help_text=_('User defined defect number'),
-        source='idInt'
+        source='idInt',
+        required=False
     )
     session_id = serializers.CharField(
         label=_('Defect input session ID'),
@@ -462,19 +487,23 @@ class DefectCreateSerializer(serializers.Serializer):
     )
     localized_description = serializers.CharField(
         label=_('Localized description'),
-        help_text=_('Text for a localized description'), # TODO: Localized or localisation ?
-        source='localizedDescription'
+        help_text=_('Text for a localized description'),  # TODO: Localized or localisation ?
+        source='localizedDescription',
+        required=False
     )
     additional_info = serializers.CharField(
         label=_('Additional info'),
         help_text=_('Free text additional information'),
-        source='additionalInfos'
+        source='additionalInfos',
+        required=False
     )
     additional_values = serializers.CharField(
         label=_('Additional values'),
-        help_text=_('How is that supposed to be structured ?'), # TODO: Identify field structure
-        source='supplementaryValues'
+        help_text=_('How is that supposed to be structured ?'),  # TODO: Identify field structure
+        source='supplementaryValues',
+        required=False
     )
+
 
 class DefectUpdateSerializer(serializers.Serializer):
     """
@@ -493,7 +522,6 @@ class DefectUpdateSerializer(serializers.Serializer):
         label=_('Defect description'),
         help_text=_('Defect description text'),
     )
-
 
 
 class DefectAreaSerializer(serializers.Serializer):
@@ -527,8 +555,9 @@ class DefectAreaSerializer(serializers.Serializer):
         help_text=_('List of numbers of defects'),
         child=serializers.IntegerField(),
         source='pins',
-        read_only = True
+        read_only=True
     )
+
 
 class DefectBIMCategorySerializer(serializers.Serializer):
     """
@@ -546,6 +575,7 @@ class DefectBIMCategorySerializer(serializers.Serializer):
         source='label'
     )
 
+
 class DefectBIMLevelSerializer(serializers.Serializer):
     """
     Serializer for a BIM category
@@ -556,4 +586,3 @@ class DefectBIMLevelSerializer(serializers.Serializer):
         read_only=True,
         source='label'
     )
-

@@ -5,7 +5,7 @@ Services for Kairnial Authorization services
 from dynamics_apis.common.services import KairnialWSService
 
 
-class KairnialACL(KairnialWSService):
+class KairnialACLService(KairnialWSService):
     """
     Service class for Kairnial Groups
     """
@@ -21,9 +21,9 @@ class KairnialACL(KairnialWSService):
             parameters=[{}],
             use_cache=True)
 
-    def list_emittors(self) -> []:
+    def list_transmitters(self) -> []:
         """
-        List defect emittors
+        List defect transmitters
         """
         return self.call(
             service='reserves',
@@ -33,7 +33,7 @@ class KairnialACL(KairnialWSService):
         )
 
 
-class KairnialModule(KairnialWSService):
+class KairnialModuleService(KairnialWSService):
     """
     Service class for Kairnial Groups
     """

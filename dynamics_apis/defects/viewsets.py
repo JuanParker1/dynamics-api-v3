@@ -14,18 +14,19 @@ from rest_framework.response import Response
 from dynamics_apis.common.decorators import handle_ws_error
 from dynamics_apis.common.serializers import ErrorSerializer
 # Create your views here.
-from dynamics_apis.common.viewsets import project_parameters, PaginatedResponse, \
-    pagination_parameters, PaginatedViewSet
+from dynamics_apis.common.viewsets import project_parameters, \
+    PaginatedResponse, pagination_parameters, PaginatedViewSet
 from dynamics_apis.defects.models import Defect
-from dynamics_apis.defects.serializers import DefectQuerySerializer, DefectSerializer, DefectCreateSerializer, \
-    DefectAreaSerializer, DefectBIMCategorySerializer, DefectBIMLevelSerializer, DefectUpdateSerializer
+from dynamics_apis.defects.serializers import DefectQuerySerializer, \
+    DefectSerializer, DefectCreateSerializer, \
+    DefectAreaSerializer, DefectBIMCategorySerializer, \
+    DefectBIMLevelSerializer, DefectUpdateSerializer
 
 
 class DefectViewSet(PaginatedViewSet):
     """
     A ViewSet for listing or retrieving documents.
     """
-    parser_classes = (MultiPartParser,)
 
     @extend_schema(
         summary=_("List Kairnial defects"),
@@ -34,7 +35,7 @@ class DefectViewSet(PaginatedViewSet):
             DefectQuerySerializer,  # serializer fields are converted to parameters
         ],
         responses={200: DefectSerializer, 400: ErrorSerializer},
-        tags=['dms/defects', ],
+        tags=['defects', ],
         methods=["GET"]
     )
     @handle_ws_error
@@ -55,9 +56,10 @@ class DefectViewSet(PaginatedViewSet):
             project_id=project_id,
             page_offset=page_offset,
             page_limit=page_limit,
-            filters=dqs.validated_data
+            filters=dqs.validated_data,
+            items_key='pins'
         )
-        print(defect_list)
+        print(defect_list[0].keys())
         serializer = DefectSerializer(defect_list, many=True)
         return PaginatedResponse(
             data=serializer.data,
@@ -74,11 +76,11 @@ class DefectViewSet(PaginatedViewSet):
                              description=_("Numeric ID of the defect")),
         ],
         responses={200: DefectSerializer, 400: ErrorSerializer},
-        tags=['dms/defects', ],
+        tags=['defects', ],
         methods=["GET"]
     )
     @handle_ws_error
-    def retrieve(self, request: HttpRequest, pk, client_id: str, project_id: str):
+    def retrieve(self, request: HttpRequest, pk: str, client_id: str, project_id: str):
         """
         Get Defeect by numeric ID
         """
@@ -98,8 +100,9 @@ class DefectViewSet(PaginatedViewSet):
         description=_("Create Kairnial defect"),
         parameters=project_parameters,
         request=DefectCreateSerializer,
+        exclude=True,
         responses={201: DefectSerializer, 400: ErrorSerializer, 404: OpenApiTypes.STR},
-        tags=['dms/defects', ],
+        tags=['defects', ],
         methods=["POST"]
     )
     def create(self, request: HttpRequest, client_id: str, project_id: str):
@@ -130,7 +133,7 @@ class DefectViewSet(PaginatedViewSet):
         parameters=project_parameters,
         request=DefectUpdateSerializer,
         responses={200: DefectSerializer, 400: ErrorSerializer, 404: OpenApiTypes.STR},
-        tags=['dms/defects', ],
+        tags=['defects', ],
         methods=["PATCH"]
     )
     @handle_ws_error
@@ -148,7 +151,7 @@ class DefectViewSet(PaginatedViewSet):
         description=_("List areas attached to defects"),
         parameters=project_parameters,
         responses={200: DefectAreaSerializer, 400: ErrorSerializer, 404: OpenApiTypes.STR},
-        tags=['dms/defects', ],
+        tags=['defects', ],
         methods=["GET"]
     )
     @action(methods=["GET"], detail=False, url_path="areas", url_name='defect_areas')
@@ -168,7 +171,7 @@ class DefectViewSet(PaginatedViewSet):
         description=_("List BIM categories attached to defects"),
         parameters=project_parameters,
         responses={200: DefectBIMCategorySerializer, 400: ErrorSerializer, 404: OpenApiTypes.STR},
-        tags=['dms/defects', ],
+        tags=['defects', ],
         methods=["GET"]
     )
     @action(methods=["GET"], detail=False, url_path="bim_categories", url_name='defects_bim_categories')
@@ -188,7 +191,7 @@ class DefectViewSet(PaginatedViewSet):
         description=_("List BIM levels attached to defects"),
         parameters=project_parameters,
         responses={200: DefectBIMLevelSerializer, 400: ErrorSerializer, 404: OpenApiTypes.STR},
-        tags=['dms/defects', ],
+        tags=['defects', ],
         methods=["GET"]
     )
     @action(methods=["GET"], detail=False, url_path="bim_levels", url_name='defects_bim_levels')

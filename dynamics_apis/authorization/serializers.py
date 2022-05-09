@@ -26,17 +26,17 @@ class ACLSerializer(serializers.Serializer):
     )
 
 
-class EmittorSerializer(serializers.Serializer):
+class TransmitterSerializer(serializers.Serializer):
     """
-    Serializer for defect emittors
+    Serializer for defect transmitters
     """
     id = serializers.IntegerField(
-        label=_('Emittor ID'),
-        help_text=_('Numeric ID of the emittor'),
+        label=_('Transmitter ID'),
+        help_text=_('Numeric ID of the transmitter'),
     )
     label = serializers.CharField(
-        label=_('Emittor label'),
-        help_text=_('Text label of the emittor'),
+        label=_('Transmitter label'),
+        help_text=_('Text label of the transmitter'),
     )
 
 

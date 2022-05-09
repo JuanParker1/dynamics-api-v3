@@ -16,6 +16,7 @@ class PaginatedModel:
             project_id: str = None,
             page_offset: int = 0,
             page_limit: int = 100,
+            items_key = 'items',
             **kwargs
     ):
         """
@@ -34,7 +35,7 @@ class PaginatedModel:
             )
             if response:
                 total = response.get('total', 0)
-                paginated_list = response.get('items', [])
+                paginated_list = response.get(items_key, [])
                 page_offset = response.get('LIMITSKIP', page_offset)
                 page_limit = response.get('LIMITTAKE', page_limit)
             else:

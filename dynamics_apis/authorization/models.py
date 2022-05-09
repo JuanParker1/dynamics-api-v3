@@ -1,7 +1,7 @@
 """
 Kairnial authorization models
 """
-from dynamics_apis.authorization.services import KairnialACL, KairnialModule
+from dynamics_apis.authorization.services import KairnialACLService, KairnialModuleService
 
 
 class ACL:
@@ -12,7 +12,7 @@ class ACL:
         """
         List Kairnial authorizations
         """
-        ka = KairnialACL(client_id=client_id, token=token, user_id=user_id, project_id=project_id)
+        ka = KairnialACLService(client_id=client_id, token=token, user_id=user_id, project_id=project_id)
         acl_list = ka.list().get('acls')
         if domain:
             acl_list = [l for l in acl_list if l['acl_type'].split(':')[0] == domain]
@@ -21,12 +21,12 @@ class ACL:
         return acl_list
 
     @classmethod
-    def emittors(cls, client_id: str, token: str, project_id: str, user_id: str = None):
+    def transmitters(cls, client_id: str, token: str, project_id: str, user_id: str = None):
         """
-        List allowed defect emittors
+        List allowed defect transmitterrs
         """
-        ka = KairnialACL(client_id=client_id, token=token, user_id=user_id, project_id=project_id)
-        return ka.list_emittors()
+        ka = KairnialACLService(client_id=client_id, token=token, user_id=user_id, project_id=project_id)
+        return ka.list_transmitters()
 
 class Module:
 
@@ -35,7 +35,7 @@ class Module:
         """
         List Kairnial authorizations
         """
-        km = KairnialModule(
+        km = KairnialModuleService(
             client_id=client_id,
             token=token,
             user_id=user_id,
