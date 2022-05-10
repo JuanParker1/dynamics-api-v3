@@ -838,7 +838,7 @@ class DocumentSearchPathSerializer(serializers.Serializer):
     folder_path = serializers.CharField(
         label=_('Folder path'),
         help_text=_('Folder path, can be created if not exists using create_folders parameter'),
-        required=False,
+        required=True,
         source='path'
     )
 
