@@ -30,7 +30,7 @@ class KairnialAuthMiddleware(object):
         return response
 
     @staticmethod
-    def process_view(request, view_kwargs, **kwargs):
+    def process_view(request, view_func, view_args, view_kwargs):
         client_id = view_kwargs.get('client_id', None)
         if client_id:
             request.client_id = client_id
