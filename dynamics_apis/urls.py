@@ -13,18 +13,17 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
 from django.urls import path, include
 from drf_spectacular.views import SpectacularSwaggerView, SpectacularAPIView, SpectacularRedocView
-from .authentication.views import APIKeyAuthenticationView
-from .users import urls as users_urls
+
 from .authentication import urls as authenticate_urls
 from .authorization import urls as authorization_urls
-from .projects import urls as project_urls
-from .documents import urls as document_urls
 from .controls import urls as controls_urls
 from .defects import urls as defects_urls
+from .documents import urls as document_urls
 from .graphql import urls as graphql_urls
+from .projects import urls as project_urls
+from .users import urls as users_urls
 
 project_path = '<str:client_id>/<str:project_id>/'
 

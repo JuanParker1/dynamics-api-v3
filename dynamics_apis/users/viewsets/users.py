@@ -1,7 +1,6 @@
 """
 REST API views for Kairnial users
 """
-import os
 
 from django.utils.translation import gettext as _
 from drf_spectacular.types import OpenApiTypes
@@ -11,14 +10,14 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 
-from dynamics_apis.common.viewsets import project_parameters
 from dynamics_apis.common.serializers import ErrorSerializer
-from dynamics_apis.users.models.users import User, UserNotFound
-from dynamics_apis.users.serializers.users import UserSerializer, UserCreationSerializer, UserQuerySerializer, \
-    ProjectMemberSerializer, ProjectMemberCountSerializer, UserGroupSerializer, UserInviteSerializer, \
-    UserInviteResponseSerializer, UserMultiInviteSerializer, UserMultiInviteResponseSerializer, UserUUIDSerializer
 # Create your views here.
 from dynamics_apis.common.services import KairnialWSServiceError
+from dynamics_apis.common.viewsets import project_parameters, JSON_CONTENT_TYPE
+from dynamics_apis.users.models.users import User, UserNotFound
+from dynamics_apis.users.serializers.users import UserQuerySerializer, \
+    ProjectMemberSerializer, ProjectMemberCountSerializer, UserGroupSerializer, UserInviteResponseSerializer, \
+    UserMultiInviteSerializer, UserUUIDSerializer
 
 
 class UserViewSet(ViewSet):
@@ -61,7 +60,7 @@ class UserViewSet(ViewSet):
                 'code': getattr(e, 'status', 0),
                 'description': getattr(e, 'message', str(e))
             })
-            return Response(error.data, content_type='application/json',
+            return Response(error.data, content_type=JSON_CONTENT_TYPE,
                             status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
@@ -96,7 +95,7 @@ class UserViewSet(ViewSet):
                 'code': getattr(e, 'status', 0),
                 'description': getattr(e, 'message', str(e))
             })
-            return Response(error.data, content_type='application/json',
+            return Response(error.data, content_type=JSON_CONTENT_TYPE,
                             status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
@@ -132,7 +131,6 @@ class UserViewSet(ViewSet):
         except UserNotFound:
             return Response(_("User not found"), status=status.HTTP_404_NOT_FOUND)
 
-
     @extend_schema(
         summary=_("Retrieve current Kairnial user"),
         description=_("Get information on the current connected user"),
@@ -162,7 +160,7 @@ class UserViewSet(ViewSet):
                 'code': 0,
                 'description': _("User not found")
             })
-            return Response(error.data, content_type='application/json',
+            return Response(error.data, content_type=JSON_CONTENT_TYPE,
                             status=status.HTTP_404_NOT_FOUND)
         except (KairnialWSServiceError, KeyError, AttributeError) as e:
             error = ErrorSerializer({
@@ -170,9 +168,8 @@ class UserViewSet(ViewSet):
                 'code': getattr(e, 'status', 0),
                 'description': getattr(e, 'message', str(e))
             })
-            return Response(error.data, content_type='application/json',
+            return Response(error.data, content_type=JSON_CONTENT_TYPE,
                             status=status.HTTP_400_BAD_REQUEST)
-
 
     @extend_schema(
         summary=_("List Kairnial user groups"),
@@ -211,7 +208,7 @@ class UserViewSet(ViewSet):
                 'code': getattr(e, 'status', 0),
                 'description': getattr(e, 'message', str(e))
             })
-            return Response(error.data, content_type='application/json',
+            return Response(error.data, content_type=JSON_CONTENT_TYPE,
                             status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
@@ -233,7 +230,7 @@ class UserViewSet(ViewSet):
         """
         user_list = UserMultiInviteSerializer(data=request.data)
         if not user_list.is_valid():
-            return Response(user_list.errors, content_type='application/json',
+            return Response(user_list.errors, content_type=JSON_CONTENT_TYPE,
                             status=status.HTTP_400_BAD_REQUEST)
         try:
             invites = User.invite(
@@ -251,7 +248,7 @@ class UserViewSet(ViewSet):
                 'code': getattr(e, 'status', 0),
                 'description': getattr(e, 'message', str(e))
             })
-            return Response(error.data, content_type='application/json',
+            return Response(error.data, content_type=JSON_CONTENT_TYPE,
                             status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
@@ -274,7 +271,7 @@ class UserViewSet(ViewSet):
         :param pk: User UUID
         :return:
         """
-        archived = User.archive(
+        User.archive(
             client_id=client_id,
             token=request.token,
             user_id=request.user_id,

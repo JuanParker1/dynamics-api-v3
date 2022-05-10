@@ -10,7 +10,9 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from dynamics_apis.common.services import KairnialWSServiceError
-from dynamics_apis.common.viewsets import client_parameters, pagination_parameters, PaginatedViewSet, PaginatedResponse
+from dynamics_apis.common.viewsets import client_parameters, pagination_parameters, \
+    PaginatedViewSet, PaginatedResponse, \
+    JSON_CONTENT_TYPE
 from .models import Project
 from .serializers import ProjectSerializer, ProjectCreationSerializer, ProjectUpdateSerializer, \
     ProjectIntegrationSerializer
@@ -27,7 +29,7 @@ class ProjectViewSet(PaginatedViewSet):
         description=_("Get a list of projects associated to current connected user"),
         request=ProjectSerializer,
         parameters=client_parameters + pagination_parameters + [
-            OpenApiParameter("search", OpenApiTypes.STR, OpenApiParameter.QUERY,
+            OpenApiParameter("search", OpenApiTypes.STR,
                              description=_("Search project name containing")),
         ],
         responses={200: ProjectSerializer, 400: KairnialWSServiceError},
@@ -51,6 +53,7 @@ class ProjectViewSet(PaginatedViewSet):
             page_offset=page_offset,
             page_limit=page_limit
         )
+
 
     @extend_schema(
         summary=_("Project discovery for Thinkproject integration"),
@@ -89,7 +92,9 @@ class ProjectViewSet(PaginatedViewSet):
     @extend_schema(
         summary=_("Create a Kairnial project"),
         description=_(
-            "Create a new project for the current connected user, give a template UUID to copy the configuration from an existing project"),
+            "Create a new project for the current connected user, "
+            "give a template UUID to copy the configuration "
+            "from an existing project"),
         parameters=client_parameters,
         request=ProjectCreationSerializer,
         responses={201: OpenApiTypes.STR, 400: OpenApiTypes.STR, 406: OpenApiTypes.STR},
@@ -111,7 +116,7 @@ class ProjectViewSet(PaginatedViewSet):
                 return Response(_("Project could not be created"),
                                 status=status.HTTP_406_NOT_ACCEPTABLE)
         else:
-            return Response(pcs.errors, content_type='application/json',
+            return Response(pcs.errors, content_type=JSON_CONTENT_TYPE,
                             status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
@@ -149,5 +154,5 @@ class ProjectViewSet(PaginatedViewSet):
                 return Response(_("Project could not be updated"),
                                 status=status.HTTP_406_NOT_ACCEPTABLE)
         else:
-            return Response(pus.errors, content_type='application/json',
+            return Response(pus.errors, content_type=JSON_CONTENT_TYPE,
                             status=status.HTTP_400_BAD_REQUEST)

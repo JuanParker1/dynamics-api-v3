@@ -9,8 +9,13 @@ class Contact:
     """
     Kairnial contact class
     """
+
     @staticmethod
-    def list(client_id: str, token: str, project_id: str, filters: dict = None, user_id: str = None) -> []:
+    def list(client_id: str,
+             token: str,
+             project_id: str,
+             filters: dict = None,
+             user_id: str = None) -> []:
         """
         Get a list of contacts for a project
         :param client_id: ClientID Token
@@ -21,7 +26,11 @@ class Contact:
         :return:
         """
         parameters = [{key: value} for key, value in filters.items()]
-        kc = KairnialContact(client_id=client_id, token=token, user_id=user_id, project_id=project_id)
+        kc = KairnialContact(
+            client_id=client_id,
+            token=token,
+            user_id=user_id,
+            project_id=project_id)
         contacts = kc.list(parameters=parameters)
         if contacts:
             return contacts.get('items')

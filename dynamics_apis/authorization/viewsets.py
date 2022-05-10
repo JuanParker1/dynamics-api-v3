@@ -10,7 +10,9 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 
 from dynamics_apis.common.serializers import ErrorSerializer
-from dynamics_apis.common.viewsets import project_parameters
+
+from dynamics_apis.common.services import KairnialWSServiceError
+from dynamics_apis.common.viewsets import project_parameters, JSON_CONTENT_TYPE
 from .models import ACL, Module
 from .serializers import ACLSerializer, ACLQuerySerializer, \
     ModuleSerializer, TransmitterSerializer
@@ -50,7 +52,7 @@ class ACLViewSet(ViewSet):
             **filters
         )
         serializer = ACLSerializer(acl_list, many=True)
-        return Response(serializer.data, content_type="application/json")
+        return Response(serializer.data, content_type=JSON_CONTENT_TYPE)
 
     @extend_schema(
         summary=_("List groups with authorization"),
@@ -102,7 +104,7 @@ class ACLViewSet(ViewSet):
             project_id=project_id
         )
         serializer = TransmitterSerializer(transmitter_list, many=True)
-        return Response(serializer.data, content_type="application/json")
+        return Response(serializer.data, content_type=JSON_CONTENT_TYPE)
 
 
 class ModuleViewSet(ViewSet):
@@ -133,4 +135,4 @@ class ModuleViewSet(ViewSet):
             project_id=project_id
         )
         serializer = ModuleSerializer(module_list, many=True)
-        return Response(serializer.data, content_type="application/json")
+        return Response(serializer.data, content_type=JSON_CONTENT_TYPE)

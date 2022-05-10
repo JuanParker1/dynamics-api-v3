@@ -15,12 +15,12 @@ from dynamics_apis.common.serializers import ErrorSerializer
 # Create your views here.
 from dynamics_apis.common.services import KairnialWSServiceError
 from dynamics_apis.common.viewsets import project_parameters, PaginatedResponse, \
-    pagination_parameters, PaginatedViewSet
+    pagination_parameters, PaginatedViewSet, JSON_CONTENT_TYPE, TokenRequest
 from ..models import Document, Folder
 from ..serializers.documents import DocumentQuerySerializer, DocumentSerializer, \
     DocumentCreateSerializer, DocumentReviseSerializer, DocumentSearchRevisionSerializer, \
-    DocumentSearchRevisionSupplementaryArguments, DocumentRevisionSerializer, \
-    DocumentSearchPathSerializer, DocumentRevisionTreeSerializer
+    DocumentSearchRevisionSupplementaryArguments, DocumentSearchPathSerializer, \
+    DocumentRevisionTreeSerializer
 from ...common.decorators import handle_ws_error
 
 
@@ -35,7 +35,7 @@ class DocumentViewSet(PaginatedViewSet, ):
         description=_("List Kairnial documents on this project"),
         parameters=project_parameters + pagination_parameters + [
             OpenApiParameter(name='parent_id', type=OpenApiTypes.STR, location='query',
-                             required=False, description=_("Parent folder ID")),
+                             description=_("Parent folder ID")),
             DocumentQuerySerializer,  # serializer fields are converted to parameters
         ],
         responses={200: DocumentSerializer, 400: ErrorSerializer},
@@ -79,14 +79,14 @@ class DocumentViewSet(PaginatedViewSet, ):
         description=_("Retrieve Kairnial document by ID"),
         parameters=project_parameters + [
             OpenApiParameter(name='id', type=OpenApiTypes.INT, location='path',
-                             required=False, description=_("Folder numeric ID")),
+                             description=_("Folder numeric ID")),
         ],
         responses={200: DocumentSerializer, 400: ErrorSerializer, 404: OpenApiTypes.STR},
         tags=['dms/documents', ],
         methods=["GET"]
     )
     @handle_ws_error
-    def retrieve(self, request: HttpRequest, client_id: str, project_id: str, pk: int):
+    def retrieve(self, request: TokenRequest, client_id: str, project_id: str, pk: int):
         """
         Retrieve folder detail
         :param request: HttpRequest
@@ -103,7 +103,8 @@ class DocumentViewSet(PaginatedViewSet, ):
         )
         if document:
             serializer = DocumentSerializer(document)
-            return Response(data=serializer.data, content_type='application/json', status=status.HTTP_200_OK)
+            return Response(data=serializer.data, content_type=JSON_CONTENT_TYPE,
+                            status=status.HTTP_200_OK)
         else:
             return Response(_("Document not found"), status=status.HTTP_404_NOT_FOUND)
 
@@ -115,9 +116,10 @@ class DocumentViewSet(PaginatedViewSet, ):
             DocumentSearchRevisionSerializer,
             DocumentSearchRevisionSupplementaryArguments
         ],
-        responses={200: DocumentRevisionTreeSerializer, 400: ErrorSerializer, 404: OpenApiTypes.STR},
+        responses={200: DocumentRevisionTreeSerializer, 400: ErrorSerializer,
+                   404: OpenApiTypes.STR},
         methods=["GET"],
-        tags=['dms/documents',]
+        tags=['dms/documents', ]
     )
     @action(methods=['GET'], detail=False, url_path='check_revisions', url_name='check_revisions')
     @handle_ws_error
@@ -141,7 +143,8 @@ class DocumentViewSet(PaginatedViewSet, ):
                 errors.update(dss.errors)
             except AssertionError:
                 pass
-            return Response(errors, content_type="application/json", status=status.HTTP_400_BAD_REQUEST)
+            return Response(errors, content_type="application/json",
+                            status=status.HTTP_400_BAD_REQUEST)
         folder_list = Folder.list(
             client_id=client_id,
             token=request.token,
@@ -195,7 +198,7 @@ class DocumentViewSet(PaginatedViewSet, ):
         data.update(request.FILES)
         dcs = DocumentCreateSerializer(data=data)
         if not dcs.is_valid():
-            return Response(dcs.errors, content_type='application/json',
+            return Response(dcs.errors, content_type=JSON_CONTENT_TYPE,
                             status=status.HTTP_400_BAD_REQUEST)
         try:
             document = Document.create(
@@ -204,7 +207,7 @@ class DocumentViewSet(PaginatedViewSet, ):
                 user_id=request.user_id,
                 project_id=project_id,
                 serialized_data=dcs.validated_data,
-                attachment=request.FILES.get('file')
+                attachment=request.FILES.get(key='file')
             )
             if not document:
                 return Response("Could not fetch resulting document",
@@ -219,7 +222,7 @@ class DocumentViewSet(PaginatedViewSet, ):
         description=_("Revise Kairnial document"),
         parameters=project_parameters,
         request=DocumentReviseSerializer,
-        responses={201: DocumentSerializer,
+        responses={200: DocumentSerializer,
                    400: ErrorSerializer,
                    404: OpenApiTypes.STR,
                    417: OpenApiTypes.STR},
@@ -240,7 +243,7 @@ class DocumentViewSet(PaginatedViewSet, ):
         data.update(request.FILES)
         dcs = DocumentCreateSerializer(data=data)
         if not dcs.is_valid():
-            return Response(dcs.errors, content_type='application/json',
+            return Response(dcs.errors, content_type=JSON_CONTENT_TYPE,
                             status=status.HTTP_400_BAD_REQUEST)
         document = Document.update(
             parent_id=pk,
@@ -255,14 +258,14 @@ class DocumentViewSet(PaginatedViewSet, ):
             return Response("Could not fetch resulting document",
                             status=status.HTTP_417_EXPECTATION_FAILED)
         serializer = DocumentSerializer(document)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @extend_schema(
         summary=_("Archive Kairnial document"),
         description=_("Archive Kairnial document by ID"),
         parameters=project_parameters + [
             OpenApiParameter(name='id', type=OpenApiTypes.INT, location='path',
-                             required=False, description=_("Document numeric ID")),
+                             description=_("Document numeric ID")),
         ],
         responses={204: OpenApiTypes.STR, 400: ErrorSerializer, 404: OpenApiTypes.STR},
         tags=['dms/documents', ],

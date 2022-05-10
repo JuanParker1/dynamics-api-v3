@@ -7,7 +7,7 @@ from dynamics_apis.projects.serializers import ProjectSerializer
 from dynamics_apis.users.models.contacts import Contact
 from dynamics_apis.users.models.groups import Group
 from dynamics_apis.users.models.users import User
-from dynamics_apis.users.serializers.contacts import ContactSerializer, ContactQuerySerializer
+from dynamics_apis.users.serializers.contacts import ContactSerializer
 from dynamics_apis.users.serializers.groups import GroupSerializer
 from dynamics_apis.users.serializers.users import ProjectMemberSerializer
 

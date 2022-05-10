@@ -22,12 +22,14 @@ class Project(PaginatedModel):
              page_offset: int,
              page_limit: int,
              user_id: str = None,
-             **kwargs) -> []:
+             **_) -> []:
         """
         Get a list of projects
         :param client_id: ClientID Token
         :param token: Access token
         :param search: Search on project name
+        :param page_offset: # of first record
+        :param page_limit: max nb of records per request
         :param user_id: Optional ID of the user
         :return:
         """

@@ -18,7 +18,6 @@ class KairnialACLService(KairnialWSService):
         """
         return self.call(
             action='getAclGrants',
-            parameters=[{}],
             use_cache=True)
 
     def list_transmitters(self) -> []:
@@ -46,5 +45,4 @@ class KairnialModuleService(KairnialWSService):
         """
         return self.call(
             action='getModules',
-            parameters=[{}],
             use_cache=True)

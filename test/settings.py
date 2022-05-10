@@ -18,6 +18,11 @@ from pathlib import Path
 from django.utils.translation import gettext_lazy as _
 from dotenv import load_dotenv
 
+from dynamics_apis.settings import \
+    KAIRNIAL_PROJECT_ENVIRONMENTS, \
+    KIARNIAL_AUTHENTICATION_SCOPES, \
+    load_key
+
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -30,7 +35,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 
 def generate_secret(nb: int = 128):
-    return ''.join([random.choice(string.printable) for i in range(nb)])
+    return ''.join([random.choice(string.printable) for _ in range(nb)])
+
 
 
 SECRET_KEY = generate_secret()

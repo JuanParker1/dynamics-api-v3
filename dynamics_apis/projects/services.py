@@ -11,6 +11,7 @@ from django.core.cache import cache
 from django.utils.translation import gettext as _
 
 from dynamics_apis.common.services import KairnialWSServiceError, KairnialCrossService
+from dynamics_apis.common.viewsets import JSON_CONTENT_TYPE
 
 PROJECT_LIST_PATH = '/api/v2/projects'
 PROJECT_CREATION_PATH = '/adminEC'
@@ -47,7 +48,7 @@ class KairnialProject(KairnialCrossService):
         if search:
             data['SEARCH'] = search
         headers = {
-            'Content-type': 'application/json',
+            'Content-type': JSON_CONTENT_TYPE,
             'Authorization': f'{self.token_type} {self.token}'
         }
         if self.user_id:
@@ -80,19 +81,18 @@ class KairnialProject(KairnialCrossService):
         """
         return self.call(
             action='adminEC.registerProject',
-            parameters=[serialized_project],
-            use_cache=False
+            parameters=[serialized_project]
         )
 
     def update(self, pk, serialized_update_project):
         """
         Update un existing project
         :param serialized_update_project: ProjectUpdateSerializer validated_date
+        :param pk: ID of the project
         :return:
         """
         serialized_update_project['g_nom'] = pk
         return self.call(
             action='adminEC.updateProjectInfos',
-            parameters=[serialized_update_project],
-            use_cache=False
+            parameters=[serialized_update_project]
         )

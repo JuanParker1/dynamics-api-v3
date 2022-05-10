@@ -25,11 +25,13 @@ class Group:
              client_id: str,
              token: str,
              project_id: str,
-             filters: dict = {},
+             filters: dict = None,
              user_id: str = None) -> []:
         """
         Get a filtered list of groups from web services
         """
+        if not filters:
+            filters = {}
         kg = KairnialGroup(
             client_id=client_id,
             token=token,
@@ -130,7 +132,6 @@ class Group:
             project_id=project_id)
         return kg.list_authorizations(group_id=pk)
 
-
     @staticmethod
     def add_authorizations(
             client_id: str,
@@ -178,4 +179,3 @@ class Group:
             user_id=user_id,
             project_id=project_id)
         return kg.remove_authorizations(group_id=pk, authorizations=authorizations)
-

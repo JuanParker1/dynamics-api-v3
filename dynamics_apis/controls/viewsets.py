@@ -2,7 +2,6 @@
 Control viewsets
 """
 
-from django.http import HttpRequest
 from django.utils.translation import gettext as _
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema, OpenApiParameter
@@ -13,8 +12,9 @@ from rest_framework.response import Response
 from dynamics_apis.common.serializers import ErrorSerializer
 # Create your views here.
 from dynamics_apis.common.viewsets import project_parameters, PaginatedResponse, \
-    pagination_parameters, PaginatedViewSet
-from .models import ControlTemplate, ControlInstance, ControlTemplateContent, ControlTemplateAttachment
+    pagination_parameters, PaginatedViewSet, JSON_CONTENT_TYPE, TokenRequest
+from .models import ControlTemplate, ControlInstance, ControlTemplateContent
+from .models import ControlTemplateAttachment
 from .serializers import ControlQuerySerializer, ControlTemplateSerializer, \
     ControlInstanceSerializer, ControlTemplateElementSerializer, ControlTemplateContentSerializer, \
     ControlTemplateAttachmentSerializer
@@ -38,7 +38,7 @@ class ControlTemplateViewSet(PaginatedViewSet):
         methods=["GET"]
     )
     @handle_ws_error
-    def list(self, request: HttpRequest, client_id: str, project_id: str):
+    def list(self, request: TokenRequest, client_id: str, project_id: str):
         """
         List control templates on a projects
         :param request:
@@ -58,7 +58,6 @@ class ControlTemplateViewSet(PaginatedViewSet):
             page_limit=page_limit,
             filters=cqs.validated_data
         )
-
         serializer = ControlTemplateSerializer(template_list, many=True)
         return PaginatedResponse(
             data=serializer.data,
@@ -77,7 +76,7 @@ class ControlTemplateViewSet(PaginatedViewSet):
     )
     @action(methods=["GET"], detail=True, url_path="elements", url_name='template_elements')
     @handle_ws_error
-    def elements(self, request: HttpRequest, client_id: str, project_id: str, pk: str):
+    def elements(self, request: TokenRequest, client_id: str, project_id: str, pk: str):
         """
         View to list template elements
         """
@@ -88,13 +87,13 @@ class ControlTemplateViewSet(PaginatedViewSet):
             project_id=project_id,
             template_id=pk
         )
-
         serializer = ControlTemplateContentSerializer(template_content)
-        return Response(data=serializer.data, content_type='application/json')
+        return Response(data=serializer.data, content_type=JSON_CONTENT_TYPE)
 
     @extend_schema(
         summary=_("List Kairnial template attachments"),
-        description=_("List Kairnial control template attachments for one template on this project"),
+        description=_(
+            "List Kairnial control template attachments for one template on this project"),
         parameters=project_parameters,
         responses={200: ControlTemplateElementSerializer, 400: ErrorSerializer},
         tags=['controls/templates', ],
@@ -102,7 +101,7 @@ class ControlTemplateViewSet(PaginatedViewSet):
     )
     @action(methods=["GET"], detail=True, url_path="attachments", url_name='template_attachments')
     @handle_ws_error
-    def attachments(self, request: HttpRequest, client_id: str, project_id: str, pk: str):
+    def attachments(self, request: TokenRequest, client_id: str, project_id: str, pk: str):
         """
         View to list template attachments
         """
@@ -112,9 +111,8 @@ class ControlTemplateViewSet(PaginatedViewSet):
             project_id=project_id,
             template_id=pk
         )
-
         serializer = ControlTemplateAttachmentSerializer(template_content)
-        return Response(data=serializer.data, content_type='application/json')
+        return Response(data=serializer.data, content_type=JSON_CONTENT_TYPE)
 
 
 class ControlInstanceViewSet(PaginatedViewSet):
@@ -127,7 +125,7 @@ class ControlInstanceViewSet(PaginatedViewSet):
         summary=_("List Kairnial instances"),
         description=_("List Kairnial control instances on this project"),
         parameters=project_parameters + pagination_parameters + [
-            OpenApiParameter('template_id', OpenApiTypes.STR, location='query', required=False),
+            OpenApiParameter('template_id', OpenApiTypes.STR, location='query', required=True),
             ControlQuerySerializer,  # serializer fields are converted to parameters
         ],
         responses={200: ControlInstanceSerializer, 400: ErrorSerializer},
@@ -135,7 +133,7 @@ class ControlInstanceViewSet(PaginatedViewSet):
         methods=["GET"]
     )
     @handle_ws_error
-    def list(self, request: HttpRequest, client_id: str, project_id: str):
+    def list(self, request: TokenRequest, client_id: str, project_id: str):
         """
         List control instances on a projects
         :param request:

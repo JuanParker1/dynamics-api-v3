@@ -1,7 +1,6 @@
 """
 REST API views for Kairnial contacts
 """
-import os
 
 from django.utils.translation import gettext as _
 from drf_spectacular.types import OpenApiTypes
@@ -11,13 +10,12 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 
 from dynamics_apis.common.serializers import ErrorSerializer
-from dynamics_apis.users.models.contacts import Contact
-from dynamics_apis.users.serializers.users import ProjectMemberSerializer
-from dynamics_apis.users.serializers.contacts import ContactQuerySerializer, ContactSerializer, \
-    ContactCreationSerializer, ContactUpdateSerializer
 # Create your views here.
 from dynamics_apis.common.services import KairnialWSServiceError
-from dynamics_apis.common.viewsets import project_parameters
+from dynamics_apis.common.viewsets import project_parameters, JSON_CONTENT_TYPE
+from dynamics_apis.users.models.contacts import Contact
+from dynamics_apis.users.serializers.contacts import ContactQuerySerializer, ContactSerializer, \
+    ContactCreationSerializer, ContactUpdateSerializer
 
 
 class ContactViewSet(ViewSet):
@@ -57,7 +55,7 @@ class ContactViewSet(ViewSet):
                 'code': getattr(e, 'status', 0),
                 'description': getattr(e, 'message', str(e))
             })
-            return Response(error.data, content_type='application/json',
+            return Response(error.data, content_type=JSON_CONTENT_TYPE,
                             status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
@@ -91,7 +89,7 @@ class ContactViewSet(ViewSet):
                 return Response(_("Contact could not be created"),
                                 status=status.HTTP_406_NOT_ACCEPTABLE)
         else:
-            return Response(ccs.errors, content_type='application/json',
+            return Response(ccs.errors, content_type=JSON_CONTENT_TYPE,
                             status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
@@ -130,7 +128,7 @@ class ContactViewSet(ViewSet):
                 return Response(_("Contact could not be updated"),
                                 status=status.HTTP_406_NOT_ACCEPTABLE)
         else:
-            return Response(cus.errors, content_type='application/json',
+            return Response(cus.errors, content_type=JSON_CONTENT_TYPE,
                             status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(

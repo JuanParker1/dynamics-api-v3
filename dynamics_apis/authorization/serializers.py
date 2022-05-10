@@ -92,5 +92,6 @@ class ModuleSerializer(serializers.Serializer):
         read_only=True
     )
 
-    def get_name(self, obj):
+    @staticmethod
+    def get_name(obj):
         return obj.get('title')

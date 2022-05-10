@@ -117,7 +117,7 @@ class DocumentQuerySerializer(serializers.Serializer):
     )
     workflows_union = serializers.DictField(
         label=_('Submitted to one of the workflows'),
-        help_text=_('Dictionary with workflow numeric ID and approvals'),
+        help_text=_('Union of given dictionary with workflow numeric ID and approvals'),
         source='typedCircuit',
         allow_null=True,
         allow_empty=True,
@@ -126,7 +126,7 @@ class DocumentQuerySerializer(serializers.Serializer):
     )
     workflows_intersection = serializers.DictField(
         label=_('Submitted to all workflows'),
-        help_text=_('Dictionary with workflow numeric ID and approvals'),
+        help_text=_('Intersection of given dictionary with workflow numeric ID and approvals'),
         source='typedCircuitAnd',
         allow_null=True,
         allow_empty=True,
@@ -135,7 +135,7 @@ class DocumentQuerySerializer(serializers.Serializer):
     )
     workflows_intersection_answered = serializers.DictField(
         label=_('Submitted to all workflows and answered'),
-        help_text=_('Dictionary with workflow numeric ID and approvals'),
+        help_text=_('Intersection of given dictionary with answered workflow numeric ID and approvals'),
         source='typedCircuitAndWithAnswer',
         allow_null=True,
         allow_empty=True,
@@ -144,7 +144,7 @@ class DocumentQuerySerializer(serializers.Serializer):
     )
     workflows_intersection_unanswered = serializers.DictField(
         label=_('Submitted to all workflows and unanswered'),
-        help_text=_('Dictionary with workflow numeric ID and approvals'),
+        help_text=_('Intersection of given dictionary with unanswered workflow numeric ID and approvals'),
         source='typedCircuitAndWithoutAnswer',
         allow_null=True,
         allow_empty=True,
@@ -152,16 +152,16 @@ class DocumentQuerySerializer(serializers.Serializer):
         required=False
     )
     operator_on_parent_with_visa = serializers.ChoiceField(
-        label=_('Filter operator'),
-        help_text=_('Type of operator to apply to filter AND or OR'),
+        label=_('Filter combination on documents with approvals'),
+        help_text=_('Type of operator to apply to filter (AND or OR) to document with approval'),
         choices=['AND', 'OR'],
         default='AND',
         source='filterTypeFilesLevelsVisaWith',
         required=False
     )
     operator_visa_without_answer = serializers.ChoiceField(
-        label=_('Filter operator'),
-        help_text=_('Type of operator to apply to filter AND or OR'),
+        label=_('Filter combination on unanswered approvals'),
+        help_text=_('Type of operator to apply to filter (AND or OR) on unanswered approvals'),
         choices=['AND', 'OR'],
         default='AND',
         source='filterTypeFilesLevelsVisaWithout',
@@ -189,8 +189,8 @@ class DocumentQuerySerializer(serializers.Serializer):
         required=False
     )
     operator_must_be_stamped = serializers.ChoiceField(
-        label=_('Filter operator'),
-        help_text=_('Type of operator to apply to filter AND or OR'),
+        label=_('Filter combination on documents that must be stamped'),
+        help_text=_('Type of combination to apply to filter (AND or OR) on documents that must be stamped'),
         choices=['AND', 'OR'],
         default='AND',
         source='filterTypeMustBeStamped',
@@ -198,7 +198,7 @@ class DocumentQuerySerializer(serializers.Serializer):
     )
     workflows_approved = serializers.DictField(
         label=_('Workflows that have been approved'),
-        help_text=_('Dictionary with workflow numeric ID and approvals'),
+        help_text=_('Dictionary with approved workflow numeric ID and approvals'),
         source='listeCircuitsVised',
         allow_null=True,
         allow_empty=True,
@@ -212,8 +212,8 @@ class DocumentQuerySerializer(serializers.Serializer):
         required=False
     )
     operator_approved_by = serializers.ChoiceField(
-        label=_('Filter operator'),
-        help_text=_('Type of operator to apply to filter AND or OR'),
+        label=_('Filter combination on documents approved by'),
+        help_text=_('Type of operator to apply to filter (AND or OR) on documents approved by'),
         choices=['AND', 'OR'],
         default='AND',
         source='filterTypeApprovedBy',
@@ -261,8 +261,8 @@ class DocumentQuerySerializer(serializers.Serializer):
         required=False
     )
     operator_search = serializers.ChoiceField(
-        label=_('Filter operator'),
-        help_text=_('Type of operator to apply to filter AND or OR'),
+        label=_('Filter combination on search'),
+        help_text=_('Type of operator to apply to filter (AND or OR) on search'),
         choices=['AND', 'OR'],
         default='AND',
         source='searchType',
@@ -301,25 +301,25 @@ class DocumentQuerySerializer(serializers.Serializer):
         required=False
     )
     created_after = serializers.DateField(
-        label=_('Approval given after'),
-        help_text=_('Exclusive date after which document was modified'),
+        label=_('Document created after'),
+        help_text=_('Exclusive date after which document was created'),
         source='creation_start',
         required=False
     )
     created_before = serializers.DateField(
-        label=_('Approval given before'),
-        help_text=_('Exclusive date before which document was modified'),
+        label=_('Document created before'),
+        help_text=_('Exclusive date before which document was created'),
         source='creation_end',
         required=False
     )
     updated_after = serializers.DateField(
-        label=_('Approval given after'),
+        label=_('Document updated after'),
         help_text=_('Exclusive date after which document was modified'),
         source='modification_start',
         required=False
     )
     updated_before = serializers.DateField(
-        label=_('Approval given before'),
+        label=_('Document updated before'),
         help_text=_('Exclusive date before which document was modified'),
         source='modification_end',
         required=False

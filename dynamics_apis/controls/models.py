@@ -28,7 +28,10 @@ class ControlTemplate(PaginatedModel):
         :param token: Access token
         :param project_id: RGOC Code of the project
         :param filters: serialized values from a ControlTemplateQuerySerializer
+        :param page_offset: # of first record
+        :param page_limit: max nb of records per request
         :param user_id: Optional User ID
+
         :return:
         """
         kf = KairnialControlTemplateService(client_id=client_id, token=token, user_id=user_id, project_id=project_id)
@@ -104,9 +107,12 @@ class ControlInstance(PaginatedModel):
         """
         List control instances for a template
         :param client_id: ID of the client
+        :param project_id: RGOC of the project
         :param token: Access token
-        :param project_id: RGOC Code of the project
+        :param filters: Instance filters
         :param template_id: UUID of the template
+        :param page_offset: # of first record
+        :param page_limit: max nb of records per request
         :param user_id: Optional User ID
         :return:
         """

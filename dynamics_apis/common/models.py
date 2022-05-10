@@ -2,6 +2,7 @@
 Common models for all Kairnial objects
 """
 import inspect
+
 from django.conf import settings
 
 
@@ -13,6 +14,7 @@ class PaginatedModel:
             cls,
             client_id: str,
             token: str,
+            user_id: str = None,
             project_id: str = None,
             page_offset: int = 0,
             page_limit: int = 100,
@@ -23,11 +25,13 @@ class PaginatedModel:
         Generate a subset of the list
         :return: total: int, paginated_list: [], page_offset: int, page_limit: int
         """
-        if set(inspect.getfullargspec(cls.list).args) & {'page_offset', 'page_limit'} == {'page_offset', 'page_limit'}:
+        if set(inspect.getfullargspec(cls.list).args) & \
+                {'page_offset', 'page_limit'} == {'page_offset', 'page_limit'}:
             # Kairnial function call supports pagination
             response = cls.list(
                 client_id=client_id,
                 token=token,
+                user_id=user_id,
                 project_id=project_id,
                 page_offset=page_offset,
                 page_limit=page_limit,
@@ -53,3 +57,17 @@ class PaginatedModel:
             total = len(obj_list)
             paginated_list = obj_list[page_offset: page_offset + page_limit]
             return total, paginated_list, page_offset, page_limit
+
+    @classmethod
+    def list(
+            cls,
+            client_id: str,
+            token: str,
+            project_id: str,
+            user_id: str = None,
+            **kwargs
+    ):
+        """
+        Unpaginated list
+        """
+        raise NotImplementedError

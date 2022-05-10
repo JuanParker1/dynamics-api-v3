@@ -28,7 +28,7 @@ class KairnialTokenAuthentication(JWTAuthentication):
     def authenticate(self, request):
         """
         Returns a two-tuple of `User` and token if a valid signature has been
-        supplied using JWT-based authentication.  Otherwise returns `None`.
+        supplied using JWT-based authentication, otherwise, returns `None`.
         """
         logger = logging.getLogger('authentication')
         try:
@@ -60,12 +60,12 @@ class KairnialTokenAuthentication(JWTAuthentication):
         except jwt.ExpiredSignatureError:
             logger.error("Token expired")
             return None
-        except (jwt.InvalidIssuerError, jwt.InvalidAudienceError) as e:
+        except (jwt.InvalidIssuerError, jwt.InvalidAudienceError):
             logger.error("incorrect claims, please check the audience and issuer")
             return None
-        except AttributeError as e:
+        except AttributeError:
             logger.error("Unable to get client_id")
             return None
-        except Exception as e:
-            logger.error("Unable to parse authentication", e)
+        except Exception:
+            logger.error("Unable to parse authentication")
             return None

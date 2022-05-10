@@ -13,6 +13,7 @@ from .serializers import PasswordAuthenticationSerializer, APIKeyAuthenticationS
     AuthResponseSerializer, ClientlessAPIKeyAuthenticationSerializer
 from .services import KairnialAuthentication, KairnialAuthenticationError
 from ..common.decorators import handle_ws_error
+from ..common.viewsets import JSON_CONTENT_TYPE
 
 
 class PasswordAuthenticationView(APIView):
@@ -45,7 +46,7 @@ class PasswordAuthenticationView(APIView):
                 return Response(str(e), content_type='application/text',
                                 status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response(serializer.errors, content_type='application/json',
+            return Response(serializer.errors, content_type=JSON_CONTENT_TYPE,
                             status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -70,8 +71,7 @@ class APIKeyAuthenticationView(APIView):
             try:
                 auth_response = ka.secrets_authentication(
                     api_key=serializer.validated_data.get('api_key'),
-                    api_secret=serializer.validated_data.get('api_secret'),
-                    scopes=serializer.validated_data.get('scopes'),
+                    api_secret=serializer.validated_data.get('api_secret')
                 )
                 resp_serializer = AuthResponseSerializer(auth_response)
                 return Response(resp_serializer.data, status=status.HTTP_200_OK)
@@ -79,7 +79,7 @@ class APIKeyAuthenticationView(APIView):
                 return Response(str(e), content_type='application/text',
                                 status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response(serializer.errors, content_type='application/json',
+            return Response(serializer.errors, content_type=JSON_CONTENT_TYPE,
                             status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -114,5 +114,5 @@ class ClientlessAPIKeyAuthenticationView(APIView):
                 return Response(str(e), content_type='application/text',
                                 status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response(serializer.errors, content_type='application/json',
+            return Response(serializer.errors, content_type=JSON_CONTENT_TYPE,
                             status=status.HTTP_400_BAD_REQUEST)

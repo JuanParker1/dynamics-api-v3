@@ -10,10 +10,9 @@ from dotenv import load_dotenv
 from rest_framework.test import APIClient
 
 from dynamics_apis.authentication.serializers import AuthResponseSerializer
+from dynamics_apis.authentication.services import KairnialAuthentication
 
 load_dotenv()
-
-from dynamics_apis.authentication.services import KairnialAuthentication
 
 TEST_API_KEY = os.environ.get('DEFAULT_KAIRNIAL_API_KEY', '')
 TEST_API_SECRET = os.environ.get('DEFAULT_KAIRNIAL_API_SECRET', '')
@@ -89,8 +88,7 @@ class CommonTest(TestCase):
         ka = KairnialAuthentication(client_id=cls.client_id)
         auth_response = ka.secrets_authentication(
             api_key=TEST_API_KEY,
-            api_secret=TEST_API_SECRET,
-            scopes="direct-login project-list"
+            api_secret=TEST_API_SECRET
         )
         access_token = AuthResponseSerializer(auth_response).data.get('access_token')
         return access_token

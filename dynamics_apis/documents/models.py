@@ -8,7 +8,8 @@ import os
 from django.core.files.uploadedfile import InMemoryUploadedFile
 
 from dynamics_apis.common.models import PaginatedModel
-from dynamics_apis.documents.services import KairnialFolderService, KairnialDocumentService, \
+from dynamics_apis.documents.services import KairnialFolderService, \
+    KairnialDocumentService, \
     KairnialApprovalTypeService, KairnialApprovalService
 
 
@@ -32,11 +33,12 @@ class Folder(PaginatedModel):
         :param token: Access token
         :param project_id: RGOC Code of the project
         :param parent_id: ID of the parent folder
-        :param filters: Dictionary of filters
+        :param filters: dictionnary of key: value filters
         :param user_id: ID of the user
         :return:
         """
-        kf = KairnialFolderService(client_id=client_id, token=token, user_id=user_id, project_id=project_id)
+        kf = KairnialFolderService(client_id=client_id, token=token, user_id=user_id,
+                                   project_id=project_id)
         folder_list = kf.list(parent_id=parent_id, filters=filters).get('brut')
         if 'path' in filters:
             output = []
@@ -74,7 +76,8 @@ class Folder(PaginatedModel):
         :param id: Numeric ID of the folder
         :param user_id: ID of the user
         """
-        kf = KairnialFolderService(client_id=client_id, token=token, user_id=user_id, project_id=project_id)
+        kf = KairnialFolderService(client_id=client_id, token=token, user_id=user_id,
+                                   project_id=project_id)
         return kf.get(id=id)
 
     @staticmethod
@@ -94,8 +97,10 @@ class Folder(PaginatedModel):
         :param user_id: ID of the user
         :return: FolderSerializer data
         """
-        fs = KairnialFolderService(client_id=client_id, token=token, user_id=user_id, project_id=project_id)
-        if folders := fs.list(parent_id=serialized_data.get('parentId'), filters={'name': serialized_data.get('nom')}):
+        fs = KairnialFolderService(client_id=client_id, token=token, user_id=user_id,
+                                   project_id=project_id)
+        if folders := fs.list(parent_id=serialized_data.get('parentId'),
+                              filters={'name': serialized_data.get('nom')}):
             return folders[0]
         return fs.create(folder_create_serializer=serialized_data)
 
@@ -117,7 +122,8 @@ class Folder(PaginatedModel):
         :param serialized_data: FolderUpdateSerializer validated data
         :param user_id: ID of the user
         """
-        fs = KairnialFolderService(client_id=client_id, token=token, user_id=user_id, project_id=project_id)
+        fs = KairnialFolderService(client_id=client_id, token=token, user_id=user_id,
+                                   project_id=project_id)
         return fs.update(id=id, folder_update_serializer=serialized_data)
 
     @staticmethod
@@ -136,7 +142,8 @@ class Folder(PaginatedModel):
         :param id: Universal ID of the folder
         :param user_id: ID of the user
         """
-        fs = KairnialFolderService(client_id=client_id, token=token, user_id=user_id, project_id=project_id)
+        fs = KairnialFolderService(client_id=client_id, token=token, user_id=user_id,
+                                   project_id=project_id)
         return fs.archive(id=id)
 
 
@@ -160,11 +167,13 @@ class Document(PaginatedModel):
         :param token: Access token
         :param project_id: RGOC Code of the project
         :param parent_id: ID of the parent folder
+        :param filters: dictionnary of key: value filters
         :param filters: Dictionary of filters
         :param user_id: ID of the user
         :return:
         """
-        kf = KairnialDocumentService(client_id=client_id, token=token, user_id=user_id, project_id=project_id)
+        kf = KairnialDocumentService(client_id=client_id, token=token, user_id=user_id,
+                                     project_id=project_id)
         return kf.list(parent_id=parent_id, filters=filters).get('fichiers')
 
     @staticmethod
@@ -183,13 +192,13 @@ class Document(PaginatedModel):
         :param id: Numeric ID of the document
         :param user_id: ID of the user
         """
-        kf = KairnialDocumentService(client_id=client_id, token=token, user_id=user_id, project_id=project_id)
+        kf = KairnialDocumentService(client_id=client_id, token=token, user_id=user_id,
+                                     project_id=project_id)
         documents = kf.get(id=id)
         if documents:
             return documents[0]
         else:
             return None
-
 
     @classmethod
     def extract_attachment_data(cls, attachment: InMemoryUploadedFile):
@@ -242,9 +251,13 @@ class Document(PaginatedModel):
         # Try to manage extensions...
         if serialized_data.get('nom'):
             filename, ext = os.path.splitext(serialized_data.get('path'))
-            if extension.lower() != ext.strip('.').lower(): # Reconcile found extension and given extension
+            # Reconcile found extension and given extension
+            if extension.lower() != ext.strip('.').lower():
                 serialized_data['nom'] = f"{serialized_data['nom']}.{extension}"
-        # Check if path already exists and prevent from creating the same path again as the webservice doesn‘t control that
+        fs = KairnialFolderService(client_id=client_id, token=token, user_id=user_id,
+                                   project_id=project_id)
+        # Check if path already exists and prevent from creating the same path
+        # again as the webservice doesn‘t control that
         if folders := Folder.list(
                 client_id=client_id,
                 token=token,
@@ -253,14 +266,17 @@ class Document(PaginatedModel):
                 filters={'exact_path': serialized_data.get('path')}):
             serialized_data['createFolders'] = False
             serialized_data['id'] = folders[0].get('fcat_id')
-        ds = KairnialDocumentService(client_id=client_id, token=token, user_id=user_id, project_id=project_id)
-        document_id, name, something = ds.create(document_create_serializer=serialized_data, content=file_content)
+        ds = KairnialDocumentService(
+            client_id=client_id, token=token,
+            user_id=user_id,
+            project_id=project_id)
+        document_id, name, something = ds.create(
+            document_create_serializer=serialized_data, content=file_content)
         documents = ds.get(document_id)
         if documents:
             return documents[0]
         else:
             return None
-
 
     @classmethod
     def update(
@@ -278,6 +294,7 @@ class Document(PaginatedModel):
         :param client_id: ID of the client
         :param token: Access token
         :param project_id: RGOC Code of the project
+        :param parent_id: UUID of the document header
         :param serialized_data: DocumentCreateSerializer validated data
         :param attachment: File field
         :param user_id: ID of the user
@@ -298,8 +315,10 @@ class Document(PaginatedModel):
         serialized_data['size'] = file_size
         serialized_data['typeFichier'] = file_type
         serialized_data['parentUUID'] = parent_id
-        fs = KairnialDocumentService(client_id=client_id, token=token, user_id=user_id, project_id=project_id)
-        document_id, name, something = fs.revise(document_revise_serializer=serialized_data, content=file_content)
+        fs = KairnialDocumentService(client_id=client_id, token=token, user_id=user_id,
+                                     project_id=project_id)
+        document_id, name, something = fs.revise(document_revise_serializer=serialized_data,
+                                                 content=file_content)
         documents = fs.get(document_id)
         if documents:
             return documents[0]
@@ -348,7 +367,8 @@ class Document(PaginatedModel):
         :param user_id: ID of the user
         :return: DocumentSerializer data
         """
-        fs = KairnialDocumentService(client_id=client_id, token=token, user_id=user_id, project_id=project_id)
+        fs = KairnialDocumentService(client_id=client_id, token=token, user_id=user_id,
+                                     project_id=project_id)
         revisions = fs.check_revision(
             document_search_revision_serializer=document_serialized_data,
             supplementary_info_serializer=supplementary_serialized_data,
@@ -361,7 +381,6 @@ class Document(PaginatedModel):
                 return revisions[0].get('')
         else:
             return {}
-
 
 
 class ApprovalType(PaginatedModel):
@@ -464,7 +483,7 @@ class Approval(PaginatedModel):
         :param document_id: Numeric ID of the document
         :param workflow_id: Numeric ID of the workflow
         :param approval_id: Numeric ID of the approval
-        :param new status: Numeric ID of the approval step
+        :param new_status: Numeric ID of the approval step
         return: [Approval ID, Step ID, ok?]
         """
         ka = KairnialApprovalService(

@@ -29,8 +29,7 @@ class KairnialGroup(KairnialWSService):
         return self.call(
             action='addGroup',
             parameters=[group.name, group.description],
-            format='bool',
-            use_cache=False
+            out_format='bool'
         )
 
     def add_users(self, group_id: int, user_list: [int]):
@@ -42,8 +41,8 @@ class KairnialGroup(KairnialWSService):
             resp = self.call(
                 action='addUserToGroup',
                 parameters=[{'groupe': group_id, 'user': [user, ]}],
-                format='bool',
-                use_cache=False)
+                out_format='bool',
+            )
             no_error &= resp
         return no_error
 
@@ -56,8 +55,8 @@ class KairnialGroup(KairnialWSService):
             resp = self.call(
                 action='removeUserFromGroup',
                 parameters=[{'groupe': group_id, 'user': [user, ]}],
-                format='bool',
-                use_cache=False)
+                out_format='bool',
+            )
             no_error &= resp
         return no_error
 
@@ -69,7 +68,6 @@ class KairnialGroup(KairnialWSService):
             service='aclmanager',
             action='getGroupsAcls',
             parameters=[{'group_uuid': group_id}],
-            format='json',
             use_cache=True)
 
     def add_authorizations(self, group_id: str, authorizations: dict):
@@ -89,9 +87,7 @@ class KairnialGroup(KairnialWSService):
                         'item_uuid': group_id,
                         'acl_id': authorization_uuid,
                         'acl_type': authorization_name
-                    }],
-                format='json',
-                use_cache=False)
+                    }])
             no_error &= resp.get('success', False)
         return no_error
 
@@ -112,8 +108,7 @@ class KairnialGroup(KairnialWSService):
                         'item_uuid': group_id,
                         'acl_id': authorization_uuid,
                         'acl_type': authorization_name
-                    }],
-                format='json',
-                use_cache=False)
+                    }]
+            )
             no_error &= resp.get('success', False)
         return no_error

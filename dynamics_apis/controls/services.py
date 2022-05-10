@@ -36,7 +36,7 @@ class KairnialControlTemplateService(KairnialWSService):
         :param template_uuid: UUID of the control template
         """
         parameters = [{'template_uuid': template_uuid}]
-        return self.call(action='getTemplates', parameters=parameters)
+        return self.call(action='getTemplates', parameters=parameters, use_cache=True)
 
     def attachments(self, template_id: str):
         """
@@ -76,7 +76,8 @@ class KairnialControlInstanceService(KairnialWSService):
         Get an instance of a control
         """
         parameters = [{'instance_uuid': instance_uuid}]
-        return self.call(action='getInstances', parameters=parameters)
+        return self.call(action='getInstances', parameters=parameters, use_cache=True)
+
 
 
 class KairnialFormControlInstanceService(KairnialWSService):
@@ -103,7 +104,9 @@ class KairnialFormControlInstanceService(KairnialWSService):
         if filters:
             parameters.update({key: value for key, value in filters.items() if value})
         parameters += [{}]
-        resp = self.call(action='getMultipleInstances', service='formControls', parameters=[parameters])
+        resp = self.call(action='getMultipleInstances',
+                         service='formControls',
+                         parameters=[parameters])
         if 'error' in resp:
             return {'items': []}
         return resp
