@@ -59,7 +59,6 @@ class DefectViewSet(PaginatedViewSet):
             filters=dqs.validated_data,
             items_key='pins'
         )
-        print(defect_list[0].keys())
         serializer = DefectSerializer(defect_list, many=True)
         return PaginatedResponse(
             data=serializer.data,

@@ -1228,6 +1228,12 @@ class DocumentCreateSerializer(serializers.Serializer):
         help_text=_('Do not create a QRCode for this file'),
         default=False
     )
+    folder_id = serializers.IntegerField(
+        label=_('Folder ID'),
+        help_text=_('Numeric ID of the folder to create document in, superseeded by folder_path'),
+        required=False,
+        source='id'
+    )
     folder_path = serializers.CharField(
         label=_('Folder path'),
         help_text=_('Folder path, can be created if not exists using create_folders parameter'),

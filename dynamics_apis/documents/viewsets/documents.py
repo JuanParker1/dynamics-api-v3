@@ -160,7 +160,8 @@ class DocumentViewSet(PaginatedViewSet, ):
                 user_id=request.user_id,
                 project_id=project_id,
                 document_serialized_data=drs.validated_data,
-                supplementary_serialized_data=dss.validated_data
+                supplementary_serialized_data=dss.validated_data,
+                check_extension=False
             )
             if revision:
                 revisions.append(revision)

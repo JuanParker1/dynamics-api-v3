@@ -58,7 +58,6 @@ class Defect(PaginatedModel):
         kf = KairnialDefectService(client_id=client_id, token=token, project_id=project_id,
                                    user_id=user_id)
         results = kf.get(pk)
-        print(results)
         try:
             total = int(results.get('total'))
         except ValueError:

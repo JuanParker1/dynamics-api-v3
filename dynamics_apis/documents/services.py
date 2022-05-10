@@ -233,11 +233,18 @@ class KairnialDocumentService(KairnialWSService):
             format='int'
         )
 
-    def check_revision(self, document_search_revision_serializer, supplementary_info_serializer):
+    def check_revision(
+            self,
+            document_search_revision_serializer: dict,
+            supplementary_info_serializer: dict,
+            check_extension: bool):
         """
         Check if a document exists
         """
-        parameters = [[document_search_revision_serializer, ], supplementary_info_serializer]
+        parameters = [
+            [document_search_revision_serializer, ],
+            supplementary_info_serializer,
+            check_extension]
         return self.call(action='getFilesForRevision', parameters=parameters)
 
 

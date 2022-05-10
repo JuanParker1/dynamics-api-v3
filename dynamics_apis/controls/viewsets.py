@@ -112,7 +112,6 @@ class ControlTemplateViewSet(PaginatedViewSet):
             project_id=project_id,
             template_id=pk
         )
-        print(template_content)
 
         serializer = ControlTemplateAttachmentSerializer(template_content)
         return Response(data=serializer.data, content_type='application/json')

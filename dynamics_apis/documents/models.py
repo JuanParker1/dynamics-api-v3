@@ -239,10 +239,20 @@ class Document(PaginatedModel):
         serialized_data['hash'] = file_hash
         serialized_data['size'] = file_size
         serialized_data['typeFichier'] = file_type
-        fs = KairnialFolderService(client_id=client_id, token=token, user_id=user_id, project_id=project_id)
+        # Try to manage extensions...
+        if serialized_data.get('nom'):
+            filename, ext = os.path.splitext(serialized_data.get('path'))
+            if extension.lower() != ext.strip('.').lower(): # Reconcile found extension and given extension
+                serialized_data['nom'] = f"{serialized_data['nom']}.{extension}"
         # Check if path already exists and prevent from creating the same path again as the webservice doesn‘t control that
-        if folders := fs.list(filters={'exact_path': serialized_data.get('path')}):
+        if folders := Folder.list(
+                client_id=client_id,
+                token=token,
+                user_id=user_id,
+                project_id=project_id,
+                filters={'exact_path': serialized_data.get('path')}):
             serialized_data['createFolders'] = False
+            serialized_data['id'] = folders[0].get('fcat_id')
         ds = KairnialDocumentService(client_id=client_id, token=token, user_id=user_id, project_id=project_id)
         document_id, name, something = ds.create(document_create_serializer=serialized_data, content=file_content)
         documents = ds.get(document_id)
@@ -325,6 +335,7 @@ class Document(PaginatedModel):
             project_id: str,
             document_serialized_data: dict,
             supplementary_serialized_data: dict,
+            check_extension: bool = False,
             user_id: str = None
     ):
         """
@@ -340,7 +351,8 @@ class Document(PaginatedModel):
         fs = KairnialDocumentService(client_id=client_id, token=token, user_id=user_id, project_id=project_id)
         revisions = fs.check_revision(
             document_search_revision_serializer=document_serialized_data,
-            supplementary_info_serializer=supplementary_serialized_data
+            supplementary_info_serializer=supplementary_serialized_data,
+            check_extension=check_extension
         )
         if revisions:
             if type(revisions) == dict and revisions.get(''):
