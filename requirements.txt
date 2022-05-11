@@ -1,4 +1,4 @@
-Django>=3.10
+Django~=4.0
 django-extensions~=3.1.5
 djangorestframework~=3.12.0
 Markdown~=3.3.0
@@ -10,5 +10,5 @@ python-dotenv~=0.19.0
 pytz>=2021.3
 djangorestframework-simplejwt~=5.0.0
 ariadne_django~=0.2.0
-ariadne~=0.14.0
+ariadne~=0.15.1
 hypothesis
