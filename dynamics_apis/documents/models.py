@@ -250,12 +250,11 @@ class Document(PaginatedModel):
         serialized_data['typeFichier'] = file_type
         # Try to manage extensions...
         if serialized_data.get('nom'):
-            filename, ext = os.path.splitext(serialized_data.get('path'))
+            filename, ext = os.path.splitext(serialized_data['nom'])
             # Reconcile found extension and given extension
+            print("Reconcile extensions", extension.lower(), ext.strip('.').lower())
             if extension.lower() != ext.strip('.').lower():
                 serialized_data['nom'] = f"{serialized_data['nom']}.{extension}"
-        fs = KairnialFolderService(client_id=client_id, token=token, user_id=user_id,
-                                   project_id=project_id)
         # Check if path already exists and prevent from creating the same path
         # again as the webservice doesn‘t control that
         if folders := Folder.list(
