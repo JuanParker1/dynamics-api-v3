@@ -371,7 +371,7 @@ class DocumentSerializer(serializers.Serializer):
         source='entete_ext',
         required=False
     )
-    original_name = serializers.CharField(
+    external_name = serializers.CharField(
         label=_('Document upload name'),
         help_text=_('Name of the document as uploaded'),
         read_only=True,
